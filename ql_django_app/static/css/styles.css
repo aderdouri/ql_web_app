@@ -1,0 +1,21 @@
+/* Custom styles to beautify the user interface */
+
+body {
+    background-color: #f8f9fa;
+}
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+.jumbotron {
+    background-color: #fff;
+    padding: 2rem 1rem;
+    border-radius: 0.3rem;
+}
+
+.footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+}

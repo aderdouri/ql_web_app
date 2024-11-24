@@ -1,0 +1,33 @@
+<!-- price_swap.html -->
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Swap Pricing</h2>
+
+    <!-- Swap Pricing Form -->
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {{ form|crispy }}
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Price Swap</button>
+        </div>
+    </form>
+
+    <!-- Display Swap Price -->
+    {% if price %}
+        <div class="alert alert-success mt-4">
+            <strong>Swap NPV:</strong> {{ price }}
+        </div>
+    {% endif %}
+
+    <!-- Display Error Message -->
+    {% if error_message %}
+        <div class="alert alert-danger mt-4">
+            {{ error_message }}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
