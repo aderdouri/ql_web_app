@@ -25,5 +25,6 @@ urlpatterns = [
     path('bond/', include('bond.urls')),
     path('swap/', include('swap.urls')),
     path('swaption/', include('swaption.urls')),
+    path('european_option/', include('european_option.urls')),
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]

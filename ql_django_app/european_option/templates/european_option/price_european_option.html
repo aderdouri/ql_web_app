@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Price European Option</h2>
+
+    <!-- European Option Pricing Form -->
+    <form method="post" class="needs-validation" novalidate>
+        {% csrf_token %}
+        {{ form|crispy }}
+        <div class="mt-3">
+            <button type="submit" class="btn btn-primary">Price European Option</button>
+        </div>
+    </form>
+
+    <!-- Display Option Price -->
+    {% if price is not None %}
+    <div class="alert alert-success mt-4">
+        <strong>Option Price:</strong> {{ price }}
+    </div>
+    {% endif %}
+
+    <!-- Display Error Message -->
+    {% if error_message %}
+    <div class="alert alert-danger mt-4">
+        {{ error_message }}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'bond',
     'swap',
     'swaption',
+    'european_option',
     'crispy_forms',  # For better form styling
     'crispy_bootstrap4',  # Add this line to use Bootstrap 4
 ]
