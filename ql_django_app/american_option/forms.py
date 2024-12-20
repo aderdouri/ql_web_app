@@ -1,18 +1,20 @@
+# filepath: /Users/aderdouri/Downloads/ql_web_app/ql_django_app/american_option/forms.py
 from django import forms
 from datetime import date, timedelta
 
-class EuropeanOptionForm(forms.Form):
+class AmericanOptionForm(forms.Form):
     OPTION_TYPE_CHOICES = [
         ('Call', 'Call'),
         ('Put', 'Put'),
     ]
 
     option_type = forms.ChoiceField(label='Option Type', choices=OPTION_TYPE_CHOICES)
-    maturity_date = forms.DateField(label='Maturity Date', 
-                                    #initial=date.today() + timedelta(days=365),
-                                    initial=date(2016, 1, 15),
-                                    widget=forms.DateInput(attrs={'type': 'date'}))
-
+    maturity_date = forms.DateField(
+        label='Maturity Date',
+        #initial=date.today() + timedelta(days=365),
+        initial=date(2016, 1, 15),
+        widget=forms.DateInput(attrs={'type': 'date'})
+    )
     spot_price = forms.FloatField(label='Spot Price', initial=127.62)
     strike_price = forms.FloatField(label='Strike Price', initial=130)
     volatility = forms.FloatField(label='Volatility (%)', initial=20)

@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from .forms import EuropeanOptionForm
 import QuantLib as ql
+import numpy as np
 
 def price_european_option(request):
     price = None
@@ -32,9 +33,8 @@ def price_european_option(request):
                 exercise = ql.EuropeanExercise(maturity_date)
                 european_option = ql.VanillaOption(payoff, exercise)
 
-                spot_handle = ql.QuoteHandle(
-                    ql.SimpleQuote(spot_price)
-                )
+                spot_handle = ql.QuoteHandle(ql.SimpleQuote(spot_price))
+
                 flat_ts = ql.YieldTermStructureHandle(
                     ql.FlatForward(calculation_date, 
                                 risk_free_rate, 
@@ -57,7 +57,7 @@ def price_european_option(request):
                                                         flat_vol_ts)
 
                 european_option.setPricingEngine(ql.AnalyticEuropeanEngine(bsm_process))
-                price = european_option.NPV()
+                price = np.round(european_option.NPV(), 4)
 
             except Exception as e:
                 error_message = str(e)
