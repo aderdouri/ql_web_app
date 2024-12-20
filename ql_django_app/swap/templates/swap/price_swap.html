@@ -18,16 +18,20 @@
 
     <!-- Display Swap Price -->
     {% if price %}
-        <div class="alert alert-success mt-4">
-            <strong>Swap NPV:</strong> {{ price }}
-        </div>
+    <div class="alert alert-success mt-4">
+        <strong>Swap NPV:</strong> {{ price }}<br>
+        <strong>Fair Spread:</strong> {{ fair_spread }}<br>
+        <strong>Fair Rate:</strong> {{ fair_rate }}<br>
+        <strong>Fixed Leg BPS:</strong> {{ fixed_leg_bps }}<br>
+        <strong>Floating Leg BPS:</strong> {{ floating_leg_bps }}
+    </div>
     {% endif %}
 
     <!-- Display Error Message -->
     {% if error_message %}
-        <div class="alert alert-danger mt-4">
-            {{ error_message }}
-        </div>
+    <div class="alert alert-danger mt-4">
+        {{ error_message }}
+    </div>
     {% endif %}
 </div>
 {% endblock %}
