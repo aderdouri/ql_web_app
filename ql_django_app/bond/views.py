@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .forms import BondForm
+import numpy as np
 import QuantLib as ql
 
 
@@ -11,59 +12,64 @@ def price_bond(request):
         form = BondForm(request.POST)
         if form.is_valid():
             # Extract cleaned data from the form
-            face = form.cleaned_data['face']
+            face_value = form.cleaned_data['face']
             coupon_rate = form.cleaned_data['coupon_rate'] / 100  # Convert to decimal
             maturity_years = form.cleaned_data['maturity_years']
-            frequency = form.cleaned_data['frequency']
+            coupon_frequency = form.cleaned_data['coupon_frequency']
             yield_rate = form.cleaned_data['yield_rate'] / 100  # Convert to decimal
 
             try:
-                # Set up calendar and dates
-                calendar = ql.UnitedStates(ql.UnitedStates.GovernmentBond)
-                settlement_date = ql.Date.todaysDate()
-                ql.Settings.instance().evaluationDate = settlement_date
-
-                maturity_date = calendar.advance(settlement_date, 
-                                                 ql.Period(maturity_years, ql.Years))
-
-                # Convert frequency to QuantLib-compatible format
                 ql_frequency_mapping = {
                     'Annual': ql.Annual,
                     'Semiannual': ql.Semiannual,
                     'Quarterly': ql.Quarterly,
                     'Monthly': ql.Monthly
                 }
-                ql_frequency = ql_frequency_mapping.get(frequency, ql.Annual)
+                coupon_frequency = ql_frequency_mapping.get(coupon_frequency)
 
-                # Schedule generation
-                schedule = ql.Schedule(settlement_date,
-                                       maturity_date,
-                                       ql.Period(ql_frequency),
-                                       calendar,
-                                       ql.Following,
-                                       ql.Following,
-                                       ql.DateGeneration.Backward,
-                                       False)
+                print('coupon_frequency', coupon_frequency)
+                issue_date = ql.Date.todaysDate()
+                calc_date = ql.Date.todaysDate() + 11 # 11 days from today
+                ql.Settings.instance().evaluationDate = calc_date
 
-                # Create bond with ActualActual and Schedule
-                bond = ql.FixedRateBond(
-                    settlementDays=3,
-                    faceAmount=face,
-                    schedule=schedule,
-                    coupons=[coupon_rate],
-                    paymentDayCounter=ql.Thirty360(ql.Thirty360.BondBasis)  # Correct parameter name
-                    )
+                flat_rate = ql.SimpleQuote(yield_rate)
+                rate_handle = ql.QuoteHandle(flat_rate)
+                day_count = ql.Actual360()
+                calendar = ql.UnitedStates(ql.UnitedStates.GovernmentBond)
+                ts_yield = ql.FlatForward(calc_date, rate_handle, day_count)
+                ts_handle = ql.YieldTermStructureHandle(ts_yield)
 
-                # Pricing engine with flat yield curve
-                yield_curve = ql.FlatForward(settlement_date, 
-                                             ql.QuoteHandle(ql.SimpleQuote(yield_rate)), 
-                                             ql.Actual360())
-                
-                bond_engine = ql.DiscountingBondEngine(ql.YieldTermStructureHandle(yield_curve))
-                bond.setPricingEngine(bond_engine)
+                maturity_date = issue_date + ql.Period(maturity_years * 12, ql.Months)
 
-                # Calculate bond price
-                price = bond.cleanPrice()
+                tenor = ql.Period(int(coupon_frequency))
+                calendar = ql.UnitedStates(ql.UnitedStates.GovernmentBond)
+                business_convention = ql.Unadjusted
+                date_generation = ql.DateGeneration.Backward
+                month_end = False
+                schedule = ql.Schedule(issue_date, 
+                                    maturity_date,
+                                    tenor, 
+                                    calendar,
+                                    business_convention,
+                                    business_convention,
+                                    date_generation,
+                                    month_end)
+
+                day_count = ql.Thirty360(ql.Thirty360.BondBasis)
+                coupons = [coupon_rate]
+
+                # Now lets construct the FixedRateBond
+                settlement_days = 0
+                fixed_rate_bond = ql.FixedRateBond(
+                    settlement_days,
+                    face_value,
+                    schedule,
+                    coupons,
+                    day_count)
+
+                bond_engine = ql.DiscountingBondEngine(ts_handle)
+                fixed_rate_bond.setPricingEngine(bond_engine)
+                price = np.round(fixed_rate_bond.NPV())
 
             except Exception as e:
                 error_message = f"An error occurred during bond pricing: {e}"
