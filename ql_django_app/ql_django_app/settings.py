@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     'bond',
     'bond02',
+    'dateadder',
     'swap',
     'swaption',
     'european_option',

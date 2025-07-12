@@ -28,5 +28,7 @@ urlpatterns = [
     path('european_option/', include('european_option.urls')),
     path('american_option/', include('american_option.urls')),
     path('bond02/', include('bond02.urls')),
+    path('dateadder/', include('dateadder.urls')),
+
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
 ]
