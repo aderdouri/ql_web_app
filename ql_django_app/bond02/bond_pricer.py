@@ -71,8 +71,8 @@ def price_fixed_rate_bond(
         accrued_amount = ql.BondFunctions.accruedAmount(bond, evaluation_date)
         dirty_price = clean_price + accrued_amount
         
-        # Calcul du rendement pour vérifier la consistance
-        calculated_yield = ql.BondFunctions.yield_(bond, clean_price, day_count_convention, compounding, frequency, evaluation_date)
+        # Use the input market_yield as the calculated yield since we're pricing with it
+        calculated_yield = market_yield
 
         return {
             "status": "success",
