@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'bond',
+    'bond02',
     'swap',
     'swaption',
     'european_option',
