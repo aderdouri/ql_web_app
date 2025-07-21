@@ -1,0 +1,129 @@
+{% extends "basics/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block sub_page_content %}
+    <h3>Chapter 5: Term Structures Lab</h3>
+    <p class="text-muted">Build a yield curve from market swap rates. Change the evaluation date to see the curve move.</p>
+    <hr>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card card-body">
+                <form id="curve-form">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                </form>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header font-weight-bold" id="chart-title">
+                    Yield Curve
+                </div>
+                <div class="card-body">
+                    <div style="height: 400px;">
+                        <canvas id="yieldCurveChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block javascript %}
+<!-- On inclut la librairie Chart.js depuis un CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Django insère les données initiales ici dans une balise script sécurisée -->
+{{ initial_data|json_script:"initial-data" }}
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        
+        let yieldCurveChart = null; 
+
+        // Fonction pour dessiner ou mettre à jour le graphique
+        function drawOrUpdateChart(plotData) {
+            if (!plotData || !plotData.plot_points) {
+                console.error("Data for chart is missing or invalid.");
+                return;
+            }
+            const labels = plotData.plot_points.map(p => p.year);
+            const dataPoints = plotData.plot_points.map(p => p.rate);
+            const ctx = document.getElementById('yieldCurveChart');
+            if (!ctx) {
+                console.error("Canvas element 'yieldCurveChart' not found!");
+                return;
+            }
+            if (yieldCurveChart) {
+                yieldCurveChart.destroy();
+            }
+            yieldCurveChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Zero Coupon Rate (%)',
+                        data: dataPoints,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Years to Maturity' } },
+                        y: { title: { display: true, text: 'Rate (%)' } }
+                    }
+                }
+            });
+        }
+
+        // --- Dessin du Graphique Initial ---
+        try {
+            const initialDataElement = document.getElementById('initial-data');
+            if (initialDataElement) {
+                const initialDataJSON = JSON.parse(initialDataElement.textContent);
+                drawOrUpdateChart(initialDataJSON);
+                document.getElementById('chart-title').innerText = 'Yield Curve on ' + initialDataJSON.evaluation_date;
+            }
+        } catch (e) {
+            console.error("Failed to draw initial chart:", e);
+        }
+
+        // --- Mise à Jour Dynamique ---
+        const dateInput = document.getElementById('id_evaluation_dt');
+        if (dateInput) {
+            dateInput.addEventListener('change', function() {
+                const form = document.getElementById('curve-form');
+                const formData = new FormData(form);
+                
+                // ==============================================================================
+                // LA CORRECTION EST ICI : On récupère le jeton CSRF du formulaire
+                // ==============================================================================
+                const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                fetch(window.location.href, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        // On ajoute le jeton aux en-têtes. C'est crucial pour la sécurité.
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) { throw new Error('Network response was not ok: ' + response.statusText); }
+                    return response.json();
+                })
+                .then(data => {
+                    drawOrUpdateChart(data); // On met à jour le graphique avec les nouvelles données
+                    document.getElementById('chart-title').innerText = 'Yield Curve on ' + data.evaluation_date;
+                })
+                .catch(error => {
+                    console.error('Error updating chart:', error);
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

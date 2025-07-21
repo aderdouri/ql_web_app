@@ -33,6 +33,8 @@ ALLOWED_HOSTS = []
 
 # Fichier : ql_django_app/settings.py
 
+# Fichier : ql_django_app/settings.py
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -42,19 +44,26 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 
     # --- Librairies tierces ---
-    "crispy_forms",          
-    "crispy_bootstrap4",      
-    'swap',
-    'swaption',
-    'european_option',
-    'american_option',
-    'bond',
-    'interactive_basics',
-    'basics',
-    'interest_rate_curves',
+    "crispy_forms",
+    "crispy_bootstrap4",
+
+    # --- Applications "Chapitre" que nous utilisons DANS les catégories actives ---
     'chapter2_instruments',
     'chapter3_greeks',
     'chapter4_quotes',
+    'chapter5_curves',
+    'interactive_basics', # Vous pouvez garder celle-ci si elle est utilisée par un chapitre
+
+    # --- Applications "Catégorie" ---
+    'basics',
+    'interest_rate_curves',
+    
+    # On met en commentaire les anciennes applications qu'on n'a pas encore ré-intégrées
+    # 'swap',
+    # 'swaption',
+    # 'european_option',
+    # 'american_option',
+    # 'bond',
 ]
 
 # Add Crispy Forms settings
@@ -136,11 +145,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
-STATIC_URL = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
