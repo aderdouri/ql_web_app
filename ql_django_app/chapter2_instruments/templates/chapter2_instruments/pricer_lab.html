@@ -1,0 +1,68 @@
+{% extends "basics/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Instruments & Engines Lab - {{ block.super }}{% endblock %}
+
+{% block sub_page_content %}
+    <!-- Titre et description de la page -->
+    <h3>Chapter 2: Instruments & Pricing Engines Lab</h3>
+    <p class="text-muted">
+        Select the option parameters and then choose a pricing engine. Observe how the calculated price changes depending on the mathematical model used, demonstrating the core concept of this chapter.
+    </p>
+    <hr>
+    
+    <!-- On utilise le système de grille de Bootstrap pour créer deux colonnes -->
+    <div class="row">
+        <!-- ======================================================= -->
+        <!-- Colonne de Gauche : Paramètres (5 colonnes de largeur sur 12) -->
+        <!-- ======================================================= -->
+        <div class="col-md-5">
+            <!-- On utilise une "card" pour encadrer le formulaire -->
+            <div class="card">
+                <div class="card-header">
+                    Parameters
+                </div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <button type="submit" class="btn btn-primary mt-3 w-100">Price with Selected Engine</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- Colonne de Droite : Résultats (7 colonnes de largeur sur 12) -->
+        <!-- ======================================================= -->
+        <div class="col-md-7">
+            <!-- On utilise une "card" pour les résultats aussi -->
+            <div class="card">
+                <div class="card-header">
+                    Result
+                </div>
+                <div class="card-body">
+                    {% if results %}
+                        <!-- On utilise une "alert" pour un affichage clair du résultat -->
+                        <div class="alert alert-success text-center">
+                            <span class="result-label">Using engine: <strong>{{ results.engine_used }}</strong></span>
+                            <hr>
+                            <span class="result-label">Calculated Price:</span>
+                            <h2 class="result-value">{{ results.price }}</h2>
+                        </div>
+                    {% else %}
+                         <div class="alert alert-info">
+                             Please select parameters and a pricing engine to see the result.
+                         </div>
+                    {% endif %}
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-danger mt-4">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

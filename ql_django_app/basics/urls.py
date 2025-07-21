@@ -10,13 +10,14 @@ urlpatterns = [
     # URL de la page d'accueil de la catégorie -> /basics/
     path('', views.home, name='home'),
     
-    # =====================================================================
-    # C'EST ICI QUE SE TROUVE LA CORRECTION :
-    # On ajoute les chemins pour chaque chapitre listé dans le Cookbook
-    # =====================================================================
     path('quantlib-basics/', include('interactive_basics.urls'), name='quantlib_basics'),
+   # Chapitre 1 : QuantLib basics (page statique pour l'instant)
     path('quantlib-basics/', views.quantlib_basics_view, name='quantlib_basics'),
-    path('instruments-engines/', views.instruments_engines_view, name='instruments_engines'),
+
+# Chapitre 2 : Instruments and pricing engines (rendu interactif par l'app 'chapter2_instruments')
+# On assigne le namespace 'instruments_engines' à l'ensemble des URLs de chapter2_instruments
+    path('instruments-engines/', include('chapter2_instruments.urls', namespace='instruments_engines')),
+
     path('numerical-greeks/', views.numerical_greeks_view, name='numerical_greeks'),
     path('market-quotes/', views.market_quotes_view, name='market_quotes'),
     path('term-structures/', views.term_structures_view, name='term_structures'),

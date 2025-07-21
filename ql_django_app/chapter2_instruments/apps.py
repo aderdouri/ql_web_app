@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class Chapter2LabConfig(AppConfig):
+class Chapter2InstrumentsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'chapter_2_lab'
+    name = 'chapter2_instruments'

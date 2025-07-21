@@ -1,41 +1,27 @@
-<!-- Fichier : templates/basics/instruments_engines.html (VERSION AMÉLIORÉE) -->
+<!-- Fichier : templates/basics/instruments_engines.html (VERSION PROPRE ET CORRIGÉE) -->
 
+<!-- 1. On hérite du gabarit de la catégorie "Basics" pour avoir la bonne navigation -->
 {% extends "basics/base.html" %}
 
+<!-- 2. On définit le titre de la page -->
 {% block title %}Instruments & Engines - {{ block.super }}{% endblock %}
 
+<!-- 3. On remplit le bloc de contenu de la sous-page -->
 {% block sub_page_content %}
     <h3>Chapter 2: Instruments and Pricing Engines</h3>
+    <hr>
     <p class="lead">
         This chapter of the Cookbook explains a fundamental concept in QuantLib: the separation between the financial <strong>instrument</strong> and the <strong>pricing engine</strong>.
     </p>
-    <hr>
     
     <div class="card mt-4">
-        <div class="card-header">
-            Key Concepts
-        </div>
         <div class="card-body">
+            <h5 class="card-title">Key Concepts</h5>
             <ul>
-                <li><strong>Instrument:</strong> Represents the contract's terms and conditions (e.g., an option's strike price and maturity). It defines "what" to price, but doesn't know how to price itself.</li>
-                <li><strong>Pricing Engine:</strong> Represents the mathematical model (e.g., Black-Scholes, Binomial Tree) used to value an instrument. It defines "how" to price and holds the necessary market data.</li>
+                <li><strong>Instrument:</strong> Represents the contract's terms and conditions, like an option's strike price and maturity. It doesn't know how to price itself.</li>
+                <li><strong>Pricing Engine:</strong> Represents the mathematical model (e.g., Black-Scholes, Binomial Tree) used to value an instrument. It holds the market data.</li>
             </ul>
-            <p class="card-text">This powerful separation allows you to value the same instrument with different models just by switching the engine.</p>
+            <p class="card-text">This separation allows you to value the same instrument with different models just by switching the engine.</p>
         </div>
     </div>
-
-    <!-- ===================================================================== -->
-    <!--     LA PARTIE AJOUTÉE QUI CHANGE TOUT                             -->
-    <!-- ===================================================================== -->
-    <div class="card mt-4 bg-light border-primary">
-        <div class="card-body text-center">
-            <h5 class="card-title">See it in Action!</h5>
-            <p>The best way to understand this concept is to experiment with it.</p>
-            <p>Our European Option Pricer has been designed to demonstrate this principle. You can define a single option (the "Instrument") and then price it using multiple "Pricing Engines".</p>
-            <a href="{% url 'equity_models:european_option:pricer' %}" class="btn btn-primary mt-2">
-                Go to the European Option Pricer Lab
-            </a>
-        </div>
-    </div>
-
 {% endblock %}

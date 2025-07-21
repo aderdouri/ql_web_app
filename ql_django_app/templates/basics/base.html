@@ -1,28 +1,25 @@
-<!-- Fichier : templates/basics/base.html (VERSION COMPLÈTE) -->
-
-<!-- 1. On hérite du gabarit principal pour avoir la navbar du haut et le style général -->
 {% extends "base.html" %}
-
-<!-- 2. On définit un titre spécifique pour cette section -->
 {% block title %}Basics - {{ block.super }}{% endblock %}
 
-<!-- 3. On remplit le bloc de contenu principal qui vient de "base.html" -->
 {% block page_content %}
 <div class="container">
-    <!-- =================================================================== -->
-    <!--     SOUS-NAVBAR AVEC TOUS LES CHAPITRES DE LA SECTION "BASICS"      -->
-    <!-- =================================================================== -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 border rounded">
         <span class="navbar-brand small font-weight-bold">Basics Chapters</span>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav mr-auto">
-                <!-- Chaque lien pointe vers une URL que nous allons définir dans 'basics/urls.py' -->
+                <!-- Lien à 2 niveaux vers une page statique -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'basics:quantlib_basics' %}">1. QuantLib basics</a>
                 </li>
+
+                <!-- ================================================================ -->
+                <!-- LIEN À 3 NIVEAUX VERS L'APPLICATION INTERACTIVE -->
+                <!-- ================================================================ -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'basics:instruments_engines' %}">2. Instruments and pricing engines</a>
+                    <a class="nav-link" href="{% url 'basics:instruments_engines:pricer_lab' %}">2. Instruments and pricing engines</a>
                 </li>
+                
+                <!-- Liens à 2 niveaux vers les autres pages statiques -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'basics:numerical_greeks' %}">3. Numerical Greeks calculation</a>
                 </li>
@@ -42,14 +39,10 @@
         </div>
     </nav>
     
-    <!-- 
-      4. On laisse un "trou" que les pages de chaque chapitre (comme pricer.html ou instruments_engines.html)
-      pourront remplir avec leur contenu spécifique.
-    -->
     {% block sub_page_content %}
         <div class="alert alert-info">
             <h4 class="alert-heading">Welcome to the Basics Section!</h4>
-            <p>This section covers the fundamental building blocks of QuantLib. Please select a chapter from the menu above to begin.</p>
+            <p>Please select a chapter from the menu above to begin.</p>
         </div>
     {% endblock %}
 </div>

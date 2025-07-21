@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'interactive_basics',
     'basics',
     'interest_rate_curves',
-    'chapter_2_lab',
+    'chapter2_instruments',
 ]
 
 # Add Crispy Forms settings
