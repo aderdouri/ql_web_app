@@ -1,0 +1,85 @@
+<!-- File: ql_web_app/chapter4_quotes/templates/chapter4_quotes/market_lab.html -->
+
+{% extends "basics/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Market Quotes Lab - {{ block.super }}{% endblock %}
+
+{% block sub_page_content %}
+    <h3>Chapter 4: Market Quotes Lab</h3>
+    <p class="text-muted">
+        This lab demonstrates the Observer pattern. First, set up a bond. Then, change the market rate and see how the bond price updates automatically without needing to be explicitly repriced.
+    </p>
+    <hr>
+    
+    <div class="row">
+        <!-- ======================================================= -->
+        <!-- Colonne de Gauche : Actions de l'Utilisateur -->
+        <!-- ======================================================= -->
+        <div class="col-md-5">
+            <!-- Première Carte : Initialisation -->
+            <div class="card mb-4">
+                <div class="card-header font-weight-bold">1. Setup Instrument</div>
+                <div class="card-body">
+                    <p class="card-text small text-muted">Create a bond linked to a market rate.</p>
+                    <!-- Ce formulaire envoie le bouton "setup_bond" -->
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ setup_form|crispy }}
+                        <!-- ======================================================= -->
+                        <!-- LE "name" DU BOUTON EST ESSENTIEL POUR LA VUE -->
+                        <!-- ======================================================= -->
+                        <button type="submit" name="setup_bond" class="btn btn-secondary mt-3 w-100">Setup Bond & Market</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Deuxième Carte : Mise à jour du Marché -->
+            <div class="card">
+                <div class="card-header font-weight-bold">2. Update Market</div>
+                <div class="card-body">
+                    <p class="card-text small text-muted">Change the underlying rate quote. The bond will react automatically.</p>
+                    <!-- Ce formulaire envoie le bouton "update_market" -->
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ update_form|crispy }}
+                        <!-- ======================================================= -->
+                        <!-- LE "name" DE CE BOUTON EST AUSSI ESSENTIEL -->
+                        <!-- ======================================================= -->
+                        <button type="submit" name="update_market" class="btn btn-primary mt-3 w-100">Update & Reprice</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================= -->
+        <!-- Colonne de Droite : Affichage des Résultats -->
+        <!-- ======================================================= -->
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header font-weight-bold">Live Pricing Result</div>
+                <div class="card-body text-center">
+                    {% if new_price is not None %}
+                        <div class="alert alert-primary">
+                            <span class="result-label">Market Rate is now: <strong>{{ new_rate }}%</strong></span>
+                            <hr>
+                            <span class="result-label">New Bond Price:</span>
+                            <h2 class="result-value text-primary">{{ new_price }}</h2>
+                        </div>
+                    {% elif initial_price is not None %}
+                        <div class="alert alert-info">
+                            <span class="result-label">Initial Market Rate: <strong>{{ initial_rate }}%</strong></span>
+                            <hr>
+                            <span class="result-label">Initial Bond Price:</span>
+                            <h2 class="result-value text-info">{{ initial_price }}</h2>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-light">
+                            Please set up a bond to begin the demonstration.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
