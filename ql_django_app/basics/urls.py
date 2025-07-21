@@ -17,7 +17,7 @@ urlpatterns = [
 # Chapitre 2 : Instruments and pricing engines (rendu interactif par l'app 'chapter2_instruments')
 # On assigne le namespace 'instruments_engines' à l'ensemble des URLs de chapter2_instruments
     path('instruments-engines/', include('chapter2_instruments.urls', namespace='instruments_engines')),
-
+    path('numerical-greeks/', include('chapter3_greeks.urls', namespace='numerical_greeks')),
     path('numerical-greeks/', views.numerical_greeks_view, name='numerical_greeks'),
     path('market-quotes/', views.market_quotes_view, name='market_quotes'),
     path('term-structures/', views.term_structures_view, name='term_structures'),
