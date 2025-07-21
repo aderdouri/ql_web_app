@@ -31,6 +31,8 @@ ALLOWED_HOSTS = []
 
 # Application definition
 
+# Fichier : ql_django_app/settings.py
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -38,15 +40,19 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    'bond',
-    'bond02',
-    'dateadder',
+
+    # --- Librairies tierces ---
+    "crispy_forms",          
+    "crispy_bootstrap4",      
     'swap',
     'swaption',
     'european_option',
     'american_option',
-    'crispy_forms',  # For better form styling
-    'crispy_bootstrap4',  # Add this line to use Bootstrap 4
+    'bond',
+    'interactive_basics',
+    'basics',
+    'interest_rate_curves',
+    'chapter_2_lab',
 ]
 
 # Add Crispy Forms settings

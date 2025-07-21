@@ -4,7 +4,7 @@ from .forms import AmericanOptionForm
 import QuantLib as ql
 import numpy as np
 
-def price_american_option(request):
+def pricer_view(request):
     price = None
     error_message = None
 

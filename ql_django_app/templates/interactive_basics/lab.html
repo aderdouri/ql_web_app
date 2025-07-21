@@ -1,0 +1,99 @@
+<!-- Fichier : templates/interactive_basics/lab.html (VERSION FINALE ORGANISÉE) -->
+
+{% extends "basics/base.html" %}
+
+{% block sub_page_content %}
+    <h3>Chapter 1: QuantLib Basics - Interactive Lab</h3>
+    <p class="text-muted">An interactive lab to experiment with the core QuantLib objects for handling dates and time.</p>
+    <hr>
+    
+    {% if error %}
+        <div class="alert alert-danger">{{ error }}</div>
+    {% endif %}
+
+    <!-- Experience 1: ql.Date -->
+    <div class="card mb-4">
+        <div class="card-header"><strong>Experience 1:</strong> Creating a `ql.Date` object</div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="form-row">
+                            <div class="col">{{ date_form.day.label_tag }} {{ date_form.day }}</div>
+                            <div class="col">{{ date_form.month.label_tag }} {{ date_form.month }}</div>
+                            <div class="col">{{ date_form.year.label_tag }} {{ date_form.year }}</div>
+                        </div>
+                        <button type="submit" name="create_date_btn" class="btn btn-primary mt-3">Create Date</button>
+                    </div>
+                    <div class="col-md-5">
+                        <strong>Result:</strong>
+                        {% if date_result %}
+                            <pre class="alert alert-light mt-2 p-2"><code>> Output: {{ date_result.date_str }}
+> Weekday: {{ date_result.weekday }}</code></pre>
+                        {% else %}
+                            <p class="text-muted small mt-2">Submit parameters to see the result.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Experience 2: ql.Period -->
+    <div class="card mb-4">
+        <div class="card-header"><strong>Experience 2:</strong> Date Arithmetic with `ql.Period`</div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-7">
+                        <div class="form-row">
+                            <div class="col">{{ period_form.start_date_str.label_tag }} {{ period_form.start_date_str }}</div>
+                            <div class="col">{{ period_form.quantity.label_tag }} {{ period_form.quantity }}</div>
+                            <div class="col">{{ period_form.unit.label_tag }} {{ period_form.unit }}</div>
+                        </div>
+                        <button type="submit" name="add_period_btn" class="btn btn-primary mt-3">Add Period</button>
+                    </div>
+                    <div class="col-md-5">
+                        <strong>Result:</strong>
+                        {% if period_result %}
+                             <pre class="alert alert-light mt-2 p-2"><code>> Output: {{ period_result.end_date_str }}</code></pre>
+                        {% else %}
+                            <p class="text-muted small mt-2">Submit parameters to see the result.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Experience 3: ql.Calendar -->
+    <div class="card mb-4">
+        <div class="card-header"><strong>Experience 3:</strong> Business Days with `ql.Calendar`</div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                 <div class="row">
+                    <div class="col-md-7">
+                        <div class="form-row">
+                            <div class="col">{{ calendar_form.start_date_str.label_tag }} {{ calendar_form.start_date_str }}</div>
+                            <div class="col">{{ calendar_form.period_days.label_tag }} {{ calendar_form.period_days }}</div>
+                            <div class="col">{{ calendar_form.calendar.label_tag }} {{ calendar_form.calendar }}</div>
+                        </div>
+                        <button type="submit" name="advance_calendar_btn" class="btn btn-primary mt-3">Advance Business Days</button>
+                    </div>
+                    <div class="col-md-5">
+                        <strong>Result:</strong>
+                        {% if calendar_result %}
+                             <pre class="alert alert-light mt-2 p-2"><code>> Output: {{ calendar_result.end_date_str }}</code></pre>
+                        {% else %}
+                            <p class="text-muted small mt-2">Submit parameters to see the result.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+{% endblock %}

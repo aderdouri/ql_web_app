@@ -1,0 +1,44 @@
+<!-- Fichier : ql_web_app/swaption/templates/swaption/pricer.html -->
+
+{% extends "rates/rates_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Pricer de Swaption - {{ block.super }}{% endblock %}
+
+{% block sub_page_content %}
+    <h3>Pricer de Swaption Européenne</h3>
+    <p class="text-muted">Valorise une option sur un swap de taux d'intérêt.</p>
+    <hr>
+    
+    <div class="row">
+        <div class="col-md-5">
+            <h5>Paramètres de la Swaption</h5>
+            <div class="card card-body mt-3">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Calculer</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <h5>Résultats</h5>
+            {% if results %}
+                <table class="table table-bordered table-striped mt-3">
+                    <tbody>
+                        <tr><td><strong>NPV de la Swaption</strong></td><td><strong>{{ results.npv }}</strong></td></tr>
+                        <tr><td>Volatilité Implicite (%)</td><td>{{ results.implied_volatility }}</td></tr>
+                    </tbody>
+                </table>
+            {% else %}
+                <div class="alert alert-info mt-3">Veuillez saisir les paramètres et cliquer sur "Calculer".</div>
+            {% endif %}
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger mt-4">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

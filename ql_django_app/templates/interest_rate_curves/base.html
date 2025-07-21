@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Interest-Rate Curves - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 border rounded">
+        <span class="navbar-brand small font-weight-bold">Interest-Rate Curves</span>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link text-muted" href="#">Yield Curve Builder (Todo)</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    {% block sub_page_content %}
+        <div class="alert alert-info">
+            <h4 class="alert-heading">Welcome to the Interest-Rate Curves Section!</h4>
+            <p>Please select a tool from the menu above to begin.</p>
+        </div>
+    {% endblock %}
+</div>
+{% endblock %}

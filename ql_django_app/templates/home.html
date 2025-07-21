@@ -1,10 +1,19 @@
+<!-- Fichier : templates/home.html (VERSION CORRIGÉE ET ADAPTÉE) -->
+
+<!-- 1. On hérite toujours de base.html, c'est correct. -->
 {% extends 'base.html' %}
 
-{% block content %}
-<div class="jumbotron text-center">
-    <h1 class="display-4">Welcome to QL Django App</h1>
-    <p class="lead">Price various financial products using QuantLib.</p>
-    <hr class="my-4">
-    <p>Select a product from the menu to get started.</p>
+<!-- 2. On définit le titre de la page -->
+{% block title %}Accueil - {{ block.super }}{% endblock %}
+
+<!-- 3. CHANGEMENT : On utilise le nom de bloc "page_content" défini dans base.html -->
+{% block page_content %}
+<div class="container text-center mt-5">
+    <div class="jumbotron">
+        <h1 class="display-4">Bienvenue sur l'Application de Finance Quantitative</h1>
+        <p class="lead">Développée par SASU myGenAI</p>
+        <hr class="my-4">
+        <p>Sélectionnez une catégorie de produits financiers dans le menu principal pour commencer l'analyse.</p>
+    </div>
 </div>
 {% endblock %}
