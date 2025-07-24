@@ -29,10 +29,6 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-# Application definition
-
-# Fichier : ql_django_app/settings.py
-
 # Fichier : ql_django_app/settings.py
 
 INSTALLED_APPS = [
@@ -53,17 +49,12 @@ INSTALLED_APPS = [
     'chapter4_quotes',
     'chapter5_curves',
     'interactive_basics', # Vous pouvez garder celle-ci si elle est utilisée par un chapitre
-
+    'chapter6_pricing_range',
+    'chapter7_random',
     # --- Applications "Catégorie" ---
     'basics',
     'interest_rate_curves',
     
-    # On met en commentaire les anciennes applications qu'on n'a pas encore ré-intégrées
-    # 'swap',
-    # 'swaption',
-    # 'european_option',
-    # 'american_option',
-    # 'bond',
 ]
 
 # Add Crispy Forms settings

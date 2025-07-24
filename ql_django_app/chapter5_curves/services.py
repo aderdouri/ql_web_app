@@ -1,9 +1,11 @@
-# Fichier : ql_web_app/chapter5_curves/services.py
 import QuantLib as ql
 from datetime import date
 import numpy as np
 
 def build_and_get_curve_data(market_rates: dict, evaluation_dt: date):
+    """
+    Builds a yield curve from swap rates and calculates its points for plotting.
+    """
     evaluation_date = ql.Date(evaluation_dt.day, evaluation_dt.month, evaluation_dt.year)
     ql.Settings.instance().evaluationDate = evaluation_date
     calendar = ql.TARGET()
@@ -18,7 +20,7 @@ def build_and_get_curve_data(market_rates: dict, evaluation_dt: date):
                 ql.SwapRateHelper(quote, tenor_period, calendar, ql.Annual, ql.Unadjusted, day_count, ql.Euribor6M())
             )
 
-    yield_curve = ql.PiecewiseLogCubicDiscount(evaluation_date, rate_helpers, ql.Actual365Fixed())
+    yield_curve = ql.PiecewiseLogCubicDiscount(0, calendar, rate_helpers, ql.Actual365Fixed())
     yield_curve.enableExtrapolation()
 
     plot_points = []

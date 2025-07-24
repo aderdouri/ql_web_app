@@ -1,0 +1,73 @@
+{% extends "basics/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block sub_page_content %}
+    <h3>Chapter 6: Price History Lab</h3>
+    <p class="text-muted">Demonstrates efficient pricing over a range of days by simulating market changes and plotting the bond's price history.</p>
+    <hr>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Calculate Price History</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header font-weight-bold">Bond Price Evolution</div>
+                <div class="card-body">
+                    {% if results %}
+                        <!-- ======================================================= -->
+                        <!--       AJOUT D'UNE CARTE D'ANALYSE                       -->
+                        <!-- ======================================================= -->
+                        <div class="alert alert-light border">
+                            <h5 class="alert-heading">How to Read This Chart</h5>
+                            <p class="small">
+                                This chart shows the "Clean Price" of the bond over time. The general upward trend is known as <strong>"pull-to-par"</strong>: as a bond gets closer to its maturity date, its price naturally converges towards its face value (100).
+                            </p>
+                            <p class="small mb-0">
+                                The small periodic drops you may see correspond to **coupon payment dates**. Just after a coupon is paid, the clean price of the bond decreases.
+                            </p>
+                        </div>
+                        <div style="height: 400px;"><canvas id="priceHistoryChart"></canvas></div>
+                    {% else %}
+                        <div class="alert alert-info">Please define a bond and a date range to see the price history.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+{% if results %}
+    {{ results|json_script:"results-data" }}
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const resultsData = JSON.parse(document.getElementById('results-data').textContent);
+        const labels = resultsData.map(p => p.date);
+        const dataPoints = resultsData.map(p => p.price);
+        const ctx = document.getElementById('priceHistoryChart').getContext('2d');
+        const priceHistoryChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{ label: 'Bond Clean Price', data: dataPoints, borderColor: 'rgb(255, 99, 132)' }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                scales: {
+                    x: { type: 'time', time: { unit: 'month' }, title: { display: true, text: 'Date' } },
+                    y: { title: { display: true, text: 'Clean Price' } }
+                }
+            }
+        });
+    });
+    </script>
+{% endif %}
+{% endblock %}

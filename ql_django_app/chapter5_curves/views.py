@@ -1,8 +1,8 @@
-# Fichier : ql_web_app/chapter5_curves/views.py
 from django.shortcuts import render
 from django.http import JsonResponse
 from .forms import CurveBuilderForm
 from . import services
+import json # On importe le module json
 
 def curve_lab_view(request):
     form = CurveBuilderForm()
@@ -10,11 +10,22 @@ def curve_lab_view(request):
     
     if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
         form = CurveBuilderForm(request.POST)
+        
         if form.is_valid():
-            data = services.build_and_get_curve_data(market_rates, form.cleaned_data['evaluation_dt'])
-            return JsonResponse(data)
-        return JsonResponse({'error': 'invalid form'}, status=400)
+            try:
+                data = services.build_and_get_curve_data(market_rates, form.cleaned_data['evaluation_dt'])
+                return JsonResponse(data)
+            except Exception as e:
+                return JsonResponse({'error': str(e)}, status=500)
+        
+        else:
+            # ==============================================================================
+            # CORRECTION : On renvoie les erreurs de validation spécifiques du formulaire
+            # ==============================================================================
+            # Cela nous dira EXACTEMENT pourquoi le formulaire est invalide.
+            return JsonResponse({'error': 'Form is invalid', 'form_errors': form.errors.as_json()}, status=400)
 
+    # La partie GET ne change pas
     initial_data = services.build_and_get_curve_data(market_rates, form.fields['evaluation_dt'].initial)
     context = {'form': form, 'initial_data': initial_data}
     return render(request, 'chapter5_curves/curve_lab.html', context)
