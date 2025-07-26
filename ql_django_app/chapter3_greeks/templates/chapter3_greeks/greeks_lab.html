@@ -1,34 +1,69 @@
 {% extends "basics/base.html" %}
 {% load crispy_forms_tags %}
+
 {% block sub_page_content %}
     <h3>Chapter 3: Numerical Greeks Lab</h3>
     <p class="text-muted">This lab demonstrates how Delta is calculated numerically by "bumping" the spot price and re-pricing the option.</p>
     <hr>
     <div class="row">
         <div class="col-md-5">
-            <div class="card card-body">
-                <form method="post">{% csrf_token %}{{ form|crispy }}<button type="submit" class="btn btn-primary mt-3 w-100">Calculate Numerical Delta</button></form>
+            <div class="card">
+                <div class="card-header">Parameters</div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <button type="submit" class="btn btn-primary mt-3 w-100">Calculate Numerical Delta</button>
+                    </form>
+                </div>
             </div>
         </div>
+
         <div class="col-md-7">
-            <h5>Calculation Steps</h5>
-            {% if results %}
-                <table class="table table-bordered mt-3">
-                    <thead class="thead-light"><tr><th>Scenario</th><th>Spot Price</th><th>Option Price</th></tr></thead>
-                    <tbody>
-                        <tr><td>Price with Spot - Bump</td><td>{{ results.spot_down }}</td><td>{{ results.price_down }}</td></tr>
-                        <tr class="table-info"><td><strong>Initial Price</strong></td><td><strong>{{ results.spot_initial }}</strong></td><td><strong>{{ results.price_initial }}</strong></td></tr>
-                        <tr><td>Price with Spot + Bump</td><td>{{ results.spot_up }}</td><td>{{ results.price_up }}</td></tr>
-                    </tbody>
-                </table>
-                <div class="alert alert-success text-center">
-                    <span class="result-label">Formula: (Price Up - Price Down) / (2 * Bump Size)</span><hr>
-                    <span class="result-label">Numerical Delta:</span>
-                    <h2 class="result-value">{{ results.delta_numerical }}</h2>
+            <div class="card">
+                <div class="card-header">Calculation Steps & Result</div>
+                <div class="card-body">
+                    {% if results %}
+                        <div class="alert alert-secondary small p-2">
+                            Calculation performed as of: <strong>{{ results.evaluation_date }}</strong>
+                        </div>
+
+                        <table class="table table-bordered text-center mt-3">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Scenario</th>
+                                    <th>Option Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Price with (Spot - Bump)</td>
+                                    <td>{{ results.price_down }}</td>
+                                </tr>
+                                <tr class="table-info">
+                                    <td><strong>Initial Price (P<sub>0</sub>)</strong></td>
+                                    <td><strong>{{ results.price_initial }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Price with (Spot + Bump)</td>
+                                    <td>{{ results.price_up }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="alert alert-success text-center mt-4">
+                            <span class="result-label">Formula: (Price<sub>Up</sub> - Price<sub>Down</sub>) / (2 * Bump Size)</span>
+                            <hr>
+                            <span class="result-label">Calculated Numerical Delta (Δ):</span>
+                            <h2 class="result-value">{{ results.delta_numerical }}</h2>
+                        </div>
+                    {% else %}
+                         <div class="alert alert-info mt-3">
+                             Please enter parameters to see the step-by-step calculation.
+                         </div>
+                    {% endif %}
                 </div>
-            {% else %}
-                 <div class="alert alert-info mt-3">Please enter parameters to see the calculation.</div>
-            {% endif %}
+            </div>
         </div>
     </div>
 {% endblock %}
