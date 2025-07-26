@@ -1,5 +1,5 @@
 from django.shortcuts import render
-
+#
 def home(request):
     """Renders the homepage for the Interest-Rate Curves category."""
     return render(request, 'interest_rate_curves/base.html')
