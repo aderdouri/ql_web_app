@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+
 {% block title %}Interest-Rate Curves - {{ block.super }}{% endblock %}
 
 {% block page_content %}
@@ -7,19 +8,32 @@
         <span class="navbar-brand small font-weight-bold">Interest-Rate Curves</span>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav mr-auto">
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'interest_rate_curves:term_structures_lab:curve_lab' %}">5. Term Structures Lab</a>
+                <!-- ======================================================= -->
+                <!-- CORRECTION ICI : Syntaxe à 3 niveaux pour l'app EONIA -->
+                <!-- ======================================================= -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'interest_rate_curves:chapter_eonia_curve:eonia_lab' %}">EONIA curve bootstrapping</a>
+                </li>
+                
+                <!-- Lien à 2 niveaux pour la page statique Euribor -->
+                <li class="nav-item">
+        <a class="nav-link" href="{% url 'interest_rate_curves:chapter_euribor_curve:euribor_lab' %}">Euribor curve bootstrapping</a>
     </li>
-    <li class="nav-item"><a class="nav-link text-muted" href="#">10. Constructing a Yield Curve (Todo)</a></li>
-</ul>
+                
+                <!-- Lien à 3 niveaux pour l'app Treasury Curve -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'interest_rate_curves:chapter10_treasury_curve:curve_lab' %}">Constructing a yield curve</a>
+                </li>
+                
+                <!-- Liens à 2 niveaux pour les autres pages statiques -->
+                <li class="nav-item"><a class="nav-link" href="{% url 'interest_rate_curves:dangerous_day_count' %}">Dangerous day-count conventions</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'interest_rate_curves:implied_term_structures' %}">Implied term structures</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'interest_rate_curves:sensitivities' %}">Interest-rate sensitivities</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'interest_rate_curves:glitch_forward_curves' %}">A glitch in forward-rate curves</a></li>
+            </ul>
         </div>
     </nav>
     
-    {% block sub_page_content %}
-        <div class="alert alert-info">
-            <h4 class="alert-heading">Welcome to the Interest-Rate Curves Section!</h4>
-            <p>Please select a tool from the menu above to begin.</p>
-        </div>
-    {% endblock %}
+    {% block sub_page_content %}{% endblock %}
 </div>
 {% endblock %}

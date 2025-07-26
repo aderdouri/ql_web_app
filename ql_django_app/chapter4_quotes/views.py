@@ -1,5 +1,3 @@
-# Fichier : ql_web_app/chapter4_quotes/views.py (VERSION AMÉLIORÉE)
-
 from django.shortcuts import render
 from django.contrib import messages
 from .forms import BondSetupForm, MarketUpdateForm
@@ -12,9 +10,7 @@ def market_lab_view(request):
     context = {'setup_form': setup_form, 'update_form': update_form}
 
     if request.method == 'POST':
-        # ==============================================================================
-        # LA CORRECTION EST ICI : On vérifie quel bouton a été pressé
-        # ==============================================================================
+        
         if 'setup_bond' in request.POST:
             # L'utilisateur a cliqué sur le bouton du premier formulaire
             setup_form = BondSetupForm(request.POST, prefix='setup')

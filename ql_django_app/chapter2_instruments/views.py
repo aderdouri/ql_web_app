@@ -1,5 +1,3 @@
-# File: ql_web_app/chapter2_instruments/views.py
-
 from django.shortcuts import render
 from django.contrib import messages
 from .forms import EngineChoiceForm

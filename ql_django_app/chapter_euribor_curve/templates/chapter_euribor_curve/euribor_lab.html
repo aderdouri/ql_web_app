@@ -1,0 +1,93 @@
+
+{% extends "interest_rate_curves/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block sub_page_content %}
+    <h3>Euribor Curve Bootstrapping Lab</h3>
+    <p class="text-muted">Change the spread assumption and click "Rebuild Curves" to see the impact on the improved curve.</p>
+    <hr>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card card-body mb-4">
+                <form id="euribor-form" method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="button" id="rebuild-btn" class="btn btn-primary mt-3 w-100">Rebuild Curves</button>
+                </form>
+            </div>
+            <div class="card">
+                <div class="card-header font-weight-bold">Analysis</div>
+                <div class="card-body small">
+                    <p>The <strong>Naive Curve (Blue)</strong> is built using only long-term swaps.</p>
+                    <hr>
+                    <p>The <strong>Improved Curve (Red)</strong> adds synthetic short-term rates derived from the EONIA curve plus the chosen spread.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header font-weight-bold">Euribor 6M Zero Rate Curves</div>
+                <div class="card-body">
+                    <div style="height: 400px;"><canvas id="euriborCurveChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+{{ initial_data|json_script:"initial-data" }}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    let euriborChart = null;
+
+    function drawChart(chartData) {
+        if (!chartData) return;
+        const ctx = document.getElementById('euriborCurveChart');
+        if (!ctx) return;
+        if (euriborChart) { euriborChart.destroy(); }
+        euriborChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [
+                    { label: 'Naive Euribor 6M Curve', data: chartData.naive_curve, borderColor: 'rgb(54, 162, 235)', pointRadius: 1 },
+                    { label: 'Improved Euribor 6M Curve', data: chartData.improved_curve, borderColor: 'rgb(255, 99, 132)', pointRadius: 1 }
+                ]
+            },
+            options: {
+                parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+                scales: { 
+                    x: { type: 'time', time: { unit: 'month' }, title: {display: true, text: 'Date'} },
+                    y: { title: { display: true, text: 'Rate (%)' } }
+                }
+            }
+        });
+    }
+
+    // Dessin initial
+    const initialData = JSON.parse(document.getElementById('initial-data').textContent);
+    drawChart(initialData);
+
+    // Logique de mise à jour au clic
+    const updateButton = document.getElementById('rebuild-btn');
+    updateButton.addEventListener('click', function() {
+        const form = document.getElementById('euribor-form');
+        const formData = new FormData(form);
+        const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrfToken },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            drawChart(data); // On redessine le graphique avec les nouvelles données
+        })
+        .catch(error => console.error('Error updating chart:', error));
+    });
+});
+</script>
+{% endblock %}

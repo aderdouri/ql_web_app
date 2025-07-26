@@ -1,4 +1,3 @@
-# Fichier : ql_web_app/chapter5_curves/urls.py
 from django.urls import path
 from . import views
 

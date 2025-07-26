@@ -1,4 +1,3 @@
-# Fichier : ql_web_app/chapter7_random/forms.py
 from django import forms
 
 class RandomGeneratorForm(forms.Form):
@@ -12,9 +11,17 @@ class RandomGeneratorForm(forms.Form):
         choices=GENERATOR_CHOICES
     )
     num_points = forms.IntegerField(
-        label='Number of Points', 
-        initial=500, 
-        min_value=10, 
-        max_value=5000
+        label='Number of Points to Generate', 
+        initial=256, 
+        min_value=16, 
+        max_value=2048,
+        help_text="Try powers of 2 for Sobol (e.g., 64, 128, 256, 512...)."
+    )
+    dimensionality = forms.IntegerField(
+        label="Dimensionality",
+        initial=2,
+        min_value=1,
+        max_value=10,
+        help_text="The number of dimensions for the random sequence (e.g., 2 for a 2D plot)."
     )
     seed = forms.IntegerField(label='Seed', initial=42)

@@ -1,9 +1,8 @@
 {% extends "basics/base.html" %}
 {% load crispy_forms_tags %}
-
 {% block sub_page_content %}
-    <h3>Chapter 6: Price History Lab</h3>
-    <p class="text-muted">Demonstrates efficient pricing over a range of days by simulating market changes and plotting the bond's price history.</p>
+    <h3>Chapter 6: Pricing over a Range of Days Lab</h3>
+    <p class="text-muted">This lab demonstrates how to efficiently price a bond over a period of time by simulating daily changes in the market yield curve.</p>
     <hr>
     <div class="row">
         <div class="col-md-4">
@@ -20,21 +19,9 @@
                 <div class="card-header font-weight-bold">Bond Price Evolution</div>
                 <div class="card-body">
                     {% if results %}
-                        <!-- ======================================================= -->
-                        <!--       AJOUT D'UNE CARTE D'ANALYSE                       -->
-                        <!-- ======================================================= -->
-                        <div class="alert alert-light border">
-                            <h5 class="alert-heading">How to Read This Chart</h5>
-                            <p class="small">
-                                This chart shows the "Clean Price" of the bond over time. The general upward trend is known as <strong>"pull-to-par"</strong>: as a bond gets closer to its maturity date, its price naturally converges towards its face value (100).
-                            </p>
-                            <p class="small mb-0">
-                                The small periodic drops you may see correspond to **coupon payment dates**. Just after a coupon is paid, the clean price of the bond decreases.
-                            </p>
-                        </div>
                         <div style="height: 400px;"><canvas id="priceHistoryChart"></canvas></div>
                     {% else %}
-                        <div class="alert alert-info">Please define a bond and a date range to see the price history.</div>
+                        <div class="alert alert-info">Please define the bond and simulation range to see the price history.</div>
                     {% endif %}
                 </div>
             </div>
@@ -50,23 +37,22 @@
     <script>
     document.addEventListener("DOMContentLoaded", function() {
         const resultsData = JSON.parse(document.getElementById('results-data').textContent);
-        const labels = resultsData.map(p => p.date);
-        const dataPoints = resultsData.map(p => p.price);
-        const ctx = document.getElementById('priceHistoryChart').getContext('2d');
-        const priceHistoryChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{ label: 'Bond Clean Price', data: dataPoints, borderColor: 'rgb(255, 99, 132)' }]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                scales: {
-                    x: { type: 'time', time: { unit: 'month' }, title: { display: true, text: 'Date' } },
-                    y: { title: { display: true, text: 'Clean Price' } }
+        const ctx = document.getElementById('priceHistoryChart');
+        if(ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{ label: 'Bond Clean Price', data: resultsData, borderColor: 'rgb(255, 99, 132)' }]
+                },
+                options: {
+                    parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+                    scales: {
+                        x: { type: 'time', time: { unit: 'month' }, title: { display: true, text: 'Date' } },
+                        y: { title: { display: true, text: 'Clean Price' } }
+                    }
                 }
-            }
-        });
+            });
+        }
     });
     </script>
 {% endif %}

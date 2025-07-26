@@ -1,12 +1,10 @@
-# Fichier : ql_web_app/interactive_basics/forms.py (VERSION AMÉLIORÉE)
-
 from django import forms
 
 class DateForm(forms.Form):
     day = forms.IntegerField(
         label="Day*",
         initial=31, min_value=1, max_value=31,
-        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm'}) # Ajout des classes CSS
+        widget=forms.NumberInput(attrs={'class': 'form-control form-control-sm'}) 
     )
     month = forms.IntegerField(
         label="Month*",

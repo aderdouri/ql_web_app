@@ -1,4 +1,4 @@
-# File: ql_web_app/chapter4_quotes/forms.py
+
 from django import forms
 
 class BondSetupForm(forms.Form):

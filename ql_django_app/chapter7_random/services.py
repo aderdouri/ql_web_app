@@ -1,30 +1,52 @@
-# Fichier : ql_web_app/chapter7_random/services.py
+
 import QuantLib as ql
 
-def generate_random_points(generator_type: str, num_points: int, seed: int):
+def generate_random_sequence(generator_type: str, num_points: int, seed: int, dimensionality: int):
     """
-    Génère un nombre spécifié de points 2D en utilisant un générateur de nombres aléatoires sélectionné.
+    Generates a sequence of N-dimensional points using a selected random number generator.
+    This service replicates the core concepts from the 'random_numbers.ipynb' notebook.
+
+    Args:
+        generator_type (str): The type of generator to use ('pseudorandom' or 'quasirandom').
+        num_points (int): The number of points to generate in the sequence.
+        seed (int): The seed for the random number generator for reproducibility.
+        dimensionality (int): The number of dimensions for each point in the sequence.
+
+    Returns:
+        list: A list of points. For 2D, it's a list of dictionaries [{'x':..., 'y':...}].
+              For other dimensions, it's a list of lists [[d1, d2, ...], ...].
     """
+    
     points = []
     
     if generator_type == 'pseudorandom':
-        # Mersenne Twister : un générateur pseudo-aléatoire de haute qualité
+        # This corresponds to the Mersenne Twister example in the notebook.
+        # It's a high-quality pseudo-random generator.
+        # Since it's a 1D generator, we need to call it 'dimensionality' times for each point.
         rng = ql.MersenneTwisterUniformRng(seed)
-        for i in range(num_points * 2): # On a besoin de 2x plus de nombres pour des paires
-            x = rng.next().value()
-            y = rng.next().value()
-            points.append({'x': x, 'y': y})
+        for _ in range(num_points):
+            point = [rng.next().value() for _ in range(dimensionality)]
+            points.append(point)
             
     elif generator_type == 'quasirandom':
-        # Sobol : une séquence à faible disparité (quasi-aléatoire)
-        # Il nécessite la dimensionnalité à la création (2D dans notre cas)
-        rng = ql.SobolRsg(2, seed)
-        for i in range(num_points):
-            # nextSequence() renvoie une liste de valeurs [x, y]
+        # This corresponds to the Sobol sequence example in the notebook.
+        # It's a low-discrepancy (quasi-random) sequence generator.
+        # It must be initialized with the desired dimensionality.
+        rng = ql.SobolRsg(dimensionality, seed)
+        for _ in range(num_points):
+            # nextSequence() returns a list of values with the correct dimensionality.
             point_values = rng.nextSequence().value()
-            points.append({'x': point_values[0], 'y': point_values[1]})
+            points.append(point_values)
             
     else:
-        raise ValueError("Type de générateur inconnu")
+        raise ValueError(f"Unknown generator type: {generator_type}")
         
-    return points
+    # --- Data Formatting for the Chart ---
+    # The scatter plot in Chart.js expects a list of objects with 'x' and 'y' keys.
+    # We only format the data this way if the user requested a 2D plot.
+    if dimensionality == 2:
+        return [{'x': p[0], 'y': p[1]} for p in points]
+    else:
+        # For other dimensions, we just return the raw list of points.
+        # The template will display a message that it cannot be plotted.
+        return points

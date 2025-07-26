@@ -1,5 +1,3 @@
-# File: ql_web_app/chapter3_greeks/forms.py
-
 from django import forms
 from datetime import date
 

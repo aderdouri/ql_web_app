@@ -1,5 +1,3 @@
-# File: ql_web_app/chapter3_greeks/services.py (VERSION COMPLETE ET CORRIGEE)
-
 import QuantLib as ql
 import numpy as np
 from datetime import date
@@ -35,9 +33,6 @@ def calculate_numerical_greeks(option_params: dict, bump_size: float) -> dict:
         calculation_date = ql.Date(8, 5, 2015) # Fixed date for consistent results
         ql.Settings.instance().evaluationDate = calculation_date
         
-        # ==============================================================================
-        # LA CORRECTION EST ICI : On spécifie un marché pour le calendrier
-        # ==============================================================================
         calendar = ql.UnitedStates(ql.UnitedStates.GovernmentBond)
         day_count = ql.Actual365Fixed()
 

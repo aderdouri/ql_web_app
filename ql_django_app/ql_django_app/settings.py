@@ -51,10 +51,12 @@ INSTALLED_APPS = [
     'interactive_basics', # Vous pouvez garder celle-ci si elle est utilisée par un chapitre
     'chapter6_pricing_range',
     'chapter7_random',
+    'chapter_eonia_curve',
+    'chapter_euribor_curve',
     # --- Applications "Catégorie" ---
     'basics',
     'interest_rate_curves',
-    
+    'chapter10_treasury_curve',
 ]
 
 # Add Crispy Forms settings

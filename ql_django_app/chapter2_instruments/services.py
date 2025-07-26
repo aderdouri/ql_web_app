@@ -1,5 +1,3 @@
-# File: ql_web_app/chapter2_instruments/services.py
-
 import QuantLib as ql
 import numpy as np
 from datetime import date

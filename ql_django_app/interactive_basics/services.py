@@ -1,4 +1,3 @@
-# Fichier : ql_web_app/interactive_basics/services.py
 import QuantLib as ql
 
 def create_date_from_form(day, month, year):
@@ -6,10 +5,6 @@ def create_date_from_form(day, month, year):
     
     date = ql.Date(day, month, year)
     
-    # =====================================================================
-    # LA CORRECTION EST ICI
-    # =====================================================================
-    # On crée un dictionnaire de traduction pour les jours de la semaine
     weekday_map = {
         1: "Sunday",
         2: "Monday",

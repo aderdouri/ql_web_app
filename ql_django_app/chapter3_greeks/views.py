@@ -1,5 +1,3 @@
-# File: ql_web_app/chapter3_greeks/views.py
-
 from django.shortcuts import render
 from django.contrib import messages  # Import the Django messaging framework
 from .forms import NumericalGreeksForm
@@ -41,10 +39,6 @@ def greeks_lab_view(request):
                 results = services.calculate_numerical_greeks(option_params, bump_size)
 
             except Exception as e:
-                # ==============================================================================
-                # CORRECTION IMPORTANTE : On n'utilise jamais "pass" dans un "except".
-                # On affiche toujours une erreur claire à l'utilisateur.
-                # ==============================================================================
                 messages.error(request, f"An error occurred during the QuantLib calculation: {e}")
         
         else:

@@ -1,46 +1,65 @@
-<!-- Fichier : ql_web_app/chapter7_random/templates/chapter7_random/random_lab.html (VERSION CORRIGÉE) -->
-
 {% extends "basics/base.html" %}
 {% load crispy_forms_tags %}
 
 {% block sub_page_content %}
     <h3>Chapter 7: Random Numbers Lab</h3>
-    <p class="text-muted">Visually compare the output of a pseudo-random generator with a quasi-random (low-discrepancy) sequence.</p>
+    <p class="text-muted">
+        Visually compare the output of a pseudo-random generator with a quasi-random (low-discrepancy) sequence and explore the concept of dimensionality.
+    </p>
     <hr>
+    
     <div class="row">
+        <!-- Colonne de gauche pour les contrôles et les explications -->
         <div class="col-md-4">
-            <div class="card card-body">
-                <form method="post">
+            <div class="card card-body mb-4">
+                <form method="post" novalidate>
                     {% csrf_token %}
                     {{ form|crispy }}
-                    <button type="submit" class="btn btn-primary mt-3 w-100">Generate Points</button>
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Generate Sequence</button>
                 </form>
             </div>
-            <div class="card mt-4">
+            
+            <div class="card">
                 <div class="card-header font-weight-bold">What to Observe</div>
                 <div class="card-body small">
-                    <p><strong>Pseudo-Random (Mersenne Twister):</strong> Notice how the points can form clusters and leave large empty gaps. This is "true" randomness, but it's inefficient for simulations.</p>
+                    <p><strong>Pseudo-Random:</strong> Notice the points form clusters and leave large empty gaps. This is "true" randomness but can be inefficient for simulations.</p>
                     <hr>
-                    <p><strong>Quasi-Random (Sobol):</strong> Notice how the points are much more evenly distributed. The sequence is designed to fill the space without leaving large gaps.</p>
+                    <p><strong>Quasi-Random (Sobol):</strong> Notice the points are much more evenly distributed, designed to fill the space efficiently. This is crucial for high-dimensional Monte Carlo pricing.</p>
+                    <hr>
+                    <p><strong>Dimensionality:</strong> While we can only plot in 2D, the service can generate sequences in any dimension. This is fundamental for simulating multiple correlated assets.</p>
                 </div>
             </div>
         </div>
+        
+        <!-- Colonne de droite pour la visualisation -->
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header font-weight-bold">
-                    Generated 2D Points
+                    Visualization / Result
                     {% if request.POST.generator_type %}
-                        <!-- ======================================================= -->
-                        <!-- LA CORRECTION EST ICI : On a supprimé le filtre 'replace' -->
-                        <!-- ======================================================= -->
                         <span class="badge badge-info float-right">{{ request.POST.generator_type|title }}</span>
                     {% endif %}
                 </div>
                 <div class="card-body">
-                    {% if results %}
-                        <div style="height: 500px;"><canvas id="randomChart"></canvas></div>
+                    
+                    {% if results and request.POST.dimensionality == '2' %}
+                        <div class="alert alert-success small p-2">
+                            Displaying the <strong>2D sequence</strong> as a scatter plot.
+                        </div>
+                        <div style="height: 500px; position: relative;"><canvas id="randomChart"></canvas></div>
+                        
+                    {% elif results %}
+                        <div class="alert alert-info">
+                            <h5 class="alert-heading">Calculation Successful!</h5>
+                            <p>A <strong>{{ request.POST.dimensionality }}D sequence</strong> with {{ request.POST.num_points }} points was generated successfully by the server.</p>
+                            <hr>
+                            <p class="mb-0">However, only 2D sequences can be plotted. Please set "Dimensionality" to 2 to visualize the result.</p>
+                        </div>
+
                     {% else %}
-                        <div class="alert alert-info">Select parameters and click "Generate Points".</div>
+                        <div class="alert alert-light">
+                            Select parameters and click "Generate Sequence" to begin.
+                        </div>
                     {% endif %}
                 </div>
             </div>
@@ -48,16 +67,16 @@
     </div>
 {% endblock %}
 
+
 {% block javascript %}
-<!-- Le code JavaScript reste le même -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% if results %}
+{% if results and request.POST.dimensionality == '2' %}
     {{ results|json_script:"results-data" }}
     <script>
     document.addEventListener("DOMContentLoaded", function() {
         const resultsData = JSON.parse(document.getElementById('results-data').textContent);
         const ctx = document.getElementById('randomChart');
-        if (ctx) {
+        if(ctx) {
             new Chart(ctx, {
                 type: 'scatter',
                 data: {
@@ -68,10 +87,11 @@
                     }]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
-                        x: { min: 0, max: 1, title: { display: true, text: 'X' } },
-                        y: { min: 0, max: 1, title: { display: true, text: 'Y' } }
+                        x: { min: 0, max: 1, title: { display: true, text: 'Dimension 1' } },
+                        y: { min: 0, max: 1, title: { display: true, text: 'Dimension 2' } }
                     }
                 }
             });

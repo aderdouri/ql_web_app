@@ -1,31 +1,23 @@
 from django.shortcuts import render
-from django.http import JsonResponse
-from .forms import CurveBuilderForm
+from .forms import CurveLabForm
 from . import services
-import json # On importe le module json
 
 def curve_lab_view(request):
-    form = CurveBuilderForm()
-    market_rates = {'2Y': 0.201, '3Y': 0.258, '5Y': 0.464, '10Y': 1.151, '15Y': 1.588}
-    
-    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        form = CurveBuilderForm(request.POST)
-        
-        if form.is_valid():
-            try:
-                data = services.build_and_get_curve_data(market_rates, form.cleaned_data['evaluation_dt'])
-                return JsonResponse(data)
-            except Exception as e:
-                return JsonResponse({'error': str(e)}, status=500)
-        
-        else:
-            # ==============================================================================
-            # CORRECTION : On renvoie les erreurs de validation spécifiques du formulaire
-            # ==============================================================================
-            # Cela nous dira EXACTEMENT pourquoi le formulaire est invalide.
-            return JsonResponse({'error': 'Form is invalid', 'form_errors': form.errors.as_json()}, status=400)
+    form = CurveLabForm(request.POST or None)
+    plot_points = None
 
-    # La partie GET ne change pas
-    initial_data = services.build_and_get_curve_data(market_rates, form.fields['evaluation_dt'].initial)
-    context = {'form': form, 'initial_data': initial_data}
+    if form.is_valid():
+        eval_dt = form.cleaned_data['evaluation_dt']
+        interpolation = form.cleaned_data['interpolation_type']
+    else:
+        form = CurveLabForm()
+        eval_dt = form.fields['evaluation_dt'].initial
+        interpolation = form.fields['interpolation_type'].initial
+            
+    plot_points = services.build_and_analyze_curves(
+        evaluation_dt=eval_dt,
+        interpolation_str=interpolation
+    )
+    
+    context = {'form': form, 'plot_points': plot_points}
     return render(request, 'chapter5_curves/curve_lab.html', context)

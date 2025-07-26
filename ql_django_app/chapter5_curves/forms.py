@@ -1,33 +1,32 @@
-# Fichier : ql_web_app/chapter5_curves/forms.py (VERSION FINALE AVEC VALIDATION)
-
 from django import forms
 from datetime import date
 
-class CurveBuilderForm(forms.Form):
+class CurveLabForm(forms.Form):
+    """
+    A form to control the parameters for the Term Structures Lab.
+    It allows selecting both the evaluation date and the curve interpolation method.
+    """
+    
+    # Choices for the interpolation dropdown menu, based on the first notebook.
+    INTERPOLATION_CHOICES = [
+        ('log_cubic', 'Log-Cubic Discount'),
+        ('linear_zero', 'Linear Zero Rates'),
+        ('cubic_zero', 'Cubic Zero Rates'),
+        ('flat_forward', 'Flat Forward Rates'),
+    ]
+    
+    # Field for the evaluation date, from the second notebook.
     evaluation_dt = forms.DateField(
         label='Evaluation Date', 
-        initial=date(2014, 10, 3),
+        initial=date(2015, 1, 15), # Default date from the first notebook
         widget=forms.DateInput(attrs={'type': 'date'}),
-        help_text="Change this date to see how a relative curve moves."
+        help_text="Changes the reference date for the 'Relative' curve."
     )
-
-    # ==============================================================================
-    # LA CORRECTION EST ICI : On ajoute une fonction de validation personnalisée
-    # ==============================================================================
-    def clean_evaluation_dt(self):
-        """
-        Custom validation for the evaluation_dt field.
-        """
-        # On récupère la date que l'utilisateur a saisie
-        dt = self.cleaned_data.get('evaluation_dt')
-
-        # On vérifie si la date est dans la plage valide pour QuantLib
-        if dt:
-            if not (1901 <= dt.year <= 2199):
-                # Si l'année est hors limites, on lève une erreur de validation
-                raise forms.ValidationError(
-                    "Year is out of QuantLib's valid range. Please choose a year between 1901 and 2199."
-                )
-        
-        # Si la date est valide, on la retourne
-        return dt
+    
+    # Field for the interpolation method, from the first notebook.
+    interpolation_type = forms.ChoiceField(
+        label='Interpolation Method', 
+        choices=INTERPOLATION_CHOICES,
+        initial='log_cubic', # Default method
+        help_text="Select the algorithm used to build the curve from market instruments."
+    )

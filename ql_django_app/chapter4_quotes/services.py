@@ -1,10 +1,6 @@
-# File: ql_web_app/chapter4_quotes/services.py
 import QuantLib as ql
 import numpy as np
 
-# --- State shared across requests (simplified for this example) ---
-# In a real app, this state might be stored in the user's session or a database.
-# Here, we use global variables for simplicity.
 bond_instrument = None
 rate_quote = None
 
