@@ -1,6 +1,11 @@
 from django.urls import path, include
 from . import views
-
+from chapter_eonia_curve import views as eonia_views
+from chapter_euribor_curve import views as euribor_views
+from chapter10_treasury_curve import views as treasury_views
+from chapter_day_count import views as day_count_views
+from chapter_implied_curve import views as implied_views
+from chapter_glitch_curve import views as glitch_views
 # On déclare l'espace de nom pour cette catégorie
 app_name = 'interest_rate_curves'
 
@@ -20,11 +25,13 @@ urlpatterns = [
     path('constructing-a-yield-curve/', include('chapter10_treasury_curve.urls')),
     
     # Le reste des chapitres pointe vers des vues statiques
-    path('dangerous-day-count-conventions/', views.dangerous_day_count_view, name='dangerous_day_count'),
+    path('dangerous-day-count-conventions/', include('chapter_day_count.urls')),
     
-    path('implied-term-structures/', views.implied_term_structures_view, name='implied_term_structures'),
-    
+    path('implied-term-structures/', include('chapter_implied_curve.urls')),
     path('interest-rate-sensitivities/', views.sensitivities_view, name='sensitivities'),
     
-    path('glitch-in-forward-rate-curves/', views.glitch_forward_curves_view, name='glitch_forward_curves'),
-]
+    path(
+        'glitch-in-forward-rate-curves/', 
+        glitch_views.glitch_lab_view, 
+        name='glitch_forward_curves'
+    ),]

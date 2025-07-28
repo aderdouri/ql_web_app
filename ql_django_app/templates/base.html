@@ -1,77 +1,33 @@
-
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}myGenAI Quant App{% endblock %}</title>
-    
-    <!-- 2. On charge le CSS de Bootstrap depuis un CDN -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    
-    <!-- 3. On charge notre propre fichier CSS personnalisé -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+<meta charset="UTF-8">
+<title>{% block title %}myGenAI Quant App{% endblock %}</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body class="d-flex flex-column min-vh-100">
-
-    <!-- =================================================================== -->
-    <!--     NAVBAR PRINCIPALE AVEC UNIQUEMENT LES LIENS ACTIFS              -->
-    <!-- =================================================================== -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">myGenAI Quant App</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="mainNavbar">
-                <ul class="navbar-nav mr-auto">
-                    <!-- Ces deux liens existent dans votre urls.py, donc ils fonctionnent -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'basics:home' %}">Basics</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'interest_rate_curves:home' %}">Interest-Rate Curves</a>
-                    </li>
-                    
-                    <!-- Les autres liens sont désactivés pour ne pas causer d'erreur -->
-                    <li class="nav-item">
-                        <a class="nav-link disabled" href="#">Interest-Rate Models</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link disabled" href="#">Equity Models</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link disabled" href="#">Bonds</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- =================================================================== -->
-    <!--     BLOC DE CONTENU PRINCIPAL                                       -->
-    <!-- =================================================================== -->
-    <main class="container mt-4 flex-grow-1">
-        {% block page_content %}
-            <!-- Par défaut, si une page n'a pas de contenu, rien ne s'affiche ici -->
-        {% endblock %}
-    </main>
-
-    <!-- =================================================================== -->
-    <!--     PIED DE PAGE (FOOTER)                                           -->
-    <!-- =================================================================== -->
-    <footer class="footer bg-dark text-white mt-auto p-3 text-center">
-        © {% now "Y" %} QL Django App - Stage myGenAI
-    </footer>
-
-    <!-- Scripts JS chargés à la fin pour de meilleures performances -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js" integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous"></script>
-    
-    <!-- Un bloc pour que les pages enfants puissent ajouter leur propre JavaScript si besoin -->
-    {% block javascript %}{% endblock %}
-</body>
-</html>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<div class="container">
+<a class="navbar-brand" href="{% url 'home' %}">myGenAI Quant App</a>
+<div class="collapse navbar-collapse">
+<ul class="navbar-nav mr-auto">
+<li class="nav-item"><a class="nav-link" href="{% url 'basics:home' %}">Basics</a></li>
+<li class="nav-item"><a class="nav-link" href="{% url 'interest_rate_curves:home' %}">Interest-Rate Curves</a></li>
+<li class="nav-item"><a class="nav-link disabled" href="#">Interest-Rate Models</a></li>
+<li class="nav-item"><a class="nav-link disabled" href="#">Equity Models</a></li>
+<li class="nav-item"><a class="nav-link disabled" href="#">Bonds</a></li>
+</ul>
+</div>
+</div>
+</nav>
+<main class="container mt-4 flex-grow-1">
+{% block page_content %}{% endblock %}
+</main>
+<footer class="footer bg-dark text-white mt-auto p-3 text-center">
+&copy; {% now "Y" %} QL Django App
+</footer>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+{% block javascript %}{% endblock %}

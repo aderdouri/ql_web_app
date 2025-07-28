@@ -1,0 +1,71 @@
+{% extends "interest_rate_curves/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block sub_page_content %}
+    <h3>Implied Term Structures Lab</h3>
+    <p class="text-muted">This page demonstrates how a new curve can be derived from a base curve by adding a credit spread.</p>
+    <hr>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card card-body mb-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Apply Spread & Rebuild</button>
+                </form>
+            </div>
+             <div class="card">
+                <div class="card-header font-weight-bold">Analysis</div>
+                <div class="card-body small">
+                    <p>The <strong>Base Curve (Blue)</strong> represents the risk-free rate.</p>
+                    <hr>
+                    <p>The <strong>Spreaded Curve (Red)</strong> is the base curve shifted upwards by the credit spread you entered. This is the implied yield curve for an asset with that level of credit risk.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header font-weight-bold">Base Curve vs. Spreaded Curve</div>
+                <div class="card-body">
+                    {% if plot_points %}
+                        <div style="height: 400px; position: relative;"><canvas id="spreadCurveChart"></canvas></div>
+                    {% else %}
+                        <div class="alert alert-warning">Could not generate plot points.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+{% if plot_points %}
+    {{ plot_points|json_script:"plot-data" }}
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const data = JSON.parse(document.getElementById('plot-data').textContent);
+        const ctx = document.getElementById('spreadCurveChart');
+        if(ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        { label: 'Base Risk-Free Curve', data: data.base, borderColor: 'rgb(54, 162, 235)', pointRadius: 0 },
+                        { label: 'Spreaded (Corporate) Curve', data: data.spreaded, borderColor: 'rgb(255, 99, 132)', pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+                    scales: { 
+                        x: { type: 'time', time: { unit: 'year' }, title: {display: true, text: 'Date'} },
+                        y: { title: { display: true, text: 'Zero Rate (%)' } }
+                    }
+                }
+            });
+        }
+    });
+    </script>
+{% endif %}
+{% endblock %}

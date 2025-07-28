@@ -1,0 +1,74 @@
+{% extends "interest_rate_curves/base.html" %}
+{% block sub_page_content %}
+    <h3>A Glitch in Forward-Rate Curves Lab</h3>
+    <p class="text-muted">This page demonstrates an interpolation glitch where the retrieved rate at a node is the average of the two adjacent flat forward levels.</p>
+    <hr>
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header font-weight-bold">Instantaneous Forward Rate</div>
+                <div class="card-body">
+                    <div style="height: 400px;"><canvas id="glitchChart"></canvas></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-header font-weight-bold">Node Analysis</div>
+                <div class="card-body">
+                    <p class="small text-muted">Notice the difference between the 'Expected' rate (the flat level) and the 'Retrieved' rate at each node date.</p>
+                    <table class="table table-sm table-bordered">
+                        <thead class="thead-light"><tr><th>Date</th><th>Expected (%)</th><th>Retrieved (%)</th></tr></thead>
+                        <tbody>
+                            {% for row in analysis_data.table_data %}
+                            <tr><td>{{ row.date }}</td><td>{{ row.expected }}</td><td>{{ row.retrieved }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ analysis_data|json_script:"analysis-data" }}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const data = JSON.parse(document.getElementById('analysis-data').textContent);
+    const ctx = document.getElementById('glitchChart');
+    if(ctx) {
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                datasets: [
+                    {
+                        label: 'True (Stepped) Forward Curve',
+                        data: data.true_plot_points,
+                        borderColor: 'rgba(255, 99, 132, 0.5)',
+                        borderDash: [5, 5],
+                        borderWidth: 2,
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'Retrieved "Glitched" Curve',
+                        data: data.plot_points,
+                        borderColor: 'rgb(54, 162, 235)',
+                        pointRadius: 1,
+                        borderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+                scales: { 
+                    x: { type: 'linear', position: 'bottom', title: {display: true, text: 'Time (Years)'} },
+                    y: { title: { display: true, text: 'Rate (%)' }, min: 0 } 
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}
