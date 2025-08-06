@@ -1,46 +1,6 @@
-
-{% extends "rates/rates_base.html" %}
-{% load crispy_forms_tags %}
-
-{% block title %}Pricer de Swap - {{ block.super }}{% endblock %}
+<!-- Fichier : swap/templates/swap/pricer.html -->
+{% extends "interest_rate_models/base.html" %}
 
 {% block sub_page_content %}
-    <h3>Pricer de Swap de Taux d'Intérêt</h3>
-    <p class="text-muted">Valorise un swap de taux vanille et calcule ses métriques clés.</p>
-    <hr>
-    
-    <div class="row">
-        <div class="col-md-5">
-            <h5>Paramètres du Swap</h5>
-            <div class="card card-body mt-3">
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form|crispy }}
-                    <button type="submit" class="btn btn-primary mt-3 w-100">Calculer</button>
-                </form>
-            </div>
-        </div>
-        <div class="col-md-7">
-            <h5>Résultats</h5>
-            {% if results %}
-                <table class="table table-bordered table-striped mt-3">
-                    <tbody>
-                        <tr><td><strong>NPV du Swap</strong></td><td><strong>{{ results.npv }}</strong></td></tr>
-                        <tr><td>Taux "Fair" (%)</td><td>{{ results.fair_rate }}</td></tr>
-                        <tr><td>Spread "Fair" (bps)</td><td>{{ results.fair_spread }}</td></tr>
-                        <tr><td>BP de la Jambe Fixe</td><td>{{ results.fixed_leg_bps }}</td></tr>
-                        <tr><td>BP de la Jambe Flottante</td><td>{{ results.floating_leg_bps }}</td></tr>
-                    </tbody>
-                </table>
-            {% else %}
-                <div class="alert alert-info mt-3">Veuillez saisir les paramètres et cliquer sur "Calculer".</div>
-            {% endif %}
-
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-danger mt-4">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        </div>
-    </div>
+    <!-- Tout le contenu de votre pricer de swap va ici -->
 {% endblock %}

@@ -28,10 +28,9 @@ urlpatterns = [
     path('dangerous-day-count-conventions/', include('chapter_day_count.urls')),
     
     path('implied-term-structures/', include('chapter_implied_curve.urls')),
-    path('interest-rate-sensitivities/', views.sensitivities_view, name='sensitivities'),
     
-    path(
+     path(
         'glitch-in-forward-rate-curves/', 
-        glitch_views.glitch_lab_view, 
-        name='glitch_forward_curves'
-    ),]
+        include(('chapter_glitch_curve.urls', 'chapter_glitch_curve'))
+    ),
+     path('interest-rate-sensitivities/', include('chapter_sensitivities.urls')),]

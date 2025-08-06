@@ -1,0 +1,76 @@
+{% extends "interest_rate_curves/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block sub_page_content %}
+    <h3>Interest-Rate Sensitivities Lab</h3>
+    <p class="text-muted">Analyze the impact of different yield curve shocks on a plain vanilla swap's NPV.</p>
+    <hr>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card card-body mb-4">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Apply Shock</button>
+                </form>
+            </div>
+             <div class="card">
+                <div class="card-header font-weight-bold">NPV Analysis</div>
+                <div class="card-body">
+                    {% if results %}
+                        <table class="table table-sm">
+                            <tr><th>Base Price:</th><td>{{ results.base_price }}</td></tr>
+                            <tr><th>Shocked Price:</th><td>{{ results.shocked_price }}</td></tr>
+                            <tr><th><strong>Sensitivity:</strong></th><td><strong>{{ results.sensitivity }}</strong></td></tr>
+                        </table>
+                    {% else %}
+                        <p class="small text-muted">Results will be displayed here.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header font-weight-bold">Yield Curve Shock</div>
+                <div class="card-body">
+                    {% if results.plot_points %}
+                        <div style="height: 400px;"><canvas id="sensitivityChart"></canvas></div>
+                    {% else %}
+                        <div class="alert alert-info">Select parameters and click "Apply Shock" to see the visualization.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% if results.plot_points %}
+    {{ results.plot_points|json_script:"plot-data" }}
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const data = JSON.parse(document.getElementById('plot-data').textContent);
+        const ctx = document.getElementById('sensitivityChart');
+        if(ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        { label: 'Base Curve', data: data.base, borderColor: 'rgb(54, 162, 235)', pointRadius: 0 },
+                        { label: 'Shocked Curve', data: data.shocked, borderColor: 'rgb(255, 99, 132)', borderDash: [5, 5], pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+                    scales: { 
+                        x: { type: 'linear', title: {display: true, text: 'Years to Maturity'} },
+                        y: { title: { display: true, text: 'Zero Rate (%)' } }
+                    }
+                }
+            });
+        }
+    });
+    </script>
+{% endif %}
+{% endblock %}

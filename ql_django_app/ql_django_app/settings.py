@@ -24,7 +24,8 @@ INSTALLED_APPS = [
     # --- Applications de Catégories Actives ---
     'basics',
     'interest_rate_curves',
-    
+     'interest_rate_models',
+      
     # --- Applications de Chapitres Actives ---
     # Ajoutez ici toutes les applications de chapitre que vous avez créées
     
@@ -40,6 +41,8 @@ INSTALLED_APPS = [
     'chapter_day_count',
     'chapter_implied_curve',
     'chapter_glitch_curve',
+    'chapter_sensitivities',
+    'swap',
 ]
 
 MIDDLEWARE = [

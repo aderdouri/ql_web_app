@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Interest-Rate Models - {{ block.super }}{% endblock %}
+{% block page_content %}
+<div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 border rounded">
+        <span class="navbar-brand small font-weight-bold">Interest-Rate Models</span>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a class="nav-link text-muted" href="#">Vanilla Swap (Todo)</a></li>
+                <li class="nav-item"><a class="nav-link text-muted" href="#">Caps & Floors (Todo)</a></li>
+            </ul>
+        </div>
+    </nav>
+    {% block sub_page_content %}{% endblock %}
+</div>
+{% endblock %}

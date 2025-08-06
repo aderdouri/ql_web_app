@@ -23,11 +23,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'interest_rate_curves:chapter_implied_curve:implied_curve_lab' %}">Implied term structures</a>
                 </li>
+                  <li class="nav-item">
+                    <a class="nav-link" href="{% url 'interest_rate_curves:chapter_sensitivities:sensitivity_lab' %}">Interest-rate sensitivities</a>
+                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-muted" href="#">Interest-rate sensitivities (Todo)</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-muted" href="#">A glitch in forward-rate curves (Todo)</a>
+                    <a class="nav-link text-muted" href="{% url 'interest_rate_curves:chapter_glitch_curve:glitch_lab' %}">A glitch in forward-rate curves (Todo)</a>
                 </li>
             </ul>
         </div>
