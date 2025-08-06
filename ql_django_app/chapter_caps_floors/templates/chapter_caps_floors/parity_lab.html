@@ -1,0 +1,52 @@
+{% extends "interest_rate_models/base.html" %}
+{% load crispy_forms_tags %}
+{% block sub_page_content %}
+    <h3>Caps and Floors Parity Lab</h3>
+    <p class="text-muted">This page demonstrates the put-call parity relationships for interest-rate caps, floors, collars, and swaps.</p>
+    <hr>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card card-body">
+                <form method="post">{% csrf_token %}{{ form|crispy }}<button type="submit" class="btn btn-primary mt-3 w-100">Run Analysis</button></form>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header font-weight-bold">Analysis Results</div>
+                <div class="card-body">
+                    {% if results %}
+                        <h5>Calculated Prices (NPV)</h5>
+                        <table class="table table-sm table-bordered">
+                            <tr><td>Cap Price</td><td>{{ results.cap_npv }}</td></tr>
+                            <tr><td>Floor Price</td><td>{{ results.floor_npv }}</td></tr>
+                            <tr><td>Collar Price</td><td>{{ results.collar_npv }}</td></tr>
+                            <tr><td>Swap Price</td><td>{{ results.swap_npv }}</td></tr>
+                        </table>
+                        <hr>
+                        <h5>Parity Checks</h5>
+                        <p>A long Cap and a short Floor should replicate a Collar and a Swap.</p>
+                        <table class="table table-sm table-bordered">
+                            <tr>
+                                <td><strong>Cap Price - Floor Price</strong></td>
+                                <td><strong>{{ results.cap_npv|add:results.floor_npv|floatformat:2 }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Collar Parity Check (<code>(Cap-Floor) - Collar</code>)</td>
+                                <td>{{ results.collar_parity_diff }}</td>
+                            </tr>
+                            <tr>
+                                <td>Swap Parity Check (<code>(Cap-Floor) - Swap</code>)</td>
+                                <td>{{ results.swap_parity_diff }}</td>
+                            </tr>
+                        </table>
+                        <div class="alert alert-info small mt-3">
+                            Note: The differences should be very close to zero, allowing for small numerical discrepancies.
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">Enter parameters and click "Run Analysis".</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

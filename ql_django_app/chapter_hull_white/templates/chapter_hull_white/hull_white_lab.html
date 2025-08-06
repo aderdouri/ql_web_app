@@ -1,0 +1,148 @@
+{% extends "interest_rate_models/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block sub_page_content %}
+    <h3>Simulating Interest Rates using Hull-White Model</h3>
+    <p class="text-muted">Generate stochastic paths for short rates using the Hull-White model and compare simulation statistics with theoretical values.</p>
+    <hr>
+    
+    <div class="row">
+        <!-- Colonne de gauche pour les paramètres -->
+        <div class="col-md-4">
+            <div class="card card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Run Simulation</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Colonne de droite pour les graphiques -->
+        <div class="col-md-8">
+            {% if results %}
+                <!-- Premier graphique : Chemins Simulés -->
+                <div class="card mb-4">
+                    <div class="card-header font-weight-bold">Simulated Short-Rate Paths</div>
+                    <div class="card-body">
+                        <div style="height: 300px; position: relative;"><canvas id="pathsChart"></canvas></div>
+                    </div>
+                </div>
+                
+                <!-- Ligne pour les deux graphiques statistiques -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header font-weight-bold">Mean of Short Rates</div>
+                            <div class="card-body">
+                                <div style="height: 250px; position: relative;"><canvas id="meanChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header font-weight-bold">Variance of Short Rates</div>
+                            <div class="card-body">
+                                <div style="height: 250px; position: relative;"><canvas id="varianceChart"></canvas></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <div class="alert alert-info">Select parameters and click "Run Simulation" to see the results.</div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% if results %}
+    {{ results|json_script:"results-data" }}
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const data = JSON.parse(document.getElementById('results-data').textContent);
+        const timeGrid = data.time_grid;
+
+        // ==============================================================================
+        // 1. GRAPHIQUE DES CHEMINS (PATHS CHART)
+        // ==============================================================================
+        const pathsCtx = document.getElementById('pathsChart');
+        if (pathsCtx) {
+            // On ne garde que les 20 premiers chemins pour ne pas surcharger le navigateur
+            const pathsToDisplay = data.paths.slice(0, 20);
+            
+            const pathDatasets = pathsToDisplay.map((path, i) => ({
+                label: `Path ${i+1}`,
+                data: path.map((y, j) => ({ x: timeGrid[j], y: y * 100 })), // Conversion en %
+                borderColor: `rgba(0, 0, 255, 0.3)`,
+                borderWidth: 1,
+                pointRadius: 0
+            }));
+
+            new Chart(pathsCtx, {
+                type: 'line',
+                data: { datasets: pathDatasets },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } }, // On cache la légende
+                    scales: {
+                        x: { type: 'linear', position: 'bottom', title: { display: true, text: 'Years' } },
+                        y: { title: { display: true, text: 'Rate (%)' } }
+                    }
+                }
+            });
+        }
+
+        // ==============================================================================
+        // 2. GRAPHIQUE DE LA MOYENNE (MEAN CHART)
+        // ==============================================================================
+        const meanCtx = document.getElementById('meanChart');
+        if(meanCtx) {
+            new Chart(meanCtx, {
+                type: 'line',
+                data: {
+                    labels: timeGrid,
+                    datasets: [
+                        { label: 'Simulated', data: data.avg_path.map(y => y*100), borderColor: 'rgb(255, 99, 132)', pointRadius: 0 },
+                        { label: 'Theoretical', data: data.theoretical_mean.map(y => y*100), borderColor: 'rgb(54, 162, 235)', borderDash: [5, 5], pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Years' } },
+                        y: { title: { display: true, text: 'Rate (%)' } }
+                    }
+                }
+            });
+        }
+
+        // ==============================================================================
+        // 3. GRAPHIQUE DE LA VARIANCE (VARIANCE CHART)
+        // ==============================================================================
+        const varCtx = document.getElementById('varianceChart');
+        if(varCtx) {
+            new Chart(varCtx, {
+                type: 'line',
+                data: {
+                    labels: timeGrid,
+                    datasets: [
+                        { label: 'Simulated', data: data.var_path, borderColor: 'rgb(255, 99, 132)', pointRadius: 0 },
+                        { label: 'Theoretical', data: data.theoretical_var, borderColor: 'rgb(54, 162, 235)', borderDash: [5, 5], pointRadius: 0 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { title: { display: true, text: 'Years' } },
+                        y: { title: { display: true, text: 'Variance' } }
+                    }
+                }
+            });
+        }
+    });
+    </script>
+{% endif %}
+{% endblock %}

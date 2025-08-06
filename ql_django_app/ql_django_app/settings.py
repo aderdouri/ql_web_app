@@ -43,7 +43,9 @@ INSTALLED_APPS = [
     'chapter_glitch_curve',
     'chapter_sensitivities',
     'swap',
-]
+    'chapter_hull_white',
+    'chapter_caps_floors',
+    'chapter_heston_calibration',]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

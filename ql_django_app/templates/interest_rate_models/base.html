@@ -1,16 +1,39 @@
 {% extends "base.html" %}
 {% block title %}Interest-Rate Models - {{ block.super }}{% endblock %}
+
 {% block page_content %}
 <div class="container">
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 border rounded">
         <span class="navbar-brand small font-weight-bold">Interest-Rate Models</span>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item"><a class="nav-link text-muted" href="#">Vanilla Swap (Todo)</a></li>
-                <li class="nav-item"><a class="nav-link text-muted" href="#">Caps & Floors (Todo)</a></li>
+                 <li class="nav-item">
+                    <a class="nav-link" href="{% url 'interest_rate_models:chapter_hull_white:hull_white_lab' %}">Simulating interest rates using Hull White model</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'interest_rate_models:short_rate_calibration' %}">Short-rate model calibration</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'interest_rate_models:swap:pricer' %}">Modeling interest rate swaps</a>
+                </li>
+                    <li class="nav-item">
+                       <a class="nav-link" href="{% url 'interest_rate_models:chapter_caps_floors:parity_lab' %}">Caps and floors</a>
+                   </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'interest_rate_models:heston_option' %}">Valuing European option using the Heston model</a>
+                </li>
+                <li class="nav-item">
+        <a class="nav-link" href="{% url 'interest_rate_models:chapter_heston_calibration:heston_calibration_lab' %}">Volatility smile and Heston model calibration</a>
+    </li>
             </ul>
         </div>
     </nav>
-    {% block sub_page_content %}{% endblock %}
+    
+    {% block sub_page_content %}
+        <div class="alert alert-info">
+            <h4 class="alert-heading">Welcome to the Interest-Rate Models Section!</h4>
+            <p>This section covers advanced models for simulating the evolution of interest rates. Please select a chapter from the menu above.</p>
+        </div>
+    {% endblock %}
 </div>
 {% endblock %}

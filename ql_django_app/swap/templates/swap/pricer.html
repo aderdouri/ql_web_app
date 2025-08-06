@@ -1,6 +1,46 @@
-<!-- Fichier : swap/templates/swap/pricer.html -->
 {% extends "interest_rate_models/base.html" %}
+{% load crispy_forms_tags %}
 
 {% block sub_page_content %}
-    <!-- Tout le contenu de votre pricer de swap va ici -->
+    <h3>Modeling Interest Rate Swaps</h3>
+    <p class="text-muted">Price a standard Plain Vanilla Interest Rate Swap using a single flat discount curve.</p>
+    <hr>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Price Swap</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header font-weight-bold">Valuation Results</div>
+                <div class="card-body">
+                    {% if results %}
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr class="table-success">
+                                    <td><strong>NPV (Net Present Value)</strong></td>
+                                    <td><strong>{{ results.npv }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Fair Rate (%)</td>
+                                    <td>{{ results.fair_rate }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Fair Spread (bps)</td>
+                                    <td>{{ results.fair_spread }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="alert alert-info">Please enter swap parameters and click "Price Swap".</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}
