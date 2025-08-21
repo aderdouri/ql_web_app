@@ -10,4 +10,5 @@ urlpatterns = [
     path('basics/', include('basics.urls')),
     path('interest-rate-curves/', include('interest_rate_curves.urls')),
     path('interest-rate-models/', include('interest_rate_models.urls')),
+    path('equity-models/', include('equity_models.urls')),
 ]

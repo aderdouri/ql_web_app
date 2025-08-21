@@ -1,64 +1,50 @@
 {% extends "interest_rate_curves/base.html" %}
+{% load crispy_forms_tags %}
 
 {% block sub_page_content %}
     <h3>A Glitch in Forward-Rate Curves Lab</h3>
-    <p class="text-muted">
-        This page demonstrates an interpolation glitch where the retrieved rate at a node is the average of the two adjacent flat forward levels. 
-        <strong>Click on the legend items in the chart to toggle datasets on and off for a clearer analysis.</strong>
-    </p>
+    <p class="text-muted">This page demonstrates how different interpolation methods can affect the retrieved rates at the nodes of the curve. Switch between methods to see the "glitch" appear or disappear.</p>
     <hr>
-    
     <div class="row">
-        <!-- Colonne de gauche pour la visualisation -->
+        <div class="col-md-5">
+            <div class="card card-body mb-4">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Rebuild Curve</button>
+                </form>
+            </div>
+            <div class="card">
+                <div class="card-header font-weight-bold">Node Analysis</div>
+                <div class="card-body" style="max-height: 450px; overflow-y: auto;">
+                    <p class="small text-muted">Notice the difference between the 'Expected' rate and the 'Retrieved' rate at each node.</p>
+                    <table class="table table-sm table-bordered table-hover">
+                        <thead class="thead-light"><tr><th>Date</th><th>Expected (%)</th><th>Retrieved (%)</th></tr></thead>
+                        <tbody>
+                            {% for row in analysis_data.table_data %}
+                            <tr><td>{{ row.date }}</td><td>{{ row.expected }}</td><td>{{ row.retrieved }}</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
         <div class="col-md-7">
             <div class="card">
                 <div class="card-header font-weight-bold">Instantaneous Forward Rate</div>
                 <div class="card-body">
-                    {% if analysis_data.plot_points_main %}
-                        <div style="height: 400px; position: relative;"><canvas id="glitchChart"></canvas></div>
-                    {% else %}
-                        <div class="alert alert-warning">Could not generate plot points for the curve.</div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        
-        <!-- Colonne de droite pour l'analyse numérique -->
-        <div class="col-md-5">
-            <div class="card">
-                <div class="card-header font-weight-bold">Node Analysis</div>
-                <div class="card-body">
-                    <p class="small text-muted">Notice the difference between the 'Expected' rate (the flat level defined in the code) and the 'Retrieved' rate at each node date.</p>
-                    <!-- On ajoute un conteneur avec une barre de défilement si le tableau est trop grand -->
-                    <div style="max-height: 350px; overflow-y: auto;">
-                        <table class="table table-sm table-bordered">
-                            <thead class="thead-light">
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Expected (%)</th>
-                                    <th>Retrieved (%)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for row in analysis_data.table_data %}
-                                <tr>
-                                    <td>{{ row.date }}</td>
-                                    <td>{{ row.expected }}</td>
-                                    <td>{{ row.retrieved }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                    <div style="height: 400px;"><canvas id="glitchChart"></canvas></div>
                 </div>
             </div>
         </div>
     </div>
 {% endblock %}
 
-
 {% block javascript %}
+<!-- On inclut Chart.js ET son adaptateur de date -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
 {% if analysis_data %}
     {{ analysis_data|json_script:"analysis-data" }}
     <script>
@@ -71,56 +57,34 @@
                 data: {
                     datasets: [
                         {
-                            label: 'Retrieved "Glitched" Curve',
-                            data: data.plot_points_main,
-                            borderColor: 'rgb(54, 162, 235)', // Blue
-                            stepped: true,
-                            pointRadius: 0,
-                            borderWidth: 2
+                            label: 'Interpolated Forward Rate',
+                            data: data.plot_points,
+                            borderColor: 'rgb(54, 162, 235)',
+                            stepped: 'after',
+                            pointRadius: 0
                         },
                         {
-                            label: 'True (Stepped) Forward Curve',
-                            data: data.plot_points_expected,
-                            borderColor: 'rgba(255, 99, 132, 0.5)', // Light Red
-                            stepped: true,
-                            pointRadius: 0,
-                            borderDash: [5, 5],
-                            borderWidth: 2,
-                            hidden: true // Hidden by default to keep the chart clean
-                        },
-                        {
-                            label: 'Retrieved Node Values (The Glitch)',
-                            data: data.plot_points_retrieved,
-                            borderColor: 'rgb(255, 99, 132)', // Red
+                            label: 'Retrieved Node Values',
+                            data: data.node_points,
                             backgroundColor: 'rgb(255, 99, 132)',
                             type: 'scatter',
-                            radius: 5
+                            pointRadius: 5
                         }
                     ]
                 },
                 options: {
+                    // =======================================================
+                    // ON CONFIGURE UN AXE TEMPOREL
+                    // =======================================================
                     parsing: { xAxisKey: 'x', yAxisKey: 'y' },
-                    plugins: {
-                        legend: {
-                            // Makes the legend clickable to show/hide datasets
-                            onClick: (e, legendItem, legend) => {
-                                const index = legendItem.datasetIndex;
-                                const ci = legend.chart;
-                                if (ci.isDatasetVisible(index)) {
-                                    ci.hide(index);
-                                    legendItem.hidden = true;
-                                } else {
-                                    ci.show(index);
-                                    legendItem.hidden = false;
-                                }
-                            }
-                        }
-                    },
                     scales: { 
                         x: { 
-                            type: 'linear', 
-                            position: 'bottom', 
-                            title: {display: true, text: 'Time (Years)'} 
+                            type: 'time', 
+                            time: { 
+                                unit: 'year', // On affiche les années comme unité principale
+                                tooltipFormat: 'dd MMM yyyy' // Format de l'infobulle
+                            },
+                            title: {display: true, text: 'Date'} 
                         },
                         y: { 
                             title: { display: true, text: 'Rate (%)' } 

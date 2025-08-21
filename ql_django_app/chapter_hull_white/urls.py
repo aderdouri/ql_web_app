@@ -1,7 +1,10 @@
+# Fichier : ql_web_app/chapter_hull_white/urls.py
 from django.urls import path
 from . import views
 
-app_name = 'chapter_hull_white' # <-- Vérifier cet app_name
+app_name = 'chapter_hull_white'
+
 urlpatterns = [
-    path('', views.hull_white_lab_view, name='hull_white_lab'), # <-- Vérifier ce name
+    path('calibration/', views.short_rate_calibration_view, name='short_rate_calibration'),
+    path('simulation/', views.hull_white_simulation_view, name='hull_white_simulation'),
 ]

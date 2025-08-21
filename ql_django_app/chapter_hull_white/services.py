@@ -1,46 +1,114 @@
+# File: ql_web_app/chapter_hull_white/services.py
+
 import QuantLib as ql
+from collections import namedtuple
+import math
 import numpy as np
 
-def run_hull_white_simulation(a, sigma, forward_rate, length_years, num_paths, timestep):
+# --- FUNCTION 1: For the Calibration Lab ---
+def calibrate_hull_white_model():
     """
-    Simule des chemins de taux courts en utilisant le modèle de Hull-White.
+    Calibrates a Hull-White model to a set of market swaption volatilities.
     """
-    day_count = ql.Thirty360(ql.Thirty360.BondBasis)
-    todays_date = ql.Date(15, 1, 2015)
-    ql.Settings.instance().evaluationDate = todays_date
+    today = ql.Date(15, 2, 2002)
+    settlement = ql.Date(19, 2, 2002)
+    ql.Settings.instance().evaluationDate = today
+    term_structure = ql.YieldTermStructureHandle(
+        ql.FlatForward(settlement, 0.04875825, ql.Actual365Fixed())
+    )
+    index = ql.Euribor1Y(term_structure)
 
-    spot_curve = ql.FlatForward(todays_date, ql.QuoteHandle(ql.SimpleQuote(forward_rate)), day_count)
-    spot_curve_handle = ql.YieldTermStructureHandle(spot_curve)
+    CalibrationData = namedtuple("CalibrationData", "start, length, volatility")
+    data = [
+        CalibrationData(1, 5, 0.1148), CalibrationData(2, 4, 0.1108),
+        CalibrationData(3, 3, 0.1070), CalibrationData(4, 2, 0.1021),
+        CalibrationData(5, 1, 0.1000)
+    ]
 
-    hw_process = ql.HullWhiteProcess(spot_curve_handle, a, sigma)
+    model = ql.HullWhite(term_structure)
+    engine = ql.JamshidianSwaptionEngine(model)
     
-    rng = ql.GaussianRandomSequenceGenerator(ql.UniformRandomSequenceGenerator(timestep, ql.UniformRandomGenerator(42)))
-    seq = ql.GaussianPathGenerator(hw_process, length_years, timestep, rng, False)
+    helpers = [
+        ql.SwaptionHelper(
+            ql.Period(d.start, ql.Years), ql.Period(d.length, ql.Years),
+            ql.QuoteHandle(ql.SimpleQuote(d.volatility)),
+            index, ql.Period(1, ql.Years), ql.Actual360(),
+            ql.Actual360(), term_structure
+        ) for d in data
+    ]
 
-    # Génération des chemins
-    paths = np.zeros((num_paths, timestep + 1))
-    for i in range(num_paths):
-        sample_path = seq.next().value()
-        paths[i, :] = np.array(list(sample_path))
-    
-    # Récupération de l'axe du temps
-    time_grid = np.array([sample_path.time(j) for j in range(timestep + 1)])
-    
-    # Calculs statistiques
-    avg_path = np.mean(paths, axis=0)
-    var_path = np.var(paths, axis=0)
-    
-    def alpha(t):
-        return forward_rate + 0.5 * np.power(sigma/a * (1.0 - np.exp(-a*t)), 2)
-    
-    theoretical_mean = alpha(time_grid)
-    theoretical_var = sigma * sigma / (2*a) * (1.0 - np.exp(-2.0 * a * time_grid))
+    for h in helpers:
+        h.setPricingEngine(engine)
 
+    method = ql.LevenbergMarquardt()
+    end_criteria = ql.EndCriteria(1000, 100, 1e-6, 1e-8, 1e-8)
+    model.calibrate(helpers, method, end_criteria)
+
+    alpha, sigma = model.params()
+    
+    errors = []
+    for i, s in enumerate(helpers):
+        model_price = s.modelValue()
+        market_price = s.marketValue()
+        error = model_price - market_price
+        errors.append({
+            'instrument': f"{data[i].start}Y into {data[i].length}Y Swaption",
+            'market_vol': f"{data[i].volatility*100:.2f}%",
+            'model_price': f"{model_price:.4f}",
+            'market_price': f"{market_price:.4f}",
+            'error': f"{error:.6f}"
+        })
+    
     return {
-        'time_grid': list(time_grid),
-        'paths': paths.tolist(),
-        'avg_path': list(avg_path),
-        'var_path': list(var_path),
-        'theoretical_mean': list(theoretical_mean),
-        'theoretical_var': list(theoretical_var)
+        'calibrated_alpha': round(alpha, 4),
+        'calibrated_sigma': round(sigma, 4),
+        'errors': errors
     }
+
+# --- FUNCTION 2: For the Simulation Lab ---
+def simulate_hull_white_paths(alpha, sigma, num_paths, num_years, seed):
+    """
+    Simulates multiple future paths for the short-term interest rate
+    according to the Hull-White model.
+    """
+    today = ql.Date(15, 5, 2015)
+    ql.Settings.instance().evaluationDate = today
+    
+    # 1. Initial flat yield curve
+    risk_free_curve = ql.FlatForward(today, 0.005, ql.Actual365Fixed())
+    risk_free_handle = ql.YieldTermStructureHandle(risk_free_curve)
+    
+    # 2. Hull-White process with user parameters
+    process = ql.HullWhiteProcess(risk_free_handle, alpha, sigma)
+    
+    # 3. Time grid for the simulation
+    timestep = 360 # Number of steps per year
+    length = num_years # Number of years
+    times = ql.TimeGrid(length, timestep)
+    
+    # 4. Random sequence generator
+    # ==============================================================================
+    # THE CORRECTION IS HERE: The dimensionality must be equal to 'timestep'
+    # ==============================================================================
+    rng = ql.GaussianRandomSequenceGenerator(
+        ql.UniformRandomSequenceGenerator(timestep, ql.UniformRandomGenerator(seed))
+    )
+    
+    # 5. Path generator
+    seq = ql.GaussianPathGenerator(process, length, timestep, rng, False)
+    
+    # 6. Simulate the paths
+    paths = []
+    for i in range(num_paths):
+        path = seq.next().value()
+        paths.append([risk_free_curve.zeroRate(0, ql.Continuous).rate()] + list(path))
+
+    # 7. Prepare data for plotting
+    time_points = list(times)
+    plot_data = []
+    for i in range(num_paths):
+        # We take a sample of points to keep the chart light
+        path_points = [{'x': t, 'y': p * 100} for t, p in zip(time_points, paths[i])][::10]
+        plot_data.append({'path_name': f'Path {i+1}', 'points': path_points})
+
+    return plot_data

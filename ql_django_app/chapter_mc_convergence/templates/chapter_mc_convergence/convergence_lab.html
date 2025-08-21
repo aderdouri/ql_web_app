@@ -1,0 +1,74 @@
+{% extends "interest_rate_models/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block sub_page_content %}
+    <h3>Hull-White Monte Carlo Convergence Lab</h3>
+    <p class="text-muted">Explore how simulation parameters affect the accuracy and distribution of Monte Carlo results for the Hull-White model.</p>
+    <hr>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Run Experiment</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header font-weight-bold">
+                    {% if results %}{{ results.title }}{% else %}Experiment Results{% endif %}
+                </div>
+                <div class="card-body">
+                    {% if results %}
+                        <div style="height: 400px;"><canvas id="convergenceChart"></canvas></div>
+                    {% else %}
+                        <div class="alert alert-info">Select an experiment and click "Run Experiment". This may take a few seconds.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% if results %}
+    {{ results|json_script:"results-data" }}
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const resultsData = JSON.parse(document.getElementById('results-data').textContent);
+        const ctx = document.getElementById('convergenceChart');
+        if(ctx) {
+            const datasets = resultsData.plots.map(plot => {
+                const r = Math.floor(Math.random() * 200);
+                const g = Math.floor(Math.random() * 200);
+                const b = Math.floor(Math.random() * 200);
+                const color = `rgba(${r}, ${g}, ${b}, 0.9)`;
+                return {
+                    label: plot.label,
+                    data: plot.points,
+                    borderColor: color,
+                    backgroundColor: color,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.1
+                }
+            });
+            new Chart(ctx, {
+                type: 'line',
+                data: { datasets: datasets },
+                options: {
+                    parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+                    scales: { 
+                        x: { type: 'linear', position: 'bottom', title: {display: true, text: 'Time (Years)'} },
+                        y: { title: { display: true, text: resultsData.y_axis } }
+                    }
+                }
+            });
+        }
+    });
+    </script>
+{% endif %}
+{% endblock %}

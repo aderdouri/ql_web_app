@@ -1,20 +1,17 @@
 from django.shortcuts import render
+from .forms import InterpolationChoiceForm
 from . import services
 
 def glitch_lab_view(request):
-    """
-    Manages the "A Glitch in Forward-Rate Curves" lab page.
-    """
+    form = InterpolationChoiceForm(request.POST or None)
     
-    # 1. On appelle le service pour obtenir les données
-    analysis_data = services.analyze_forward_curve_glitch()
+    if form.is_valid():
+        interpolation = form.cleaned_data['interpolation_type']
+    else:
+        form = InterpolationChoiceForm()
+        interpolation = form.fields['interpolation_type'].initial
+        
+    analysis_data = services.analyze_forward_curve_glitch(interpolation_str=interpolation)
     
-    # 2. On prépare le contexte
-    context = {
-        'analysis_data': analysis_data
-    }
-    
-    # ==============================================================================
-    # 3. LA LIGNE RETURN EST BIEN À LA FIN DE LA FONCTION, SANS INDENTATION
-    # ==============================================================================
+    context = {'form': form, 'analysis_data': analysis_data}
     return render(request, 'chapter_glitch_curve/glitch_lab.html', context)

@@ -1,7 +1,13 @@
 from django import forms
 
-class ForwardRateNodeForm(forms.Form):
-    # Un champ pour la durée (ex: 1 pour 1 an, 2 pour 2 ans...)
-    tenor_years = forms.IntegerField(label="Tenor (Years)", min_value=1)
-    # Un champ pour le taux forward
-    forward_rate_pct = forms.FloatField(label="Forward Rate (%)")
+class InterpolationChoiceForm(forms.Form):
+    INTERPOLATION_CHOICES = [
+        ('flat_forward', 'Flat Forward (causes glitch)'),
+        ('linear_forward', 'Linear Forward (smoother)'),
+    ]
+    
+    interpolation_type = forms.ChoiceField(
+        label='Interpolation Method', 
+        choices=INTERPOLATION_CHOICES,
+        help_text="Select an interpolation to see its effect on the nodes."
+    )

@@ -1,8 +1,19 @@
+# Fichier : ql_web_app/chapter_hull_white/forms.py
 from django import forms
 
-class HullWhiteForm(forms.Form):
-    a = forms.FloatField(label="Mean Reversion (a)", initial=0.1)
-    sigma = forms.FloatField(label="Volatility (sigma)", initial=0.1)
-    forward_rate = forms.FloatField(label="Initial Forward Rate (%)", initial=5.0)
-    length_years = forms.IntegerField(label="Simulation Length (Years)", initial=10, min_value=1, max_value=30)
-    num_paths = forms.IntegerField(label="Number of Paths to Simulate", initial=10, min_value=1, max_value=1000)
+# Formulaire pour le labo de calibration
+class CalibrationForm(forms.Form):
+    MODEL_CHOICES = [
+        ('HullWhite', 'Hull-White 1-Factor'),
+        ('BlackKarasinski', 'Black-Karasinski'),
+        ('G2', 'G2++ 2-Factor'),
+    ]
+    model_name = forms.ChoiceField(label="Short-Rate Model", choices=MODEL_CHOICES)
+
+# Formulaire pour le labo de simulation
+class HullWhiteSimulationForm(forms.Form):
+    alpha = forms.FloatField(label="Alpha (Mean Reversion)", initial=0.1)
+    sigma = forms.FloatField(label="Sigma (Volatility)", initial=0.01)
+    num_paths = forms.IntegerField(label="Number of Paths", initial=5)
+    num_years = forms.IntegerField(label="Simulation Length (Years)", initial=10)
+    seed = forms.IntegerField(label="Random Seed", initial=42)

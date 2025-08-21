@@ -6,7 +6,7 @@
     <p class="text-muted">Price a standard Plain Vanilla Interest Rate Swap using a single flat discount curve.</p>
     <hr>
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-5">
             <div class="card card-body">
                 <form method="post">
                     {% csrf_token %}
@@ -15,16 +15,24 @@
                 </form>
             </div>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-7">
             <div class="card">
                 <div class="card-header font-weight-bold">Valuation Results</div>
                 <div class="card-body">
                     {% if results %}
-                        <table class="table table-bordered">
+                        <table class="table table-sm table-bordered">
                             <tbody>
-                                <tr class="table-success">
-                                    <td><strong>NPV (Net Present Value)</strong></td>
+                                <tr class="table-primary">
+                                    <td><strong>Swap NPV (Net Present Value)</strong></td>
                                     <td><strong>{{ results.npv }}</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Fixed Leg NPV</td>
+                                    <td>{{ results.fixed_leg_npv }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Floating Leg NPV</td>
+                                    <td>{{ results.floating_leg_npv }}</td>
                                 </tr>
                                 <tr>
                                     <td>Fair Rate (%)</td>
@@ -36,8 +44,11 @@
                                 </tr>
                             </tbody>
                         </table>
+                        <p class="small text-muted mt-3">
+                            <strong>Note:</strong> The Swap NPV is the value of the floating leg minus the value of the fixed leg (from the perspective of the fixed-rate payer).
+                        </p>
                     {% else %}
-                        <div class="alert alert-info">Please enter swap parameters and click "Price Swap".</div>
+                        <div class="alert alert-danger">Could not calculate results. Please check parameters.</div>
                     {% endif %}
                 </div>
             </div>

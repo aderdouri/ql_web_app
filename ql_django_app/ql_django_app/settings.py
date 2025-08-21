@@ -24,7 +24,8 @@ INSTALLED_APPS = [
     # --- Applications de Catégories Actives ---
     'basics',
     'interest_rate_curves',
-     'interest_rate_models',
+    'interest_rate_models',
+    'equity_models',
       
     # --- Applications de Chapitres Actives ---
     # Ajoutez ici toutes les applications de chapitre que vous avez créées
@@ -35,7 +36,6 @@ INSTALLED_APPS = [
     'chapter5_curves',
     'chapter6_pricing_range',
     'chapter7_random',
-    'chapter10_treasury_curve',
     'chapter_eonia_curve',
     'chapter_euribor_curve',
     'chapter_day_count',
@@ -45,7 +45,12 @@ INSTALLED_APPS = [
     'swap',
     'chapter_hull_white',
     'chapter_caps_floors',
-    'chapter_heston_calibration',]
+    'chapter_heston_calibration',
+    'chapter_yield_curve',
+    'chapter_calibration',
+    'chapter_heston_option',
+    'chapter_mc_convergence', ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

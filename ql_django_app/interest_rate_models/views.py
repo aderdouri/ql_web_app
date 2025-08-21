@@ -20,3 +20,10 @@ def heston_option_view(request):
 
 def heston_calibration_view(request):
     return render(request, 'interest_rate_models/heston_calibration.html')
+# ==============================================================================
+def par_indexed_coupons_view(request):
+    """
+    Placeholder view for the "Par versus indexed coupons" chapter.
+    """
+    # Pour l'instant, elle rendra un template "en construction".
+    return render(request, 'interest_rate_models/par_indexed_coupons.html')

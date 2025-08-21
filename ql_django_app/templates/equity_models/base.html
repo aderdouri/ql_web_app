@@ -1,0 +1,41 @@
+<!-- Fichier : templates/equity_models/base.html (NOUVEAU FICHIER) -->
+{% extends "base.html" %}
+
+{% block title %}Equity Models - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4 border rounded">
+        <span class="navbar-brand small font-weight-bold">Equity Models</span>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'equity_models:chapter_heston_option:heston_lab' %}">21. Valuing European option using Heston</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'equity_models:chapter_heston_calibration:calibration_lab' %}">22. Volatility smile and Heston calibration</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">23. Heston parameter calibration... (Todo)</a>
+                </li>
+                <li class="nav-item">
+                    <!-- Ici, on peut réutiliser l'app 'european_option' existante -->
+                    <a class="nav-link" href="#">24. Valuing European and American options (Todo)</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">25. Valuing options on commodity futures... (Todo)</a>
+                </li>
+ <li class="nav-item"><a class="nav-link" href="#">25. Valuing options on commodity futures... (Todo)</a></li>
+    <li class="nav-item"><a class="nav-link" href="#">26. Defining rho for the Black process (Todo)</a></li>
+    <li class="nav-item"><a class="nav-link" href="#">27. Using curves with different day-count conventions (Todo)</a></li>            </ul>
+        </div>
+    </nav>
+    
+    {% block sub_page_content %}
+        <div class="alert alert-info">
+            <h4 class="alert-heading">Welcome to the Equity Models Section!</h4>
+            <p>This section covers advanced models for equity derivatives, such as stochastic volatility models. Please select a chapter from the menu above.</p>
+        </div>
+    {% endblock %}
+</div>
+{% endblock %}

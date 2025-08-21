@@ -1,4 +1,6 @@
+<!-- Fichier : templates/interest_rate_models/base.html (VERSION CORRIGÉE) -->
 {% extends "base.html" %}
+
 {% block title %}Interest-Rate Models - {{ block.super }}{% endblock %}
 
 {% block page_content %}
@@ -7,24 +9,27 @@
         <span class="navbar-brand small font-weight-bold">Interest-Rate Models</span>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav mr-auto">
-                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'interest_rate_models:chapter_hull_white:hull_white_lab' %}">Simulating interest rates using Hull White model</a>
+                <!-- ======================================================= -->
+                <!-- LA LISTE DE CHAPITRES CORRIGÉE EST ICI -->
+                <!-- ======================================================= -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'interest_rate_models:chapter_hull_white:hull_white_simulation' %}">15. Simulating interest rates...</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'interest_rate_models:short_rate_calibration' %}">Short-rate model calibration</a>
+    <a class="nav-link" href="{% url 'interest_rate_models:chapter_mc_convergence:convergence_lab' %}">16. Thoughts on convergence...</a>
+</li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'interest_rate_models:chapter_calibration:calibration_lab' %}">17. Short-rate model calibration</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'interest_rate_models:swap:pricer' %}">Modeling interest rate swaps</a>
-                </li>
-                    <li class="nav-item">
-                       <a class="nav-link" href="{% url 'interest_rate_models:chapter_caps_floors:parity_lab' %}">Caps and floors</a>
-                   </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'interest_rate_models:heston_option' %}">Valuing European option using the Heston model</a>
+                    <a class="nav-link" href="#">18. Par versus indexed coupons (Todo)</a>
                 </li>
                 <li class="nav-item">
-        <a class="nav-link" href="{% url 'interest_rate_models:chapter_heston_calibration:heston_calibration_lab' %}">Volatility smile and Heston model calibration</a>
-    </li>
+                    <a class="nav-link" href="{% url 'interest_rate_models:swap:pricer' %}">19. Modeling interest rate swaps</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'interest_rate_models:chapter_caps_floors:parity_lab' %}">20. Caps and floors</a>
+                </li>
             </ul>
         </div>
     </nav>
