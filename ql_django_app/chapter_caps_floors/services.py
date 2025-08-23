@@ -42,9 +42,6 @@ def analyze_cap_floor_parity(length_years, strike_pct, vol_pct, rate_pct, nomina
     collar.setPricingEngine(engine)
     collar_npv = collar.NPV()
     
-    # ==============================================================================
-    # LA CORRECTION EST ICI : On spécifie la convention Thirty360
-    # ==============================================================================
     swap = ql.VanillaSwap(
         ql.VanillaSwap.Payer, nominal,
         schedule, strike, ql.Thirty360(ql.Thirty360.BondBasis),

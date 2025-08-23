@@ -1,4 +1,3 @@
-# File: ql_web_app/chapter_heston_option/services.py
 import QuantLib as ql
 import numpy as np
 from datetime import date

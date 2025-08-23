@@ -1,8 +1,6 @@
-# Fichier : ql_django_app/settings.py (VERSION FINALE ET PROPRE)
-
 from pathlib import Path
 import os
-# BASE_DIR pointe vers le dossier qui contient 'manage.py' (ql_django_app/)
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "django-insecure-apy5-j2n+2h_4kt5m=^3u8q4k%_8g&*^a5wa=g2mi%$fe_wi&*"
@@ -28,7 +26,7 @@ INSTALLED_APPS = [
     'equity_models',
       
     # --- Applications de Chapitres Actives ---
-    # Ajoutez ici toutes les applications de chapitre que vous avez créées
+    
     
     'chapter2_instruments',
     'chapter3_greeks',
@@ -49,7 +47,8 @@ INSTALLED_APPS = [
     'chapter_yield_curve',
     'chapter_calibration',
     'chapter_heston_option',
-    'chapter_mc_convergence', ]
+    'chapter_mc_convergence',
+    'chapter_par_vs_indexed', ]
 
 
 MIDDLEWARE = [
@@ -70,9 +69,7 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         
-        # ==============================================================================
-        # CORRECTION DÉFINITIVE ICI : On utilise os.path.join, qui est très robuste
-        # ==============================================================================
+       
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
         ],
@@ -99,7 +96,7 @@ USE_TZ = True
 
 # --- Static files (CSS, JavaScript, Images) ---
 STATIC_URL = "static/"
-# Chemin vers votre dossier de fichiers statiques principal
+# Chemin vers le  dossier de fichiers statiques principal
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

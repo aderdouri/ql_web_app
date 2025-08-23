@@ -1,4 +1,3 @@
-# Fichier : ql_web_app/chapter_calibration/forms.py
 from django import forms
 
 class ModelChoiceForm(forms.Form):

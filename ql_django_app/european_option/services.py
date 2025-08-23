@@ -1,5 +1,3 @@
-# File: ql_web_app/european_option/services.py (FINAL AND COMPLETE CODE)
-
 import QuantLib as ql
 import numpy as np
 from datetime import date
@@ -70,7 +68,6 @@ def calculate_european_option_metrics(
     elif pricing_engine_name == 'BinomialJR':
         engine = ql.BinomialVanillaEngine(bsm_process, 'jr', binomial_steps)
     else:
-        # If the name is unknown, raise an error to inform the developer.
         raise ValueError(f"Unknown pricing engine: {pricing_engine_name}")
         
     # 5. Attach the engine to the instrument

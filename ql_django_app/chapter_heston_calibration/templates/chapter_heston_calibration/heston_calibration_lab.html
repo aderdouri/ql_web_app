@@ -1,43 +1,79 @@
-{% extends "interest_rate_models/base.html" %}
+{% extends "equity_models/base.html" %}
 {% load crispy_forms_tags %}
 {% block sub_page_content %}
-    <h3>Heston Model Calibration Lab</h3>
-    <p class="text-muted">Calibrate the Heston model to a given volatility surface and analyze the calibration error.</p>
+    <h3>Volatility Smile and Heston Model Calibration Lab</h3>
     <hr>
     <div class="row">
         <div class="col-md-4">
             <div class="card card-body">
-                <form method="post">{% csrf_token %}{{ form|crispy }}<button type="submit" class="btn btn-primary mt-3 w-100">Run Calibration</button></form>
+                <p class="small text-muted">Set the initial guess for the Heston parameters and run the calibration.</p>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Run Calibration</button>
+                </form>
             </div>
         </div>
         <div class="col-md-8">
-            {% if results %}
             <div class="card mb-4">
-                <div class="card-header font-weight-bold">Calibrated Parameters</div>
+                <div class="card-header font-weight-bold">1-Year Volatility Smile: Market vs. Calibrated Heston</div>
                 <div class="card-body">
-                    <ul>
-                        {% for key, value in results.calibrated_params.items %}
-                            <li><strong>{{ key }}:</strong> {{ value|floatformat:4 }}</li>
-                        {% endfor %}
-                    </ul>
+                    {% if results and not results.error %}
+                        <div style="height: 300px;"><canvas id="smileChart"></canvas></div>
+                    {% elif results.error %}
+                        <div class="alert alert-danger">Calculation Error: {{ results.error }}</div>
+                    {% else %}
+                        <div class="alert alert-info">Click "Run Calibration" to see the results.</div>
+                    {% endif %}
                 </div>
             </div>
-            <div class="card">
-                <div class="card-header font-weight-bold">Calibration Errors</div>
-                <div class="card-body" style="max-height: 400px; overflow-y: auto;">
-                    <table class="table table-sm">
-                        <thead><tr><th>Strike</th><th>Market Vol (%)</th><th>Model Vol (%)</th><th>Error (%)</th></tr></thead>
-                        <tbody>
-                            {% for err in results.errors %}
-                            <tr><td>{{ err.strike }}</td><td>{{ err.market_vol|floatformat:2 }}</td><td>{{ err.model_vol|floatformat:2 }}</td><td>{{ err.error_pct|floatformat:2 }}</td></tr>
+             <div class="card">
+                <div class="card-header font-weight-bold">Calibration Results</div>
+                <div class="card-body">
+                    {% if results and not results.error %}
+                        <p><strong>Calibrated Parameters:</strong> <code>{{ results.params }}</code></p>
+                        <table class="table table-sm table-bordered">
+                            <thead class="thead-light"><tr><th>Strike</th><th>Market Price</th><th>Model Price</th><th>Rel. Error</th></tr></thead>
+                            <tbody>
+                            {% for item in results.errors_table %}
+                                <tr><td>{{ item.strike }}</td><td>{{ item.market_price }}</td><td>{{ item.model_price }}</td><td>{{ item.rel_error_pct }}</td></tr>
                             {% endfor %}
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    {% endif %}
                 </div>
             </div>
-            {% else %}
-            <div class="alert alert-info">Enter initial parameters and click "Run Calibration".</div>
-            {% endif %}
         </div>
     </div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% if results and not results.error %}
+    {{ results|json_script:"results-data" }}
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const data = JSON.parse(document.getElementById('results-data').textContent);
+        const ctx = document.getElementById('smileChart');
+        if(ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        { label: 'Market Smile', data: data.market_smile, type: 'scatter', backgroundColor: 'rgb(54, 162, 235)' },
+                        { label: 'Calibrated Heston Smile', data: data.model_smile, borderColor: 'rgb(255, 99, 132)', pointRadius: 0, tension: 0.1 }
+                    ]
+                },
+                options: {
+                    parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+                    scales: { 
+                        x: { title: {display: true, text: 'Strike'} }, 
+                        y: { title: {display: true, text: 'Implied Volatility (%)'} } 
+                    }
+                }
+            });
+        }
+    });
+    </script>
+{% endif %}
 {% endblock %}

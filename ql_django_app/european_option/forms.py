@@ -1,5 +1,3 @@
-# File: ql_web_app/european_option/forms.py (FINAL AND COMPLETE CODE)
-
 from django import forms
 from datetime import date
 

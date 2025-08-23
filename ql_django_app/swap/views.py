@@ -1,4 +1,3 @@
-# File: ql_web_app/swap/views.py
 from django.shortcuts import render
 from .forms import VanillaSwapForm
 from . import services

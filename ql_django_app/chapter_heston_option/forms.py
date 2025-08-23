@@ -1,4 +1,3 @@
-# File: ql_web_app/chapter_heston_option/forms.py
 from django import forms
 from datetime import date
 

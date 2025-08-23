@@ -1,4 +1,3 @@
-# filepath: /Users/aderdouri/Downloads/ql_web_app/ql_django_app/american_option/views.py
 from django.shortcuts import render
 from .forms import AmericanOptionForm
 import QuantLib as ql

@@ -1,4 +1,3 @@
-# Fichier : ql_web_app/chapter_mc_convergence/forms.py
 from django import forms
 
 class ConvergenceForm(forms.Form):

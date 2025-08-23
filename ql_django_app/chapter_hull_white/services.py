@@ -1,5 +1,3 @@
-# File: ql_web_app/chapter_hull_white/services.py
-
 import QuantLib as ql
 from collections import namedtuple
 import math
@@ -87,9 +85,6 @@ def simulate_hull_white_paths(alpha, sigma, num_paths, num_years, seed):
     times = ql.TimeGrid(length, timestep)
     
     # 4. Random sequence generator
-    # ==============================================================================
-    # THE CORRECTION IS HERE: The dimensionality must be equal to 'timestep'
-    # ==============================================================================
     rng = ql.GaussianRandomSequenceGenerator(
         ql.UniformRandomSequenceGenerator(timestep, ql.UniformRandomGenerator(seed))
     )

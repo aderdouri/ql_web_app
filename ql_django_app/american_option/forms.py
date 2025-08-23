@@ -1,4 +1,3 @@
-# filepath: /Users/aderdouri/Downloads/ql_web_app/ql_django_app/american_option/forms.py
 from django import forms
 from datetime import date, timedelta
 

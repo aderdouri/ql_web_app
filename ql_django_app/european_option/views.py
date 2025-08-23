@@ -1,5 +1,3 @@
-# File: ql_web_app/european_option/views.py (FINAL AND COMPLETE CODE)
-
 from django.shortcuts import render
 from django.contrib import messages
 from .forms import EuropeanOptionForm

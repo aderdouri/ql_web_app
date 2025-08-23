@@ -1,4 +1,3 @@
-# Fichier : ql_web_app/equity_models/views.py
 from django.shortcuts import render
 
 def home(request):

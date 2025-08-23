@@ -7,9 +7,6 @@ class EngineChoiceForm(forms.Form):
     It allows the user to select a pricing model and option parameters.
     """
     
-    # This list defines the choices that will appear in the dropdown menu.
-    # The first value ('analytic') is what your code will see.
-    # The second value ('Analytic Black-Scholes...') is what the user will see.
     ENGINE_CHOICES = [
         ('analytic', 'Analytic Black-Scholes Formula'),
         ('binomial_crr', 'Binomial Tree (Cox-Ross-Rubinstein, 200 steps)'),

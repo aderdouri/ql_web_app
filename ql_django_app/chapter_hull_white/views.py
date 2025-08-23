@@ -1,8 +1,5 @@
-# File: ql_web_app/chapter_hull_white/views.py
-
 from django.shortcuts import render
 from . import services
-# Import both form classes from your forms.py file
 from .forms import CalibrationForm, HullWhiteSimulationForm
 
 # --- View for the "Short-rate model calibration" Lab ---
@@ -41,14 +38,13 @@ def hull_white_simulation_view(request):
     
     # Determine which parameters to use for the simulation
     if form.is_valid():
-        # If the form was submitted and is valid, use the user's data
         alpha = form.cleaned_data['alpha']
         sigma = form.cleaned_data['sigma']
         num_paths = form.cleaned_data['num_paths']
         num_years = form.cleaned_data['num_years']
         seed = form.cleaned_data['seed']
     else:
-        # On a GET request or if the form is invalid, use the default initial values
+        
         form = HullWhiteSimulationForm()
         alpha = form.fields['alpha'].initial
         sigma = form.fields['sigma'].initial

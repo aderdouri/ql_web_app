@@ -1,6 +1,6 @@
-# File: ql_web_app/swap/services.py
 import QuantLib as ql
 import numpy as np
+from datetime import date 
 
 def calculate_vanilla_swap_metrics(
     notional: float,
@@ -11,27 +11,28 @@ def calculate_vanilla_swap_metrics(
 ) -> dict:
     
     # 1. Setup and parameter conversion
-    today = ql.Date.todaysDate()
-    ql.Settings.instance().evaluationDate = today
+    
+    evaluation_date = ql.Date(15, 1, 2015) 
+    ql.Settings.instance().evaluationDate = evaluation_date
     
     fixed_rate = fixed_rate_pct / 100.0
-    floating_spread = floating_spread_bps / 10000.0 # Convert bps to decimal
+    floating_spread = floating_spread_bps / 10000.0
     discount_rate = discount_curve_rate_pct / 100.0
 
     # 2. Build the yield curve and index
     day_count = ql.Actual365Fixed()
     discount_curve = ql.YieldTermStructureHandle(
-        ql.FlatForward(today, discount_rate, day_count)
+        ql.FlatForward(evaluation_date, discount_rate, day_count)
     )
-    # For simplicity, we use the same curve for forecasting
     forecast_curve = ql.YieldTermStructureHandle(
-        ql.FlatForward(today, discount_rate, day_count)
+        ql.FlatForward(evaluation_date, discount_rate, day_count)
     )
     libor_index = ql.Euribor6M(forecast_curve)
 
     # 3. Create the instrument schedules
     calendar = ql.TARGET()
-    settle_date = calendar.advance(today, ql.Period('2D'))
+    # Le swap commence 2 jours après notre date d'évaluation fixe
+    settle_date = calendar.advance(evaluation_date, ql.Period('2D'))
     maturity_date = calendar.advance(settle_date, ql.Period(maturity_years, ql.Years))
 
     fixed_schedule = ql.Schedule(
@@ -44,7 +45,6 @@ def calculate_vanilla_swap_metrics(
     )
     
     # 4. Create the Interest Rate Swap instrument
-    # We use the 'notional' provided by the user here
     vanilla_swap = ql.VanillaSwap(
         ql.VanillaSwap.Payer, 
         notional,
@@ -64,8 +64,8 @@ def calculate_vanilla_swap_metrics(
     # 6. Calculate and return all relevant metrics
     results = {
         'npv': np.round(vanilla_swap.NPV(), 2),
-        'fair_rate': np.round(vanilla_swap.fairRate() * 100, 4), # in %
-        'fair_spread': np.round(vanilla_swap.fairSpread() * 10000, 2), # in bps
+        'fair_rate': np.round(vanilla_swap.fairRate() * 100, 4),
+        'fair_spread': np.round(vanilla_swap.fairSpread() * 10000, 2),
         'fixed_leg_npv': np.round(vanilla_swap.fixedLegNPV(), 2),
         'floating_leg_npv': np.round(vanilla_swap.floatingLegNPV(), 2),
     }

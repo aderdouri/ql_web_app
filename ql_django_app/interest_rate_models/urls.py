@@ -28,5 +28,5 @@ urlpatterns = [
     path('hull-white-convergence/', include('chapter_mc_convergence.urls')),
     
     # Chapitre 18: Par versus indexed coupons
-    path('par-vs-indexed-coupons/', views.par_indexed_coupons_view, name='par_indexed_coupons'),
+    path('par-vs-indexed-coupons/', include('chapter_par_vs_indexed.urls')),
 ]

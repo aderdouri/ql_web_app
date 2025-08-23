@@ -1,4 +1,3 @@
-# Fichier : ql_web_app/basics/views.py (VERSION FINALE SANS DATEADDER)
 from django.shortcuts import render
 
 def home(request):

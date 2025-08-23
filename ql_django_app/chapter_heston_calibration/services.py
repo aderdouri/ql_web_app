@@ -1,81 +1,88 @@
 import QuantLib as ql
 import numpy as np
 
-def run_heston_calibration(initial_params: dict, max_iterations: int):
+def calibrate_heston_and_get_smile(atm_vol_pct: float, smile_skew: float):
     """
-    Calibre un modèle de Heston sur une surface de volatilité implicite.
+    Dynamically generates a market volatility smile based on user input,
+    calibrates the Heston model to it, and returns the results for plotting.
     """
-    
-    # --- Setup de marché ---
-    day_count = ql.Actual365Fixed()
-    calendar = ql.UnitedStates(ql.UnitedStates.GovernmentBond)
-    calculation_date = ql.Date(6, 11, 2015)
-    ql.Settings.instance().evaluationDate = calculation_date
+    try:
+        # --- 1. Setup ---
+        today = ql.Date(6, 11, 2015)
+        ql.Settings.instance().evaluationDate = today
+        calendar = ql.TARGET()
+        day_count = ql.Actual365Fixed()
+        spot = 659.37
+        risk_free_rate = 0.01
+        dividend_rate = 0.0
 
-    spot = 659.37
-    risk_free_rate = 0.01
-    dividend_rate = 0.0
-    flat_ts = ql.YieldTermStructureHandle(ql.FlatForward(calculation_date, risk_free_rate, day_count))
-    dividend_ts = ql.YieldTermStructureHandle(ql.FlatForward(calculation_date, dividend_rate, day_count))
+        flat_ts = ql.YieldTermStructureHandle(ql.FlatForward(today, risk_free_rate, day_count))
+        dividend_ts = ql.YieldTermStructureHandle(ql.FlatForward(today, dividend_rate, day_count))
+        
+        maturity_date = today + ql.Period("1Y")
+        strikes = [593.43, 626.40, 659.37, 692.34, 725.31]
 
-    expiration_dates = [ql.Date(6,m,y) for y,m in [(2015,12), (2016,1), (2016,3), (2016,6), (2016,12), (2017,12)]]
-    strikes = [527.50, 593.43, 626.40, 659.37, 692.34, 725.31, 758.28]
-    data = [[0.37, 0.30, 0.27, 0.26, 0.25, 0.25, 0.26], [0.34, 0.29, 0.27, 0.26, 0.25, 0.25, 0.25],
-            [0.37, 0.34, 0.32, 0.31, 0.30, 0.29, 0.29], [0.35, 0.33, 0.32, 0.31, 0.30, 0.30, 0.29],
-            [0.35, 0.33, 0.32, 0.32, 0.31, 0.31, 0.31], [0.35, 0.34, 0.33, 0.32, 0.32, 0.31, 0.31]]
-
-    implied_vols = ql.Matrix(len(strikes), len(expiration_dates))
-    for i in range(len(strikes)):
-        for j in range(len(expiration_dates)):
-            implied_vols[i][j] = data[j][i]
-
-    black_var_surface = ql.BlackVarianceSurface(calculation_date, calendar, expiration_dates, strikes, implied_vols, day_count)
-
-    # --- Calibration du modèle ---
-    v0, kappa, theta, sigma, rho = initial_params.values()
-    process = ql.HestonProcess(flat_ts, dividend_ts, ql.QuoteHandle(ql.SimpleQuote(spot)), v0, kappa, theta, sigma, rho)
-    model = ql.HestonModel(process)
-    engine = ql.AnalyticHestonEngine(model)
-
-    heston_helpers = []
-    # ==============================================================================
-    # On va aussi stocker les strikes et maturités correspondants à chaque helper
-    # ==============================================================================
-    helper_metadata = [] 
-    
-    black_var_surface.setInterpolation("bicubic")
-    for i in range(len(expiration_dates)):
-        for j in range(len(strikes)):
-            t = (expiration_dates[i] - calculation_date)
-            vol = implied_vols[j][i]
-            helper = ql.HestonModelHelper(ql.Period(t, ql.Days), calendar, spot, strikes[j], ql.QuoteHandle(ql.SimpleQuote(vol)), flat_ts, dividend_ts)
+        # --- Dynamically generate the market smile based on user parameters ---
+        atm_vol = atm_vol_pct / 100.0
+        # Simple quadratic formula to create a smile/skew
+        market_vols = [
+            atm_vol + smile_skew * (s/spot - 1) + 0.8 * (s/spot - 1)**2 
+            for s in strikes
+        ]
+        
+        # --- 2. Heston Model Calibration ---
+        # We use a fixed, stable initial guess for the optimizer
+        initial_params = {'v0': atm_vol**2, 'kappa': 3.0, 'theta': atm_vol**2, 'rho': -0.5, 'sigma': 0.5}
+        
+        # Ensure we are using a list, not a set or other unserializable type
+        v0, kappa, theta, rho, sigma = list(initial_params.values())
+        
+        process = ql.HestonProcess(flat_ts, dividend_ts, ql.QuoteHandle(ql.SimpleQuote(spot)), v0, kappa, theta, sigma, rho)
+        model = ql.HestonModel(process)
+        engine = ql.AnalyticHestonEngine(model)
+        
+        helpers = []
+        for s, vol in zip(strikes, market_vols):
+            period = ql.Period(maturity_date - today, ql.Days)
+            helper = ql.HestonModelHelper(period, calendar, spot, s, ql.QuoteHandle(ql.SimpleQuote(vol)), flat_ts, dividend_ts)
             helper.setPricingEngine(engine)
-            heston_helpers.append(helper)
-            # On stocke les informations correspondantes
-            helper_metadata.append({'strike': strikes[j], 'maturity': expiration_dates[i]})
+            helpers.append(helper)
 
-    lm = ql.LevenbergMarquardt(1e-8, 1e-8, 1e-8)
-    model.calibrate(heston_helpers, lm, ql.EndCriteria(max_iterations, 50, 1e-8, 1e-8, 1e-8))
-    
-    calibrated_params = {'theta': model.theta(), 'kappa': model.kappa(), 'sigma': model.sigma(), 'rho': model.rho(), 'v0': model.v0()}
+        lm = ql.LevenbergMarquardt()
+        model.calibrate(helpers, lm, ql.EndCriteria(100, 10, 1.0e-8, 1.0e-8, 1.0e-8))
+        theta_cal, kappa_cal, sigma_cal, rho_cal, v0_cal = model.params()
 
-    # --- Analyse de l'erreur ---
-    errors = []
-    # ==============================================================================
-    # LA CORRECTION EST ICI : On boucle sur les helpers et leurs métadonnées en même temps
-    # ==============================================================================
-    for i, opt in enumerate(heston_helpers):
-        err = (opt.modelValue() / opt.marketValue() - 1.0)
+        # --- 3. Prepare data for the IHM display ---
+        bsm_process = ql.BlackScholesMertonProcess(ql.QuoteHandle(ql.SimpleQuote(spot)), dividend_ts, flat_ts, ql.BlackVolTermStructureHandle(ql.BlackConstantVol(today, calendar, 0.20, day_count)))
+
+        errors_table = []
+        for i, opt in enumerate(helpers):
+            err = (opt.modelValue()/opt.marketValue() - 1.0)
+            errors_table.append({'strike': strikes[i], 'market_price': f"{opt.marketValue():.4f}", 'model_price': f"{opt.modelValue():.4f}", 'rel_error_pct': f"{err*100:.2f}%"})
+
+        strikes_grid = np.linspace(550, 750, 25)
+        model_vols = []
+        for s_grid in strikes_grid:
+            payoff = ql.PlainVanillaPayoff(ql.Option.Call, s_grid)
+            exercise = ql.EuropeanExercise(maturity_date)
+            option = ql.VanillaOption(payoff, exercise)
+            option.setPricingEngine(engine)
+            price = option.NPV()
+            try:
+                implied_vol = option.impliedVolatility(price, bsm_process, 1.0e-4)
+                model_vols.append(implied_vol)
+            except RuntimeError:
+                model_vols.append(np.nan)
         
-        # On récupère le strike et la maturité de notre liste de métadonnées
-        meta = helper_metadata[i]
+        market_smile = [{'x': s, 'y': v*100} for s, v in zip(strikes, market_vols)]
+        model_smile = [{'x': s, 'y': v*100} for s, v in zip(strikes_grid, model_vols) if not np.isnan(v)]
         
-        errors.append({
-            'strike': meta['strike'], 
-            'maturity': meta['maturity'].ISO(),
-            'market_vol': opt.marketValue() * 100, 
-            'model_vol': opt.modelValue() * 100, 
-            'error_pct': err * 100
-        })
-
-    return {'calibrated_params': calibrated_params, 'errors': errors}
+        return {
+            'params': f"θ={theta_cal:.3f}, κ={kappa_cal:.3f}, σ={sigma_cal:.3f}, ρ={rho_cal:.3f}, v₀={v0_cal:.3f}",
+            'errors_table': errors_table,
+            'market_smile': market_smile,
+            'model_smile': model_smile
+        }
+    except Exception as e:
+        print(f"ERROR IN HESTON CALIBRATION SERVICE: {e}")
+        return {'error': str(e)}

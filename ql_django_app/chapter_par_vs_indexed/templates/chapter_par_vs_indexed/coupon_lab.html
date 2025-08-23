@@ -1,0 +1,81 @@
+{% extends "interest_rate_models/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block sub_page_content %}
+    <h3>Par versus Indexed Coupons Lab</h3>
+    <p class="text-muted">
+        This page demonstrates the subtle but important difference between an index's theoretical tenor period and a coupon's actual accrual period. 
+        Select a different <strong>Business Day Convention</strong> to see how calendar adjustments affect the coupon dates and amount.
+    </p>
+    <hr>
+    
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="card">
+                <div class="card-header font-weight-bold">Index Tenor vs. Coupon Period (Analysis of 2nd Coupon)</div>
+                <div class="card-body">
+                    <table class="table table-sm table-bordered">
+                        <tbody>
+                            <tr>
+                                <td><strong>Fixing Date</strong></td>
+                                <td>{{ analysis.fixing_date }}</td>
+                            </tr>
+                            <tr>
+                                <td>Index Fixing on that Date</td>
+                                <td>{{ analysis.index_fixing_rate }}</td>
+                            </tr>
+                            <tr class="table-info">
+                                <td>Theoretical Index Tenor Period</td>
+                                <td>{{ analysis.index_start_date }} -> <strong>{{ analysis.index_end_date }}</strong></td>
+                            </tr>
+                            <tr>
+                                <td>Forward Rate over Tenor Period</td>
+                                <td>{{ analysis.index_tenor_rate }}</td>
+                            </tr>
+                            <tr class="table-danger">
+                                <td><strong>Actual Coupon Accrual Period</strong></td>
+                                <!-- Highlight the end date if it's different from the index's end date -->
+                                <td><strong>{{ analysis.coupon_start_date }} -> 
+                                    {% if analysis.coupon_end_date != analysis.index_end_date %}
+                                        <span class="bg-warning p-1 rounded">{{ analysis.coupon_end_date }}</span>
+                                    {% else %}
+                                        {{ analysis.coupon_end_date }}
+                                    {% endif %}
+                                </strong></td>
+                            </tr>
+                             <tr>
+                                <td>Forward Rate over Coupon Period</td>
+                                <td>{{ analysis.coupon_period_rate }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="card mb-4">
+                <div class="card-header font-weight-bold">Controls</div>
+                <div class="card-body">
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form|crispy }}
+                        <button type="submit" class="btn btn-primary mt-3 w-100">Recalculate with Convention</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header font-weight-bold">Final Coupon Calculation</div>
+                <div class="card-body">
+                     <div class="alert alert-success text-center">
+                        <span class="result-label">Final Coupon Rate Applied:</span>
+                        <h2 class="result-value">{{ analysis.coupon_final_rate }}</h2>
+                        <hr>
+                        <span class="result-label">Resulting Coupon Amount (on 1M Notional):</span>
+                        <h2 class="result-value">{{ analysis.coupon_amount }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

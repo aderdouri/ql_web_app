@@ -1,7 +1,6 @@
-# Fichier : ql_web_app/swaption/views.py
 from django.shortcuts import render
 from django.contrib import messages
-from .forms import SwaptionForm # Nous allons créer ce formulaire
+from .forms import SwaptionForm 
 from . import services
 
 def pricer_view(request): # On standardise le nom

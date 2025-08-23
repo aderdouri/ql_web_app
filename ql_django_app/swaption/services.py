@@ -1,5 +1,3 @@
-# Fichier : ql_web_app/swaption/services.py (NOUVEAU FICHIER)
-
 import QuantLib as ql
 import numpy as np
 

@@ -1,4 +1,3 @@
-<!-- Fichier : templates/interest_rate_models/base.html (VERSION CORRIGÉE) -->
 {% extends "base.html" %}
 
 {% block title %}Interest-Rate Models - {{ block.super }}{% endblock %}
@@ -10,7 +9,7 @@
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav mr-auto">
                 <!-- ======================================================= -->
-                <!-- LA LISTE DE CHAPITRES CORRIGÉE EST ICI -->
+                <!-- LA LISTE DE CHAPITRES  EST ICI -->
                 <!-- ======================================================= -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'interest_rate_models:chapter_hull_white:hull_white_simulation' %}">15. Simulating interest rates...</a>
@@ -21,9 +20,9 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'interest_rate_models:chapter_calibration:calibration_lab' %}">17. Short-rate model calibration</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">18. Par versus indexed coupons (Todo)</a>
-                </li>
+                  <li class="nav-item">
+        <a class="nav-link" href="{% url 'interest_rate_models:chapter_par_vs_indexed:coupon_lab' %}">18. Par versus indexed coupons</a>
+    </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'interest_rate_models:swap:pricer' %}">19. Modeling interest rate swaps</a>
                 </li>

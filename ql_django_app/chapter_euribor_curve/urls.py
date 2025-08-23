@@ -1,4 +1,3 @@
-# Fichier : ql_web_app/chapter_euribor_curve/urls.py
 from django.urls import path
 from . import views
 

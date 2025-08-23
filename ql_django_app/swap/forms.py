@@ -1,5 +1,3 @@
-# File: ql_web_app/swap/forms.py
-
 from django import forms
 
 class VanillaSwapForm(forms.Form):
@@ -26,9 +24,7 @@ class VanillaSwapForm(forms.Form):
         help_text="The rate of the fixed leg. E.g., 1.5 for 1.5%."
     )
     
-    # ==============================================================================
-    # THE CORRECTION IS HERE: Renamed 'floating_spreads_bps' to 'floating_spread_bps'
-    # ==============================================================================
+
     floating_spread_bps = forms.FloatField(
         label="Floating Spread (bps)", 
         initial=0.0,

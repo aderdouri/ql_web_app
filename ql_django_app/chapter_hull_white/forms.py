@@ -1,4 +1,3 @@
-# Fichier : ql_web_app/chapter_hull_white/forms.py
 from django import forms
 
 # Formulaire pour le labo de calibration

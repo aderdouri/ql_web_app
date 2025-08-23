@@ -1,12 +1,8 @@
-# Fichier : ql_web_app/chapter_mc_convergence/services.py (VERSION COMPLÈTE)
 import QuantLib as ql
 import numpy as np
 from scipy.integrate import simpson
 import math
 
-# ==============================================================================
-# LES FONCTIONS UTILITAIRES MANQUANTES SONT AJOUTÉES ICI
-# ==============================================================================
 
 def get_path_generator(timestep, hw_process, length, seed):
     """
@@ -27,8 +23,6 @@ def generate_paths(num_paths, timestep, seq):
     time = np.array(list(seq.timeGrid()))
     return time, arr
 
-
-# --- Fonction principale du service (maintenant elle trouvera les fonctions ci-dessus) ---
 def run_convergence_experiment(experiment_type: str, a: float, sigma: float, num_paths: int, seed: int):
     """
     Exécute une expérience de convergence Monte Carlo pour Hull-White.

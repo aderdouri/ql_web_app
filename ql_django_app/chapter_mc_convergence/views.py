@@ -1,4 +1,3 @@
-# Fichier : ql_web_app/chapter_mc_convergence/views.py
 from django.shortcuts import render
 from .forms import ConvergenceForm
 from . import services

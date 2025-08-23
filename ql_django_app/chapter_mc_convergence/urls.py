@@ -1,4 +1,3 @@
-# Fichier : ql_web_app/chapter_mc_convergence/urls.py
 from django.urls import path
 from . import views
 

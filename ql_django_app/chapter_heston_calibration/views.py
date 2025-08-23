@@ -1,21 +1,25 @@
 from django.shortcuts import render
-from .forms import HestonCalibrationForm
+from .forms import SmileControlForm
 from . import services
 
-def heston_calibration_lab_view(request):
-    form = HestonCalibrationForm(request.POST or None)
+def calibration_lab_view(request):
+    form = SmileControlForm(request.POST or None)
     results = None
-    if request.method == 'POST' and form.is_valid():
-        initial_params = {
-            'v0': form.cleaned_data['v0'],
-            'kappa': form.cleaned_data['kappa'],
-            'theta': form.cleaned_data['theta'],
-            'sigma': form.cleaned_data['sigma'],
-            'rho': form.cleaned_data['rho'],
-        }
-        results = services.run_heston_calibration(
-            initial_params=initial_params,
-            max_iterations=form.cleaned_data['max_iterations']
-        )
+    
+    if form.is_valid():
+        atm_vol = form.cleaned_data['atm_vol_pct']
+        skew = form.cleaned_data['smile_skew']
+    else:
+        form = SmileControlForm()
+        atm_vol = form.fields['atm_vol_pct'].initial
+        skew = form.fields['smile_skew'].initial
+
+    try:
+        
+        results = services.calibrate_heston_and_get_smile(atm_vol, skew)
+
+    except Exception as e:
+        results = {'error': str(e)}
+    
     context = {'form': form, 'results': results}
     return render(request, 'chapter_heston_calibration/heston_calibration_lab.html', context)

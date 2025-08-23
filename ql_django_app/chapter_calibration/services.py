@@ -1,4 +1,3 @@
-# Fichier : ql_web_app/chapter_calibration/services.py
 import QuantLib as ql
 from collections import namedtuple
 import math

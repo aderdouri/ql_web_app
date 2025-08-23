@@ -1,4 +1,3 @@
-# File: ql_web_app/chapter10_treasury_curve/views.py
 from django.shortcuts import render
 from .forms import CurveConstructionForm
 from . import services
