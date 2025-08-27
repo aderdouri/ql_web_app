@@ -1,0 +1,247 @@
+{% extends "basics/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block sub_page_content %}
+    <h3>Chapter 1: QuantLib Basics - Interactive Lab</h3>
+    <p class="text-muted">An interactive lab to experiment with the core QuantLib objects for handling dates, time, schedules, and interest rates.</p>
+    
+    <!-- Texte d'intro de la recette pour 'Date' -->
+    <div class="p-3 mb-4 bg-light rounded-3 border">
+        <!--<h5 class="font-italic">Note on `ql.Date` object</h5>-->
+        <p class="mb-0 small">"The Date object can be created using the constructor as `Date(day, month, year)`. Pay attention that day is the first argument, followed by month and then the year. This is different from the Python `datetime` object instantiation."</p>
+    </div>
+
+    <form id="lab-form" novalidate>
+        {% csrf_token %}
+        <!-- Expérience 1 -->
+        <div class="card mb-4">
+            <div class="card-header font-weight-bold">1. Create and Validate a Date</div>
+            <div class="card-body">
+                <p class="small text-muted">Test how QuantLib's `Date` object validates inputs. Try a valid date like (31, March, 2015) and an invalid one like (31, April, 2015).</p>
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <div class="row">
+                            <div class="col-sm-4">{{ create_date_form.day|as_crispy_field }}</div>
+                            <div class="col-sm-4">{{ create_date_form.month|as_crispy_field }}</div>
+                            <div class="col-sm-4">{{ create_date_form.year|as_crispy_field }}</div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <button type="button" id="btn-create-date" class="btn btn-primary w-100 mt-3 mt-lg-0">Create Date</button>
+                    </div>
+                </div>
+                <div id="result-create-date" class="mt-3"></div>
+            </div>
+        </div>
+
+        <!-- Expérience 2 -->
+        <div class="card mb-4">
+            <div class="card-header font-weight-bold">2. Add a Period to a Date</div>
+             <div class="card-body">
+                <div class="row align-items-end">
+                    <div class="col-lg-8">{{ add_period_form|crispy }}</div>
+                    <div class="col-lg-4">
+                        <button type="button" id="btn-add-period" class="btn btn-primary w-100">Add Period</button>
+                    </div>
+                </div>
+                <div id="result-add-period" class="mt-3"></div>
+            </div>
+        </div>
+
+        <!-- Expérience 3: Calendars (ordre de la recette) -->
+        <div class="card mb-4">
+            <div class="card-header font-weight-bold">3. Handle Holidays with Calendars</div>
+            <div class="card-body">
+                <p class="small text-muted">"The Calendar class implements this functionality for all the major exchanges. Let us take a look at a few examples here."</p>
+                <div class="row align-items-end">
+                    <div class="col-lg-8">{{ advance_days_form|crispy }}</div>
+                    <div class="col-lg-4">
+                        <button type="button" id="btn-advance-days" class="btn btn-primary w-100">Advance Business Days</button>
+                    </div>
+                </div>
+                <div id="result-advance-days" class="mt-3"></div>
+            </div>
+        </div>
+
+        <!-- Expérience 4: Schedules -->
+        <div class="card mb-4">
+            <div class="card-header font-weight-bold">4. Generate a Payment Schedule</div>
+            <div class="card-body">
+                <p class="small text-muted">"The Schedule object is necessary in creating coupon schedules or call schedules. It generates a list of dates based on a set of rules."</p>
+                <div class="row align-items-end">
+                    <div class="col-lg-8">{{ schedule_form|crispy }}</div>
+                    <div class="col-lg-4">
+                        <button type="button" id="btn-create-schedule" class="btn btn-primary w-100">Create Schedule</button>
+                    </div>
+                </div>
+                <div id="result-schedule" class="mt-3"></div>
+            </div>
+        </div>
+
+        <!-- Expérience 5: Interest Rates -->
+        <div class="card mb-4">
+            <div class="card-header font-weight-bold">5. Define an Interest Rate</div>
+            <div class="card-body">
+                <p class="small text-muted">"The InterestRate class can be used to store the interest rate with the compounding type, day count and the frequency of compounding."</p>
+                 <div class="row align-items-end">
+                    <div class="col-lg-8">{{ interest_rate_form|crispy }}</div>
+                    <div class="col-lg-4">
+                        <button type="button" id="btn-create-rate" class="btn btn-primary w-100">Create Interest Rate</button>
+                    </div>
+                </div>
+                <div id="result-interest-rate" class="mt-3"></div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    function displaySimpleResult(elementId, response) {
+        const resultDiv = document.getElementById(elementId);
+        let alertClass = (response.status === 'success') ? 'alert-success' : 'alert-danger';
+        let content = `<div class="alert ${alertClass} small p-2"><strong>Result:</strong> ${response.result}</div>`;
+        resultDiv.innerHTML = content;
+    }
+    
+    function displayFormError(elementId, error) {
+        const resultDiv = document.getElementById(elementId);
+        let errorMessage = "Invalid form data. Please check the fields.";
+        if (error.form_errors) {
+            try {
+                const formErrors = JSON.parse(error.form_errors);
+                const firstFieldName = Object.keys(formErrors)[0];
+                errorMessage = formErrors[firstFieldName][0].message;
+            } catch (e) { /* Fallback */ }
+        }
+        resultDiv.innerHTML = `<div class="alert alert-danger small p-2">${errorMessage}</div>`;
+    }
+
+    // --- Experience 1: Create Date ---
+    document.getElementById('btn-create-date').addEventListener('click', () => {
+        const data = {
+            day: document.querySelector('#id_day').value,
+            month: document.querySelector('#id_month').value,
+            year: document.querySelector('#id_year').value,
+        };
+        fetch("{% url 'basics:interactive_basics:api_create_date' %}", {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify(data)
+        })
+        .then(response => { if (!response.ok) { return response.json().then(err => Promise.reject(err)); } return response.json(); })
+        .then(data => {
+            displaySimpleResult('result-create-date', data);
+            if (data.status === 'success' && data.raw_date) {
+                document.querySelector('#id_start_date').value = data.raw_date;
+                document.querySelector('#id_start_date_cal').value = data.raw_date;
+            }
+        })
+        .catch(error => { displayFormError('result-create-date', error); });
+    });
+
+    // --- Experience 2: Add Period ---
+    document.getElementById('btn-add-period').addEventListener('click', () => {
+        const data = {
+            start_date: document.querySelector('#id_start_date').value,
+            quantity: document.querySelector('#id_quantity').value,
+            unit: document.querySelector('#id_unit').value,
+        };
+        fetch("{% url 'basics:interactive_basics:api_add_period' %}", {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify(data)
+        })
+        .then(response => { if (!response.ok) { return response.json().then(err => Promise.reject(err)); } return response.json(); })
+        .then(data => {
+             displaySimpleResult('result-add-period', data);
+             if (data.status === 'success') {
+                document.querySelector('#id_start_date_cal').value = data.result;
+            }
+        })
+        .catch(error => { displayFormError('result-add-period', error); });
+    });
+
+    // ==============================================================================
+    // CORRECTION : On utilise 'fetch' ici aussi
+    // ==============================================================================
+
+    // --- EXPERIENCE 3: Advance Days ---
+    document.getElementById('btn-advance-days').addEventListener('click', () => {
+        const data = {
+            start_date_cal: document.querySelector('#id_start_date_cal').value,
+            period_days: document.querySelector('#id_period_days').value,
+            calendar: document.querySelector('#id_calendar').value,
+        };
+        fetch("{% url 'basics:interactive_basics:api_advance_days' %}", {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            const resultDiv = document.getElementById('result-advance-days');
+            const content = `<div class="alert alert-success small p-2">
+                <strong>Raw Date (no calendar):</strong> <code>${data.raw_date}</code><br>
+                <strong>Adjusted Date:</strong> <code>${data.adjusted_date}</code>
+            </div>`;
+            resultDiv.innerHTML = content;
+        });
+    });
+
+    // --- EXPERIENCE 4: Create Schedule ---
+    document.getElementById('btn-create-schedule').addEventListener('click', () => {
+        const data = {
+            effective_date: document.querySelector('#id_effective_date').value,
+            termination_date: document.querySelector('#id_termination_date').value,
+            tenor: document.querySelector('#id_tenor').value,
+            calendar_sched: document.querySelector('#id_calendar_sched').value,
+        };
+        fetch("{% url 'basics:interactive_basics:api_create_schedule' %}", {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            const resultDiv = document.getElementById('result-schedule');
+            let datesHtml = data.result.map(d => `<li><code>${d}</code></li>`).join('');
+            const content = `<div class="alert alert-success" style="max-height: 200px; overflow-y: auto;">
+                <strong>Generated Dates:</strong>
+                <ul class="list-unstyled mt-2 small">${datesHtml}</ul>
+            </div>`;
+            resultDiv.innerHTML = content;
+        });
+    });
+
+    // --- EXPERIENCE 5: Create Interest Rate ---
+    document.getElementById('btn-create-rate').addEventListener('click', () => {
+        const data = {
+            rate: document.querySelector('#id_rate').value,
+            day_counter: document.querySelector('#id_day_counter').value,
+            compounding: document.querySelector('#id_compounding').value,
+            frequency: document.querySelector('#id_frequency').value,
+        };
+        fetch("{% url 'basics:interactive_basics:api_create_rate' %}", {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrftoken }, body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(data => {
+            const resultDiv = document.getElementById('result-interest-rate');
+            if (data.status === 'success') {
+                const res = data.result;
+                const content = `
+                    <div class="alert alert-success small p-2">
+                        <strong>Resulting Object Properties:</strong>
+                        <table class="table table-sm table-borderless lab-result-table mb-0 mt-2">
+                            <tr><td>Rate:</td><td><code>${res.rate}</code></td></tr>
+                            <tr><td>Day Count:</td><td><code>${res.day_counter}</code></td></tr>
+                            <tr><td>Compounding:</td><td><code>${res.compounding}</code></td></tr>
+                            <tr><td>Frequency:</td><td><code>${res.frequency}</code></td></tr>
+                            <tr class="table-info"><td><strong>Compound Factor (1Y):</strong></td><td><code>${res.compound_factor_1y}</code></td></tr>
+                        </table>
+                    </div>`;
+                resultDiv.innerHTML = content;
+            } else {
+                displaySimpleResult('result-interest-rate', data);
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

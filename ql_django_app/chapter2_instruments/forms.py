@@ -1,55 +1,25 @@
+# Fichier : ql_web_app/chapter2_instruments/forms.py (VERSION AVEC PARAMÈTRES RÉALISTES)
 from django import forms
 from datetime import date
 
-class EngineChoiceForm(forms.Form):
-    """
-    A form for the interactive "Instruments & Engines" lab.
-    It allows the user to select a pricing model and option parameters.
-    """
-    
+class PricingEngineForm(forms.Form):
     ENGINE_CHOICES = [
         ('analytic', 'Analytic Black-Scholes Formula'),
-        ('binomial_crr', 'Binomial Tree (Cox-Ross-Rubinstein, 200 steps)'),
-        ('monte_carlo', 'Monte Carlo Simulation (10k paths)'),
+        ('binomial_crr', 'Binomial Tree (Cox-Ross-Rubinstein)'),
+        ('monte_carlo', 'Monte Carlo Simulation'),
     ]
-
-    # The key field for this demonstration: a dropdown menu (ChoiceField)
+    
     engine_choice = forms.ChoiceField(
         label='Pricing Engine', 
-        choices=ENGINE_CHOICES,
-        help_text="Select the mathematical model to value the option."
+        choices=ENGINE_CHOICES
     )
     
-    # --- Standard option parameters ---
-    # These fields define the input boxes for the user.
-    
-    maturity_dt = forms.DateField(
-        label='Maturity Date', 
-        initial=date(2016, 1, 15),
-        widget=forms.DateInput(attrs={'type': 'date'}),
-        help_text="The expiration date of the option."
-    )
-    
-    spot_price = forms.FloatField(
-        label='Spot Price', 
-        initial=127.62,
-        help_text="Current market price of the underlying asset."
-    )
-    
-    strike_price = forms.FloatField(
-        label='Strike Price', 
-        initial=130,
-        help_text="The price at which the option can be exercised."
-    )
-    
-    volatility_pct = forms.FloatField(
-        label='Volatility (%)', 
-        initial=20.0,
-        help_text="Annualized volatility of the asset. E.g., 20.0 for 20%."
-    )
-    
-    risk_free_rate_pct = forms.FloatField(
-        label='Risk-Free Rate (%)', 
-        initial=0.1,
-        help_text="The risk-free interest rate. E.g., 0.1 for 0.1%."
-    )
+    # ==============================================================================
+    # ON UTILISE DES PARAMÈTRES "AT-THE-MONEY" PLUS COHÉRENTS
+    # ==============================================================================
+    maturity_dt = forms.DateField(label='Maturity Date', initial=date(2016, 5, 15), widget=forms.DateInput(attrs={'type':'date'}))
+    spot_price = forms.FloatField(label='Spot Price', initial=100.0)
+    strike_price = forms.FloatField(label='Strike Price', initial=100.0)
+    volatility_pct = forms.FloatField(label='Volatility (%)', initial=20.0)
+    dividend_rate_pct = forms.FloatField(label='Dividend Rate (%)', initial=1.5)
+    risk_free_rate_pct = forms.FloatField(label='Risk-Free Rate (%)', initial=1.0)

@@ -1,54 +1,34 @@
+# Fichier : ql_web_app/chapter2_instruments/views.py
 from django.shortcuts import render
-from django.contrib import messages
-from .forms import EngineChoiceForm
+from .forms import PricingEngineForm
 from . import services
 
 def pricer_lab_view(request):
-    """
-    This view manages the "Instruments & Engines" lab page.
-    It handles both displaying the form and processing the submitted data.
-    """
-    
-    # Initialize form and results for a GET request (when the user first visits the page)
-    form = EngineChoiceForm()
+    form = PricingEngineForm(request.POST or None)
     results = None
 
-    # Check if the form has been submitted (POST request)
-    if request.method == 'POST':
-        # Create a form instance and populate it with data from the request
-        form = EngineChoiceForm(request.POST)
-        
-        # Check if the form is valid (all fields are correct)
-        if form.is_valid():
-            try:
-                # Group all option parameters into a dictionary
-                option_params = {
-                    'maturity_dt': form.cleaned_data['maturity_dt'],
-                    'spot_price': form.cleaned_data['spot_price'],
-                    'strike_price': form.cleaned_data['strike_price'],
-                    'volatility_pct': form.cleaned_data['volatility_pct'],
-                    'risk_free_rate_pct': form.cleaned_data['risk_free_rate_pct'],
-                }
-                
-                # Get the user's choice for the pricing engine
-                engine_choice = form.cleaned_data['engine_choice']
-                
-                # Call our clean service function to perform the calculation
-                results = services.price_option_with_selected_engine(engine_choice, option_params)
-
-            except Exception as e:
-                # If any error occurs during the QuantLib calculation, display a friendly message
-                messages.error(request, f"An error occurred during calculation: {e}")
-        
-        else:
-            # If the form itself has validation errors (e.g., text in a number field)
-            messages.warning(request, "The submitted data was invalid. Please check the form.")
-            
-    # Prepare the context dictionary to pass data to the template
-    context = {
-        'form': form, 
-        'results': results
-    }
+    # On détermine les paramètres à utiliser
+    if form.is_valid():
+        engine_choice = form.cleaned_data['engine_choice']
+        option_params = {k: v for k, v in form.cleaned_data.items() if k != 'engine_choice'}
+    else:
+        # En cas de GET ou d'erreur, on utilise les valeurs par défaut
+        form = PricingEngineForm()
+        engine_choice = form.fields['engine_choice'].initial
+        option_params = {
+            'maturity_dt': form.fields['maturity_dt'].initial,
+            'spot_price': form.fields['spot_price'].initial,
+            'strike_price': form.fields['strike_price'].initial,
+            'volatility_pct': form.fields['volatility_pct'].initial,
+            'dividend_rate_pct': form.fields['dividend_rate_pct'].initial,
+            'risk_free_rate_pct': form.fields['risk_free_rate_pct'].initial,
+        }
     
-    # Render the final HTML page
+    # On lance toujours le calcul
+    try:
+        results = services.price_option_with_engine(option_params, engine_choice)
+    except Exception as e:
+        print(f"Error in Chapter 2 service: {e}")
+    
+    context = {'form': form, 'results': results}
     return render(request, 'chapter2_instruments/pricer_lab.html', context)

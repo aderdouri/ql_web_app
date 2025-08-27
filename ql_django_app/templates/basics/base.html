@@ -1,5 +1,5 @@
+<!-- Fichier : templates/basics/base.html (VERSION FINALE ET COHÉRENTE) -->
 {% extends "base.html" %}
-{% block title %}Basics - {{ block.super }}{% endblock %}
 
 {% block page_content %}
 <div class="container">
@@ -7,43 +7,34 @@
         <span class="navbar-brand small font-weight-bold">Basics Chapters</span>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav mr-auto">
-                <!-- Lien à 2 niveaux vers une page statique -->
+                <!-- ======================================================= -->
+                <!-- TOUS LES LIENS UTILISENT LA MÊME LOGIQUE À 3 NIVEAUX -->
+                <!-- ======================================================= -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'basics:quantlib_basics' %}">1. QuantLib basics</a>
-                </li>
-
-                <!-- ================================================================ -->
-                <!-- LIEN À 3 NIVEAUX VERS L'APPLICATION INTERACTIVE -->
-                <!-- ================================================================ -->
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'basics:instruments_engines:pricer_lab' %}">2. Instruments and pricing engines</a>
-                </li>
-                
-                <!-- Liens à 2 niveaux vers les autres pages statiques -->
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'basics:numerical_greeks:greeks_lab' %}">3. Numerical Greeks calculation</a>
+                    <a class="nav-link" href="{% url 'basics:interactive_basics:date_lab' %}">1. QuantLib basics</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'basics:market_quotes:market_lab' %}">4. Market quotes</a>
+                    <a class="nav-link" href="{% url 'basics:chapter2_instruments:pricer_lab' %}">2. Instruments and pricing engines</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'basics:term_structures' %}">5. Term structures...</a>
+                    <a class="nav-link" href="{% url 'basics:chapter3_greeks:greeks_lab' %}">3. Numerical Greeks calculation</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'basics:pricing_over_range' %}">6. Pricing over a range of days</a>
+                    <a class="nav-link" href="{% url 'basics:chapter4_quotes:market_lab' %}">4. Market quotes</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'basics:random_numbers' %}">7. Random numbers...</a>
+                    <a class="nav-link" href="{% url 'basics:chapter5_curves:curve_lab' %}">5. Term structures</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'basics:chapter6_pricing_range:price_history_lab' %}">6. Pricing over a range of days</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'basics:chapter7_random:random_lab' %}">7. Random numbers</a>
                 </li>
             </ul>
         </div>
     </nav>
     
-    {% block sub_page_content %}
-        <div class="alert alert-info">
-            <h4 class="alert-heading">Welcome to the Basics Section!</h4>
-            <p>Please select a chapter from the menu above to begin.</p>
-        </div>
-    {% endblock %}
+    {% block sub_page_content %}{% endblock %}
 </div>
 {% endblock %}

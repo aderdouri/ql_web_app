@@ -1,72 +1,74 @@
 {% extends "basics/base.html" %}
 {% load crispy_forms_tags %}
 
-{% block title %}Market Quotes Lab - {{ block.super }}{% endblock %}
-
 {% block sub_page_content %}
-    <h3>Chapter 4: Market Quotes Lab</h3>
-    <p class="text-muted">
-        This lab demonstrates the Observer pattern. First, set up a bond. Then, change the market rate and see how the bond price updates automatically without needing to be explicitly repriced.
-    </p>
+    <h3>Chapter 4: Market Quotes & Nelson-Siegel Model Lab</h3>
+    <p class="text-muted">"Explain the approach and recall the Nelson-Siegel model." - Build a yield curve using the Nelson-Siegel parametric model and then price a bond using the constructed curve.</p>
     <hr>
-    
     <div class="row">
-        <div class="col-md-5">
-            <!-- Première Carte : Initialisation -->
-            <div class="card mb-4">
-                <div class="card-header font-weight-bold">1. Setup Instrument</div>
-                <div class="card-body">
-                    <p class="card-text small text-muted">Create a bond linked to a market rate.</p>
-                    <!-- Ce formulaire envoie le bouton "setup_bond" -->
-                    <form method="post" novalidate>
-                        {% csrf_token %}
-                        {{ setup_form|crispy }}
-                        <button type="submit" name="setup_bond" class="btn btn-secondary mt-3 w-100">Setup Bond & Market</button>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Deuxième Carte : Mise à jour du Marché -->
-            <div class="card">
-                <div class="card-header font-weight-bold">2. Update Market</div>
-                <div class="card-body">
-                    <p class="card-text small text-muted">Change the underlying rate quote. The bond will react automatically.</p>
-                    <!-- Ce formulaire envoie le bouton "update_market" -->
-                    <form method="post" novalidate>
-                        {% csrf_token %}
-                        {{ update_form|crispy }}
-                       
-                        <button type="submit" name="update_market" class="btn btn-primary mt-3 w-100">Update & Reprice</button>
-                    </form>
-                </div>
+        <div class="col-md-4">
+            <div class="card card-body">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Build Curve & Price Bond</button>
+                </form>
             </div>
         </div>
-
-        <div class="col-md-7">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header font-weight-bold">Nelson-Siegel Yield Curve</div>
+                <div class="card-body">
+                    {% if results.plot_points %}<div style="height: 300px; position:relative;"><canvas id="nsCurveChart"></canvas></div>{% endif %}
+                </div>
+            </div>
             <div class="card">
-                <div class="card-header font-weight-bold">Live Pricing Result</div>
+                <div class="card-header font-weight-bold">Valuation Result</div>
                 <div class="card-body text-center">
-                    {% if new_price is not None %}
-                        <div class="alert alert-primary">
-                            <span class="result-label">Market Rate is now: <strong>{{ new_rate }}%</strong></span>
-                            <hr>
-                            <span class="result-label">New Bond Price:</span>
-                            <h2 class="result-value text-primary">{{ new_price }}</h2>
-                        </div>
-                    {% elif initial_price is not None %}
-                        <div class="alert alert-info">
-                            <span class="result-label">Initial Market Rate: <strong>{{ initial_rate }}%</strong></span>
-                            <hr>
-                            <span class="result-label">Initial Bond Price:</span>
-                            <h2 class="result-value text-info">{{ initial_price }}</h2>
-                        </div>
+                    {% if results.bond_price %}
+                        <span class="result-label">Calculated Bond Price:</span>
+                        <h2 class="result-value">{{ results.bond_price }}</h2>
                     {% else %}
-                        <div class="alert alert-light">
-                            Please set up a bond to begin the demonstration.
-                        </div>
+                        <div class="alert alert-danger">Could not calculate bond price.</div>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% if results.plot_points %}
+    {{ results.plot_points|json_script:"plot-data" }}
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const plotData = JSON.parse(document.getElementById('plot-data').textContent);
+        const ctx = document.getElementById('nsCurveChart');
+        if(ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'Zero Rate (%)',
+                        data: plotData,
+                        borderColor: 'rgb(153, 102, 255)',
+                        tension: 0.1,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    parsing: { xAxisKey: 'x', yAxisKey: 'y' },
+                    scales: { 
+                        x: { type: 'linear', title: {display: true, text: 'Maturity (Years)'} },
+                        y: { title: {display: true, text: 'Rate (%)'} }
+                    }
+                }
+            });
+        }
+    });
+    </script>
+{% endif %}
 {% endblock %}

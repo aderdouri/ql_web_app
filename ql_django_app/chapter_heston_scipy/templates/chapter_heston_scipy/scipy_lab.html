@@ -1,0 +1,49 @@
+
+{% extends "equity_models/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block sub_page_content %}
+    <h3>Heston Parameter Calibration with SciPy</h3>
+    <p class="text-muted">Compare the results of Heston model calibration using different optimization algorithms from QuantLib and SciPy.</p>
+    <hr>
+    <div class="row">
+        <div class="col-md-5">
+            <div class="card card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Run Calibration</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-7">
+            <div class="card">
+                <div class="card-header font-weight-bold">Calibration Results</div>
+                <div class="card-body">
+                    {% if results %}
+                        <!-- =================================================================== -->
+                        <!--     NEW LOGIC: Check if the 'results' dictionary contains an error    -->
+                        <!-- =================================================================== -->
+                        {% if results.error %}
+                            <div class="alert alert-danger">
+                                <h5 class="alert-heading">Calculation Error!</h5>
+                                <p>{{ results.error }}</p>
+                            </div>
+                        {% else %}
+                            <!-- If no error, display the normal results -->
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item"><strong>Optimizer:</strong> {{ results.optimizer }}</li>
+                                <li class="list-group-item"><strong>Avg. Abs. Error (%):</strong> {{ results.avg_error_pct }}</li>
+                                <li class="list-group-item"><strong>Calibrated Parameters:</strong> <code>{{ results.params }}</code></li>
+                            </ul>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            Select an optimizer and click "Run Calibration". This may take several seconds.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

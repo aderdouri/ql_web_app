@@ -1,33 +1,23 @@
+# File: ql_web_app/chapter4_quotes/views.py
 from django.shortcuts import render
-from django.contrib import messages
-from .forms import BondSetupForm, MarketUpdateForm
+from .forms import NelsonSiegelForm # On utilise le bon nom de formulaire
 from . import services
 
 def market_lab_view(request):
-    # On initialise toujours les deux formulaires
-    setup_form = BondSetupForm(prefix='setup')
-    update_form = MarketUpdateForm(prefix='update')
-    context = {'setup_form': setup_form, 'update_form': update_form}
-
-    if request.method == 'POST':
+    form = NelsonSiegelForm(request.POST or None)
+    results = None
+    
+    if form.is_valid():
+        # On sépare les paramètres pour le service
+        ns_params = {k: v for k, v in form.cleaned_data.items() if k.startswith(('beta', 'tau'))}
+        bond_params = {k: v for k, v in form.cleaned_data.items() if k.startswith('bond')}
+    else:
+        # On utilise les valeurs par défaut
+        form = NelsonSiegelForm()
+        ns_params = {k: v.initial for k, v in form.fields.items() if k.startswith(('beta', 'tau'))}
+        bond_params = {k: v.initial for k, v in form.fields.items() if k.startswith('bond')}
         
-        if 'setup_bond' in request.POST:
-            # L'utilisateur a cliqué sur le bouton du premier formulaire
-            setup_form = BondSetupForm(request.POST, prefix='setup')
-            if setup_form.is_valid():
-                initial_data = services.setup_bond_and_market(
-                    coupon_rate_pct=setup_form.cleaned_data['coupon_rate_pct'],
-                    maturity_years=setup_form.cleaned_data['maturity_years']
-                )
-                context.update(initial_data)
-        
-        elif 'update_market' in request.POST:
-            # L'utilisateur a cliqué sur le bouton du deuxième formulaire
-            update_form = MarketUpdateForm(request.POST, prefix='update')
-            if update_form.is_valid():
-                new_data = services.update_market_and_reprice(
-                    new_rate_pct=update_form.cleaned_data['new_rate_pct']
-                )
-                context.update(new_data)
+    results = services.build_ns_curve_and_price_bond(ns_params, bond_params)
 
+    context = {'form': form, 'results': results}
     return render(request, 'chapter4_quotes/market_lab.html', context)

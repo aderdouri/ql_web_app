@@ -1,40 +1,79 @@
+# File: ql_web_app/interactive_basics/views.py
 from django.shortcuts import render
-from .forms import DateForm, PeriodForm, CalendarForm
+from django.http import JsonResponse
+import json
+from .forms import CreateDateForm, AddPeriodForm, AdvanceBusinessDaysForm, ScheduleForm, InterestRateForm
 from . import services
 
-def interactive_lab_view(request):
-    context = {}
+# --- Vue Principale (pour afficher la page) ---
+def date_lab_view(request):
+    context = {
+        'create_date_form': CreateDateForm(),
+        'add_period_form': AddPeriodForm(),
+        'advance_days_form': AdvanceBusinessDaysForm(),
+        'schedule_form': ScheduleForm(),
+        'interest_rate_form': InterestRateForm(),
+    }
+    return render(request, 'interactive_basics/date_lab.html', context)
+
+# --- Vues "API" pour les calculs en arrière-plan ---
+
+def api_create_date(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        form = CreateDateForm(data)
+        if form.is_valid():
+            cleaned_data = form.cleaned_data
+            cleaned_data['month'] = int(cleaned_data['month'])
+            result = services.create_ql_date(cleaned_data)
+            return JsonResponse(result)
+        else:
+            # ==============================================================================
+            # CORRECTION : On renvoie les erreurs de validation spécifiques du formulaire
+            # ==============================================================================
+            return JsonResponse({'status': 'error', 'form_errors': form.errors.as_json()}, status=400)
+    return JsonResponse({'status': 'error', 'result': 'Invalid request method.'}, status=400)
+
+def api_add_period(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        form = AddPeriodForm(data)
+        if form.is_valid():
+            result = services.add_ql_period(form.cleaned_data)
+            return JsonResponse(result)
+        else:
+            return JsonResponse({'status': 'error', 'form_errors': form.errors.as_json()}, status=400)
+    return JsonResponse({'status': 'error', 'result': 'Invalid request method.'}, status=400)
+
+def api_advance_days(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        form = AdvanceBusinessDaysForm(data)
+        if form.is_valid():
+            result = services.calculate_calendar_dates(form.cleaned_data)
+            return JsonResponse(result)
+        else:
+            return JsonResponse({'status': 'error', 'form_errors': form.errors.as_json()}, status=400)
+    return JsonResponse({'status': 'error', 'result': 'Invalid request method.'}, status=400)
     
-    # Initialiser tous les formulaires
-    date_form = DateForm()
-    period_form = PeriodForm()
-    calendar_form = CalendarForm()
+def api_create_schedule(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        form = ScheduleForm(data)
+        if form.is_valid():
+            result = services.create_schedule(form.cleaned_data)
+            return JsonResponse(result)
+        else:
+            return JsonResponse({'status': 'error', 'form_errors': form.errors.as_json()}, status=400)
+    return JsonResponse({'status': 'error', 'result': 'Invalid request method.'}, status=400)
 
-    try:
-        if request.method == 'POST':
-            # Déterminer quel formulaire a été soumis
-            if 'create_date_btn' in request.POST:
-                date_form = DateForm(request.POST)
-                if date_form.is_valid():
-                    d = date_form.cleaned_data
-                    context['date_result'] = services.create_date_from_form(d['day'], d['month'], d['year'])
-            
-            elif 'add_period_btn' in request.POST:
-                period_form = PeriodForm(request.POST)
-                if period_form.is_valid():
-                    p = period_form.cleaned_data
-                    context['period_result'] = services.add_period_from_form(p['start_date_str'], p['quantity'], p['unit'])
-
-            elif 'advance_calendar_btn' in request.POST:
-                calendar_form = CalendarForm(request.POST)
-                if calendar_form.is_valid():
-                    c = calendar_form.cleaned_data
-                    context['calendar_result'] = services.advance_with_calendar_from_form(c['start_date_str'], c['period_days'], c['calendar'])
-    except Exception as e:
-        context['error'] = f"QuantLib Error: {e}"
-
-    context['date_form'] = date_form
-    context['period_form'] = period_form
-    context['calendar_form'] = calendar_form
-    
-    return render(request, 'interactive_basics/lab.html', context)
+def api_create_rate(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        form = InterestRateForm(data)
+        if form.is_valid():
+            result = services.create_interest_rate(form.cleaned_data)
+            return JsonResponse(result)
+        else:
+            return JsonResponse({'status': 'error', 'form_errors': form.errors.as_json()}, status=400)
+    return JsonResponse({'status': 'error', 'result': 'Invalid request method.'}, status=400)
