@@ -1,25 +1,28 @@
-# Fichier : ql_web_app/chapter2_instruments/forms.py (VERSION AVEC PARAMÈTRES RÉALISTES)
-from django import forms
-from datetime import date
+from django.forms import Form, ChoiceField, FloatField, DateField, DateInput
+import datetime
 
-class PricingEngineForm(forms.Form):
-    ENGINE_CHOICES = [
-        ('analytic', 'Analytic Black-Scholes Formula'),
-        ('binomial_crr', 'Binomial Tree (Cox-Ross-Rubinstein)'),
-        ('monte_carlo', 'Monte Carlo Simulation'),
-    ]
+class OptionPricerForm(Form):
+    # ... les autres champs ne changent pas ...
+    option_type = ChoiceField(choices=[('Call', 'Call'), ('Put', 'Put')], initial='Call', label="Type d'Option")
+    strike_price = FloatField(initial=100.0, label="Prix d'Exercice (Strike)")
     
-    engine_choice = forms.ChoiceField(
-        label='Pricing Engine', 
-        choices=ENGINE_CHOICES
+    # ==========================================================
+    # CORRECTION PRINCIPALE : Utiliser des dates logiques
+    # ==========================================================
+    expiry_date = DateField(
+        # Mettre une date d'échéance dans le futur
+        initial=datetime.date.today() + datetime.timedelta(days=90), 
+        widget=DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+        label="Date d'Échéance"
     )
     
-    # ==============================================================================
-    # ON UTILISE DES PARAMÈTRES "AT-THE-MONEY" PLUS COHÉRENTS
-    # ==============================================================================
-    maturity_dt = forms.DateField(label='Maturity Date', initial=date(2016, 5, 15), widget=forms.DateInput(attrs={'type':'date'}))
-    spot_price = forms.FloatField(label='Spot Price', initial=100.0)
-    strike_price = forms.FloatField(label='Strike Price', initial=100.0)
-    volatility_pct = forms.FloatField(label='Volatility (%)', initial=20.0)
-    dividend_rate_pct = forms.FloatField(label='Dividend Rate (%)', initial=1.5)
-    risk_free_rate_pct = forms.FloatField(label='Risk-Free Rate (%)', initial=1.0)
+    underlying_price = FloatField(initial=100.0, label="Prix du Sous-jacent")
+    risk_free_rate = FloatField(initial=0.01, label="Taux Sans Risque")
+    volatility = FloatField(initial=0.20, label="Volatilité")
+
+    evaluation_date = DateField(
+        # La date d'évaluation est aujourd'hui
+        initial=datetime.date.today(), 
+        widget=DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+        label="Date d'Évaluation"
+    )

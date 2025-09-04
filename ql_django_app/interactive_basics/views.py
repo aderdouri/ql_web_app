@@ -1,79 +1,30 @@
-# File: ql_web_app/interactive_basics/views.py
+# interactive_basics/views.py
+
 from django.shortcuts import render
-from django.http import JsonResponse
-import json
-from .forms import CreateDateForm, AddPeriodForm, AdvanceBusinessDaysForm, ScheduleForm, InterestRateForm
+from .forms import QuantLibBasicsForm
 from . import services
 
-# --- Vue Principale (pour afficher la page) ---
-def date_lab_view(request):
-    context = {
-        'create_date_form': CreateDateForm(),
-        'add_period_form': AddPeriodForm(),
-        'advance_days_form': AdvanceBusinessDaysForm(),
-        'schedule_form': ScheduleForm(),
-        'interest_rate_form': InterestRateForm(),
-    }
-    return render(request, 'interactive_basics/date_lab.html', context)
+def basics_lab_view(request):
+    form = QuantLibBasicsForm(request.POST or None)
+    context = {'form': form}
 
-# --- Vues "API" pour les calculs en arrière-plan ---
+    if request.method == 'POST' and form.is_valid():
+        data = form.cleaned_data
+        action = request.POST.get('action') # Get which button was clicked
+        
+        results = {}
+        if action == 'run_date' and all(k in data for k in ['date_day', 'date_month', 'date_year']):
+            results['date_results'] = services.process_date_module(data['date_day'], int(data['date_month']), data['date_year'])
+        
+        if action == 'run_calendar' and all(k in data for k in ['calendar_start_date', 'calendar_period_days', 'calendar_choice']):
+            results['calendar_results'] = services.process_calendar_module(data['calendar_start_date'], data['calendar_period_days'], data['calendar_choice'])
+        
+        if action == 'run_schedule' and all(k in data for k in ['schedule_effective_date', 'schedule_termination_date', 'schedule_tenor']):
+            results['schedule_results'] = services.process_schedule_module(data)
 
-def api_create_date(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        form = CreateDateForm(data)
-        if form.is_valid():
-            cleaned_data = form.cleaned_data
-            cleaned_data['month'] = int(cleaned_data['month'])
-            result = services.create_ql_date(cleaned_data)
-            return JsonResponse(result)
-        else:
-            # ==============================================================================
-            # CORRECTION : On renvoie les erreurs de validation spécifiques du formulaire
-            # ==============================================================================
-            return JsonResponse({'status': 'error', 'form_errors': form.errors.as_json()}, status=400)
-    return JsonResponse({'status': 'error', 'result': 'Invalid request method.'}, status=400)
+        if action == 'run_interest_rate' and all(k in data for k in ['ir_annual_rate', 'ir_time_years']):
+            results['ir_results'] = services.process_interest_rate_module(data)
+            
+        context['results'] = results
 
-def api_add_period(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        form = AddPeriodForm(data)
-        if form.is_valid():
-            result = services.add_ql_period(form.cleaned_data)
-            return JsonResponse(result)
-        else:
-            return JsonResponse({'status': 'error', 'form_errors': form.errors.as_json()}, status=400)
-    return JsonResponse({'status': 'error', 'result': 'Invalid request method.'}, status=400)
-
-def api_advance_days(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        form = AdvanceBusinessDaysForm(data)
-        if form.is_valid():
-            result = services.calculate_calendar_dates(form.cleaned_data)
-            return JsonResponse(result)
-        else:
-            return JsonResponse({'status': 'error', 'form_errors': form.errors.as_json()}, status=400)
-    return JsonResponse({'status': 'error', 'result': 'Invalid request method.'}, status=400)
-    
-def api_create_schedule(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        form = ScheduleForm(data)
-        if form.is_valid():
-            result = services.create_schedule(form.cleaned_data)
-            return JsonResponse(result)
-        else:
-            return JsonResponse({'status': 'error', 'form_errors': form.errors.as_json()}, status=400)
-    return JsonResponse({'status': 'error', 'result': 'Invalid request method.'}, status=400)
-
-def api_create_rate(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
-        form = InterestRateForm(data)
-        if form.is_valid():
-            result = services.create_interest_rate(form.cleaned_data)
-            return JsonResponse(result)
-        else:
-            return JsonResponse({'status': 'error', 'form_errors': form.errors.as_json()}, status=400)
-    return JsonResponse({'status': 'error', 'result': 'Invalid request method.'}, status=400)
+    return render(request, 'interactive_basics/basics_lab.html', context)

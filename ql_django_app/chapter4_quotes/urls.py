@@ -1,7 +1,10 @@
+# chapter4_quotes/urls.py (VERSION FINALE ET COMPLÈTE)
+
 from django.urls import path
-from . import views
+from .views import market_lab_view
 
 app_name = 'chapter4_quotes'
+
 urlpatterns = [
-    path('', views.market_lab_view, name='market_lab'),
+    path('market-lab/', market_lab_view, name='market_lab'),
 ]

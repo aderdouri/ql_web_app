@@ -1,0 +1,146 @@
+{% extends "basics/base.html" %}
+
+{% block page_content %}
+
+<style>
+    /* Vous pouvez mettre ces styles dans un fichier CSS séparé si vous le souhaitez */
+    .module { border: 1px solid #ccc; padding: 1em; margin-bottom: 2em; border-radius: 5px; background-color: white; }
+    .module h2 { margin-top: 0; border-bottom: 2px solid #eee; padding-bottom: 0.5em; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1em; align-items: end; }
+    .results { background-color: #f4f4f4; border: 1px solid #ddd; padding: 1em; margin-top: 1em; border-radius: 5px; }
+    .results pre { white-space: pre-wrap; word-wrap: break-word; }
+    .results ul { padding-left: 20px; }
+    button { background-color: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+    button:hover { background-color: #0056b3; }
+    .error { color: #dc3545; font-weight: bold; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input[type="text"], input[type="number"], input[type="date"], select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px;}
+</style>
+
+<h1>Chapter 1: QuantLib Basics - Interactive Lab</h1>
+<p class="lead">An interactive lab to experiment with the core QuantLib objects for handling dates, time, schedules, and interest rates.</p>
+<hr/>
+
+<form method="post">
+    {% csrf_token %}
+
+    <!-- Module 1: Date -->
+    <div class="module">
+        <h2>1. The Date Class</h2>
+        <div class="form-grid">
+            <div>{{ form.date_day.label_tag }} {{ form.date_day }}</div>
+            <div>{{ form.date_month.label_tag }} {{ form.date_month }}</div>
+            <div>{{ form.date_year.label_tag }} {{ form.date_year }}</div>
+        </div>
+        <button type="submit" name="action" value="run_date">Run Date Module</button>
+        
+        {% if results.date_results %}
+        <div class="results">
+            <h3>Date Module Results</h3>
+            {% if results.date_results.error %}
+                <p class="error">{{ results.date_results.error }}</p>
+            {% else %}
+                <p><strong>Created Date:</strong> {{ results.date_results.created_date }}</p>
+                <p><strong>Properties:</strong> Day={{ results.date_results.properties.day }}, Month={{ results.date_results.properties.month }}, Year={{ results.date_results.properties.year }}, Weekday={{ results.date_results.properties.weekday }}</p>
+                <strong>Arithmetic:</strong>
+                <ul>
+                    <li>+1 Day: {{ results.date_results.arithmetic.add_day }}</li>
+                    <li>-1 Day: {{ results.date_results.arithmetic.subtract_day }}</li>
+                    <li>+1 Week: {{ results.date_results.arithmetic.add_week }}</li>
+                    <li>+1 Month: {{ results.date_results.arithmetic.add_month }}</li>
+                    <li>+1 Year: {{ results.date_results.arithmetic.add_year }}</li>
+                </ul>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Module 2: Calendar -->
+    <div class="module">
+        <h2>2. The Calendar Class</h2>
+        <div class="form-grid">
+            <div>{{ form.calendar_start_date.label_tag }} {{ form.calendar_start_date }}</div>
+            <div>{{ form.calendar_period_days.label_tag }} {{ form.calendar_period_days }}</div>
+            <div>{{ form.calendar_choice.label_tag }} {{ form.calendar_choice }}</div>
+        </div>
+        <button type="submit" name="action" value="run_calendar">Run Calendar Module</button>
+
+        {% if results.calendar_results %}
+        <div class="results">
+            <h3>Calendar Module Results</h3>
+            {% if results.calendar_results.error %}
+                <p class="error">{{ results.calendar_results.error }}</p>
+            {% else %}
+                <p><strong>Start Date:</strong> {{ results.calendar_results.start_date }}</p>
+                <p><strong>Period:</strong> {{ results.calendar_results.period }}</p>
+                <p><strong>Raw Date (no calendar):</strong> {{ results.calendar_results.raw_date }}</p>
+                <p><strong>Adjusted Date (with {{ results.calendar_results.calendar_used }} calendar):</strong> {{ results.calendar_results.advanced_date }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Module 3: Schedule -->
+    <div class="module">
+        <h2>3. The Schedule Class</h2>
+        <div class="form-grid">
+             <div>{{ form.schedule_effective_date.label_tag }} {{ form.schedule_effective_date }}</div>
+             <div>{{ form.schedule_termination_date.label_tag }} {{ form.schedule_termination_date }}</div>
+             <div>{{ form.schedule_tenor.label_tag }} {{ form.schedule_tenor }}</div>
+             <div>{{ form.schedule_calendar.label_tag }} {{ form.schedule_calendar }}</div>
+             <div>{{ form.schedule_convention.label_tag }} {{ form.schedule_convention }}</div>
+             <div>{{ form.schedule_date_generation.label_tag }} {{ form.schedule_date_generation }}</div>
+             <div>{{ form.schedule_end_of_month.label_tag }} {{ form.schedule_end_of_month }}</div>
+        </div>
+        <button type="submit" name="action" value="run_schedule">Run Schedule Module</button>
+
+         {% if results.schedule_results %}
+        <div class="results">
+            <h3>Schedule Module Results</h3>
+             {% if results.schedule_results.error %}
+                <p class="error">{{ results.schedule_results.error }}</p>
+            {% else %}
+                <p><strong>Generated Dates:</strong></p>
+                <ol>
+                    {% for date in results.schedule_results.dates %}
+                        <li>{{ date }}</li>
+                    {% endfor %}
+                </ol>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Module 4: Interest Rate -->
+    <div class="module">
+        <h2>4. The InterestRate Class</h2>
+         <div class="form-grid">
+            <div>{{ form.ir_annual_rate.label_tag }} {{ form.ir_annual_rate }}</div>
+            <div>{{ form.ir_day_count.label_tag }} {{ form.ir_day_count }}</div>
+            <div>{{ form.ir_compound_type.label_tag }} {{ form.ir_compound_type }}</div>
+            <div>{{ form.ir_frequency.label_tag }} {{ form.ir_frequency }}</div>
+            <div>{{ form.ir_time_years.label_tag }} {{ form.ir_time_years }}</div>
+            <div>{{ form.ir_new_frequency.label_tag }} {{ form.ir_new_frequency }}</div>
+        </div>
+        <button type="submit" name="action" value="run_interest_rate">Run Interest Rate Module</button>
+        
+        {% if results.ir_results %}
+        <div class="results">
+            <h3>Interest Rate Module Results</h3>
+            {% if results.ir_results.error %}
+                <p class="error">{{ results.ir_results.error }}</p>
+            {% else %}
+                <p><strong>Created Rate:</strong> {{ results.ir_results.created_rate }}</p>
+                <p><strong>Compound Factor (for {{ form.cleaned_data.ir_time_years }} years):</strong> {{ results.ir_results.compound_factor }}</p>
+                <p><strong>Discount Factor (for {{ form.cleaned_data.ir_time_years }} years):</strong> {{ results.ir_results.discount_factor }}</p>
+                <hr>
+                <p><strong>Equivalent Rate:</strong> {{ results.ir_results.equivalent_rate }}</p>
+                <p><strong>Verification (Discount Factor):</strong> {{ results.ir_results.equivalent_discount_factor }}</p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+</form>
+
+{% endblock %}

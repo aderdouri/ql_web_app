@@ -1,27 +1,39 @@
+# chapter3_greeks/forms.py (VERSION FINALE AVEC AIDE)
+
 from django import forms
-from datetime import date
 
 class NumericalGreeksForm(forms.Form):
-    evaluation_dt = forms.DateField(label='Evaluation Date', initial=date(2015, 5, 15), widget=forms.DateInput(attrs={'type':'date'}))
-    maturity_dt = forms.DateField(label='Maturity Date', initial=date(2016, 1, 15), widget=forms.DateInput(attrs={'type':'date'}))
-    spot_price = forms.FloatField(label='Spot Price', initial=100.0)
-    strike_price = forms.FloatField(label='Strike Price', initial=100.0)
-    volatility_pct = forms.FloatField(label='Volatility (%)', initial=20.0)
-    risk_free_rate_pct = forms.FloatField(label='Risk-Free Rate (%)', initial=1.0)
+    # Paramètres de l'option à barrière
+    barrier_type = forms.ChoiceField(
+        choices=[('UpIn', 'Up-and-In'), ('UpOut', 'Up-and-Out'), ('DownIn', 'Down-and-In'), ('DownOut', 'Down-and-Out')],
+        initial='UpIn', label="Type de Barrière"
+    )
+    barrier_level = forms.FloatField(
+        initial=120.0, label="Niveau de la Barrière",
+        help_text="Pour une barrière 'Up', doit être > au prix du sous-jacent. Pour 'Down', doit être <."
+    )
+    rebate = forms.FloatField(initial=0.0, label="Rebate")
+    
+    # Paramètres de l'option sous-jacente
+    option_type = forms.ChoiceField(choices=[('Call', 'Call'), ('Put', 'Put')], initial='Call', label="Type d'Option")
+    strike_price = forms.FloatField(initial=100.0, label="Prix d'Exercice (Strike)")
+    
+    # Dates
+    evaluation_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+        label="Date d'Évaluation"
+    )
+    expiry_date = forms.DateField(
+        widget=forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+        label="Date d'Échéance", help_text="Doit être après la date d'évaluation."
+    )
+    
+    # Données de marché
+    underlying_price = forms.FloatField(initial=100.0, label="Prix du Sous-jacent")
+    risk_free_rate = forms.FloatField(initial=0.01, label="Taux Sans Risque")
+    volatility = forms.FloatField(initial=0.20, label="Volatilité")
 
-    # ==============================================================================
-    # ON AJOUTE UNE RÈGLE DE VALIDATION PERSONNALISÉE
-    # ==============================================================================
-    def clean(self):
-        cleaned_data = super().clean()
-        eval_date = cleaned_data.get("evaluation_dt")
-        maturity = cleaned_data.get("maturity_dt")
-
-        if eval_date and maturity:
-            # On vérifie que la maturité est bien après l'évaluation
-            if maturity <= eval_date:
-                # Si non, on lève une erreur qui sera affichée sur le formulaire
-                raise forms.ValidationError(
-                    "The Maturity Date must be after the Evaluation Date."
-                )
-        return cleaned_data
+    # Paramètres pour le calcul numérique
+    h_underlying = forms.FloatField(initial=0.01, label="Perturbation (h) du Sous-jacent")
+    h_rate = forms.FloatField(initial=0.0001, label="Perturbation (h) du Taux")
+    h_vol = forms.FloatField(initial=0.0001, label="Perturbation (h) de la Volatilité")

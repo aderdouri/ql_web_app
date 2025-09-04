@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'interest_rate_curves',
     'interest_rate_models',
     'equity_models',
+    'interactive_basics',
       
     # --- Applications de Chapitres Actives ---
     

@@ -1,49 +1,55 @@
-# File: ql_web_app/chapter4_quotes/services.py
+# chapter4_quotes/services.py
+
 import QuantLib as ql
 import numpy as np
 
-def build_ns_curve_and_price_bond(ns_params: dict, bond_params: dict):
-    """
-    Builds a Nelson-Siegel yield curve from user parameters and prices a bond with it.
-    """
-    today = ql.Date(15, 1, 2015)
+price_history = []
+def record_price_on_notification(bond):
+    global price_history
+    try: price_history.append(bond.cleanPrice())
+    except Exception: pass
+
+def build_curve_and_get_initial_state(eval_date, bond_prices):
+    # ... (le code de cette fonction reste identique, il est déjà correct)
+    today = ql.Date(eval_date.day, eval_date.month, eval_date.year)
     ql.Settings.instance().evaluationDate = today
-    day_count = ql.Actual365Fixed()
+    data = [ (2, 0.02), (4, 0.0225), (6, 0.025), (8, 0.0275), (10, 0.03), (12, 0.0325), (14, 0.035), (16, 0.0375), (18, 0.04), (20, 0.0425), (22, 0.045), (24, 0.0475), (26, 0.05), (28, 0.0525), (30, 0.055)]
     calendar = ql.TARGET()
+    settlement = calendar.advance(today, 3, ql.Days)
+    quotes = [ql.SimpleQuote(price) for price in bond_prices]
+    helpers = []
+    for i, (length, coupon) in enumerate(data):
+        maturity = calendar.advance(settlement, length, ql.Years)
+        schedule = ql.Schedule(settlement, maturity, ql.Period(ql.Annual), calendar, ql.ModifiedFollowing, ql.ModifiedFollowing, ql.DateGeneration.Backward, False)
+        helpers.append(ql.FixedRateBondHelper(ql.QuoteHandle(quotes[i]), 3, 100.0, schedule, [coupon], ql.SimpleDayCounter(), ql.ModifiedFollowing))
+    curve = ql.FittedBondDiscountCurve(0, calendar, helpers, ql.SimpleDayCounter(), ql.NelsonSiegelFitting())
+    curve_handle = ql.YieldTermStructureHandle(curve)
+    bond_schedule = ql.Schedule(today, calendar.advance(today, 15, ql.Years), ql.Period(ql.Semiannual), calendar, ql.ModifiedFollowing, ql.ModifiedFollowing, ql.DateGeneration.Backward, False)
+    benchmark_bond = ql.FixedRateBond(3, 100.0, bond_schedule, [0.04], ql.Actual360())
+    benchmark_bond.setPricingEngine(ql.DiscountingBondEngine(curve_handle))
+    return quotes, benchmark_bond, curve
 
-    # 1. Build the Nelson-Siegel curve with user parameters
-    ns_curve = ql.NelsonSiegel(
-        today,
-        ns_params['beta0'],
-        ns_params['beta1'],
-        ns_params['beta2'],
-        ns_params['tau'],
-        day_count
-    )
-    ns_handle = ql.YieldTermStructureHandle(ns_curve)
-
-    # 2. Extract points from the curve for the plot
-    plot_points = []
-    max_years = 30
-    for yrs in np.arange(0, max_years + 0.25, 0.25):
-        d = calendar.advance(today, ql.Period(int(yrs * 12), ql.Months))
-        rate = ns_curve.zeroRate(d, day_count, ql.Compounded).rate() * 100
-        plot_points.append({'x': yrs, 'y': round(rate, 4)})
+def run_simulation_optimised(quotes, bond, new_price, simulation_type):
+    global price_history
+    price_history = []
+    try:
+        for q in quotes:
+            q.setValue(100.0)
         
-    # 3. Build and price the bond
-    bond_maturity = bond_params['bond_maturity_years']
-    bond_coupon = bond_params['bond_coupon_rate'] / 100.0
-    
-    maturity_date = calendar.advance(today, ql.Period(bond_maturity, ql.Years))
-    schedule = ql.Schedule(today, maturity_date, ql.Period(ql.Semiannual), calendar,
-                           ql.Unadjusted, ql.Unadjusted, ql.DateGeneration.Backward, False)
-    
-    bond_to_price = ql.FixedRateBond(2, 100.0, schedule, [bond_coupon], day_count)
-    
-    engine = ql.DiscountingBondEngine(ns_handle)
-    bond_to_price.setPricingEngine(engine)
-    
-    return {
-        'bond_price': f"{bond_to_price.cleanPrice():.4f}",
-        'plot_points': plot_points
-    }
+        if simulation_type == 'naive':
+            price_history.append(bond.cleanPrice())
+            observer = ql.Observer(lambda: record_price_on_notification(bond))
+            observer.registerWith(bond)
+            for q in quotes:
+                q.setValue(float(new_price))
+            observer.unregisterWith(bond)
+            unique_prices = price_history[::2] + price_history[-1:] if price_history else []
+            return {'update_chart_data': unique_prices}
+            
+        elif simulation_type == 'pull':
+            for q in quotes:
+                q.setValue(float(new_price))
+            final_price = bond.cleanPrice()
+            return {'final_price': final_price}
+    except Exception as e:
+        return {'error': str(e)}

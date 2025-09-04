@@ -8,6 +8,7 @@ urlpatterns = [
 
     # On ne garde QUE les catégories qui existent et sont configurées
     path('basics/', include('basics.urls')),
+    path('basics/', include('interactive_basics.urls')),
     path('interest-rate-curves/', include('interest_rate_curves.urls')),
     path('interest-rate-models/', include('interest_rate_models.urls')),
     path('equity-models/', include('equity_models.urls')),

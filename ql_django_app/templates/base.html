@@ -1,33 +1,58 @@
+<!-- templates/base.html (VERSION FINALE, COMPATIBLE AVEC TOUT) -->
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-<meta charset="UTF-8">
-<title>{% block title %}myGenAI Quant App{% endblock %}</title>
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <meta charset="UTF-8">
+    <title>{% block title %}myGenAI Quant App{% endblock %}</title>
+    
+    <!-- CSS pour le style -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    
+    <!-- On charge la bibliothèque Chart.js ici pour qu'elle soit disponible sur toutes les pages -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    {% block styles %}{% endblock %}
 </head>
 <body class="d-flex flex-column min-vh-100">
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-<div class="container">
-<a class="navbar-brand" href="{% url 'home' %}">myGenAI Quant App</a>
-<div class="collapse navbar-collapse">
-<ul class="navbar-nav mr-auto">
-<li class="nav-item"><a class="nav-link" href="{% url 'basics:home' %}">Basics</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'interest_rate_curves:home' %}">Interest-Rate Curves</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'interest_rate_models:home' %}">Interest-Rate Models</a></li>
-<li class="nav-item"><a class="nav-link" href="{% url 'equity_models:home' %}">Equity Models</a></li>
-<li class="nav-item"><a class="nav-link disabled" href="#">Bonds</a></li>
-</ul>
-</div>
-</div>
-</nav>
-<main class="container mt-4 flex-grow-1">
-{% block page_content %}{% endblock %}
-</main>
-<footer class="footer bg-dark text-white mt-auto p-3 text-center">
-&copy; {% now "Y" %} QL Django App
-</footer>
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-{% block javascript %}{% endblock %}
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">myGenAI Quant App</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'basics:home' %}">Basics</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'interest_rate_curves:home' %}">Interest-Rate Curves</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'interest_rate_models:home' %}">Interest-Rate Models</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'equity_models:home' %}">Equity Models</a></li>
+                    <li class="nav-item"><a class="nav-link disabled" href="#">Bonds</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mt-4 flex-grow-1">
+        {% block page_content %}{% endblock %}
+    </main>
+
+    <footer class="footer bg-dark text-white mt-auto p-3 text-center">
+        &copy; {% now "Y" %} QL Django App
+    </footer>
+
+    <!-- Scripts JS pour Bootstrap -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <!-- ==================================================================== -->
+    <!-- CORRECTION : On accepte les deux noms de bloc ici -->
+    <!-- ==================================================================== -->
+    
+    <!-- Pour les anciens fichiers qui utilisent `javascript` -->
+    {% block javascript %}{% endblock %}
+    
+    <!-- Pour les nouveaux fichiers (comme pricer_lab.html) qui utilisent `scripts` -->
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>

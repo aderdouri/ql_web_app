@@ -1,139 +1,184 @@
 {% extends "basics/base.html" %}
-{% load crispy_forms_tags %}
 
-{% block sub_page_content %}
-    <h3>Chapter 3: Numerical Greeks Lab</h3>
-    <p class="text-muted">Calculate the price and first-order Greeks of a European option numerically. The chart visualizes the option's Delta (the slope of the price curve).</p>
-    <hr>
-    
-    <div class="row">
-        <!-- Colonne de gauche pour les paramètres -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header font-weight-bold">Option Parameters</div>
-                <div class="card-body">
-                    <form method="post" novalidate>
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        <button type="submit" class="btn btn-primary mt-3 w-100">Calculate Greeks</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Colonne de droite pour les résultats -->
-        <div class="col-md-8">
-            {% if results %}
-                <div class="card mb-4">
-                    <div class="card-header font-weight-bold">Calculated Price and Greeks</div>
-                    <div class="card-body">
-                        <p><strong>Option Price:</strong> <code>{{ results.price }}</code></p>
-                        <table class="table table-sm table-bordered">
-                            <thead class="thead-light"><tr><th>Greek (Agrégat)</th><th>Value</th><th>Explanation</th></tr></thead>
-                            <tbody>
-                                {% for name, value in results.greeks.items %}
-                                <tr>
-                                    <td><strong>{{ name }}</strong></td>
-                                    <td><code>{{ value }}</code></td>
-                                    <td class="small text-muted">
-                                        {% if name == 'Delta' %}Sensitivity to a $1 change in Spot Price.{% endif %}
-                                        {% if name == 'Gamma' %}Rate of change of Delta.{% endif %}
-                                        {% if name == 'Vega (per 1%)' %}Sensitivity to a 1% change in Volatility.{% endif %}
-                                        {% if name == 'Rho (per 1%)' %}Sensitivity to a 1% change in Interest Rate.{% endif %}
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+{% block title %}Chapter 3 - Numerical Greeks{% endblock %}
 
-                <!-- ======================================================= -->
-                <!-- NOUVELLE CARTE D'ANALYSE DYNAMIQUE -->
-                <!-- ======================================================= -->
-                <div class="card mb-4">
-                    <div class="card-header font-weight-bold">Results Analysis</div>
-                    <div class="card-body">
-                        {% if results.greeks.Delta >= 0.99 %}
-                            <div class="alert alert-info">
-                                <h6 class="alert-heading">Deep In-The-Money Option</h6>
-                                <p class="small mb-0">The <strong>Delta</strong> is very close to 1.0. This is because the option is so deeply "in-the-money" (Spot >> Strike) that it's almost certain to be exercised. It now behaves almost exactly like the underlying stock.</p>
-                                <hr>
-                                <p class="small mb-0">Consequently, the <strong>Gamma</strong> and <strong>Vega</strong> are close to zero. The option's value is now dominated by its intrinsic value (Spot - Strike), so changes in Delta (Gamma) or Volatility (Vega) have very little impact.</p>
-                            </div>
-                        {% elif results.greeks.Delta <= 0.01 %}
-                            <div class="alert alert-info">
-                                <h6 class="alert-heading">Far Out-of-The-Money Option</h6>
-                                <p class="small mb-0">The <strong>Delta</strong>, <strong>Gamma</strong>, and <strong>Vega</strong> are all close to zero. This is because the option is so far "out-of-the-money" (Strike >> Spot) that the probability of it finishing with any value is extremely low.</p>
-                            </div>
-                        {% else %}
-                             <div class="alert alert-light border">
-                                <h6 class="alert-heading">At-The-Money / Near-The-Money Option</h6>
-                                <p class="small mb-0">The option is near the strike price. This is where <strong>Gamma</strong> and <strong>Vega</strong> are typically at their highest, as the option's value is most sensitive to changes in the spot price and volatility.</p>
-                            </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header font-weight-bold">Option Price vs. Spot Price (Page 23)</div>
-                    <div class="card-body">
-                        <div style="height: 300px; position: relative;"><canvas id="priceCurveChart"></canvas></div>
-                    </div>
-                </div>
-            {% else %}
-                <div class="alert alert-info">Enter parameters to see the results.</div>
-            {% endif %}
-        </div>
-    </div>
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .page-wrapper { display: flex; flex-wrap: wrap; gap: 2rem; }
+        .controls { flex: 1; min-width: 350px; background-color: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); align-self: flex-start; }
+        .results-area { flex: 2; min-width: 400px; }
+        h2, h3, h4 { color: #333; }
+        h3 { border-bottom: 2px solid #eee; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .form-group .help-text { font-size: 0.8rem; color: #6c757d; }
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .result-box { background-color: white; border: 1px solid #e0e0e0; padding: 1rem; border-radius: 8px; text-align: center; }
+        .result-box h4 { margin: 0 0 0.5rem 0; color: #007bff; font-size: 1rem; }
+        .result-box p { font-size: 1.1rem; font-weight: bold; margin: 0; color: #333; }
+        .intermediate-calc { background-color: #f8f9fa; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; }
+        .intermediate-calc p { margin: 0.5rem 0; display: flex; justify-content: space-between; font-size: 0.9rem; }
+        .intermediate-calc span { font-family: monospace, monospace; font-weight: bold; }
+        #error-message-container { margin-bottom: 1rem; }
+        .chart-container { background-color: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 2rem; }
+        .btn-compare { width: 100%; padding: 10px; margin-top: 10px; color: white; border: none; cursor: pointer; border-radius: 4px; font-size: 1rem; background-color: #28a745; }
+    </style>
 {% endblock %}
 
-{% block javascript %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% if results.plot_data and results.center_point %}
-    {{ results.plot_data|json_script:"plot-data" }}
-    {{ results.center_point|json_script:"center-point" }}
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const plotData = JSON.parse(document.getElementById('plot-data').textContent);
-        const centerPoint = JSON.parse(document.getElementById('center-point').textContent);
-        const ctx = document.getElementById('priceCurveChart');
+
+{% block sub_page_content %}
+<div class="page-wrapper">
+    <div class="controls">
+        <h2>Paramètres</h2>
+        <form id="greeksForm" method="post" action="{% url 'basics:chapter3_greeks:greeks_lab' %}">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </form>
+        <button type="button" id="snapshotBtn" class="btn-compare">Comparer la courbe actuelle</button>
+    </div>
+
+    <div class="results-area">
+        <h3>Calculs Numériques des Greeks</h3>
+        <div id="error-message-container" class="alert alert-danger" style="display: none;"></div>
         
-        if(ctx) {
-            new Chart(ctx, {
-                // On spécifie que c'est un graphique mixte
-                type: 'scatter', 
-                data: {
-                    datasets: [
-                        {
-                            label: 'Option Price',
-                            data: plotData,
-                            // On force ce dataset à être une ligne
-                            type: 'line', 
-                            borderColor: 'rgb(75, 192, 192)',
-                            tension: 0.1,
-                            pointRadius: 0
-                        },
-                        {
-                            label: 'Current Spot',
-                            data: [centerPoint],
-                            // Ce dataset est un scatter plot
-                            backgroundColor: 'red',
-                            pointRadius: 5,
-                            borderColor: 'red'
-                        }
-                    ]
+        <div class="intermediate-calc">
+            <h4>Calculs Intermédiaires (pour Delta & Gamma)</h4>
+            <p>Valeur de départ (P0): <span id="p0_result">{{ results.p0|floatformat:6|default:"-" }}</span></p>
+            <p>Valeur avec Sous-jacent + h (P+): <span id="p_plus_u_result">{{ results.p_plus_u|floatformat:6|default:"-" }}</span></p>
+            <p>Valeur avec Sous-jacent - h (P-): <span id="p_minus_u_result">{{ results.p_minus_u|floatformat:6|default:"-" }}</span></p>
+        </div>
+        
+        <h4>Résultats Finaux</h4>
+        <div class="results-grid">
+            <div class="result-box"><h4>Delta</h4><p id="delta_result">{{ results.delta|floatformat:6|default:"-" }}</p></div>
+            <div class="result-box"><h4>Gamma</h4><p id="gamma_result">{{ results.gamma|floatformat:6|default:"-" }}</p></div>
+            <div class="result-box"><h4>Vega</h4><p id="vega_result">{{ results.vega|floatformat:6|default:"-" }}</p></div>
+            <div class="result-box"><h4>Rho</h4><p id="rho_result">{{ results.rho|floatformat:6|default:"-" }}</p></div>
+            <div class="result-box"><h4>Theta</h4><p id="theta_result">{{ results.theta|floatformat:6|default:"-" }}</p></div>
+        </div>
+
+        <div class="chart-container">
+            <h3>Visualisation : Valeur de l'Option et Delta (Pente)</h3>
+            <canvas id="greeksChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- On passe toutes les données initiales ici, y compris les erreurs potentielles -->
+{{ results|json_script:"initial-data" }}
+{% endblock sub_page_content %}
+
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof Chart === 'undefined') { return; }
+
+        let chart;
+        let snapshotDataset = null;
+        const form = document.getElementById('greeksForm');
+        const errorContainer = document.getElementById('error-message-container');
+        const ctx = document.getElementById('greeksChart').getContext('2d');
+
+        function renderChart(chartData) {
+            if (!chartData || !chartData.curve) return;
+            const datasets = [
+                {
+                    label: "Valeur de l'Option", data: chartData.curve.y,
+                    borderColor: 'rgb(0, 123, 255)', borderWidth: 3, pointRadius: 0, tension: 0.1
                 },
-                options: {
-                    parsing: { xAxisKey: 'x', yAxisKey: 'y' },
-                    scales: { 
-                        x: { title: {display: true, text: 'Spot Price'} },
-                        y: { title: {display: true, text: 'Option Price'} }
-                    }
+                {
+                    label: "Pente (Delta)", data: chartData.tangent.y,
+                    borderColor: 'rgba(255, 99, 132, 0.8)', borderWidth: 1, pointRadius: 0, borderDash: [2, 2]
                 }
+            ];
+            if (snapshotDataset) { datasets.push(snapshotDataset); }
+            if (chart) { chart.destroy(); }
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.curve.x.map(x => x.toFixed(2)),
+                    datasets: datasets
+                },
+                options: { animation: false, spanGaps: true }
             });
         }
+
+        function updateUI(data) {
+            if (data.error) {
+                errorContainer.innerText = `Erreur : ${data.error}`;
+                errorContainer.style.display = 'block';
+                document.querySelectorAll('.results-area p span, .results-area .result-box p').forEach(el => el.innerText = "-");
+                if (chart) { chart.clear(); }
+            } else {
+                errorContainer.style.display = 'none';
+                document.getElementById('p0_result').innerText = data.p0.toFixed(6);
+                document.getElementById('p_plus_u_result').innerText = data.p_plus_u.toFixed(6);
+                document.getElementById('p_minus_u_result').innerText = data.p_minus_u.toFixed(6);
+                document.getElementById('delta_result').innerText = data.delta.toFixed(6);
+                document.getElementById('gamma_result').innerText = data.gamma.toFixed(6);
+                document.getElementById('vega_result').innerText = data.vega.toFixed(6);
+                document.getElementById('rho_result').innerText = data.rho.toFixed(6);
+                document.getElementById('theta_result').innerText = data.theta.toFixed(6);
+                
+                if (data.chart_data) {
+                    renderChart(data.chart_data);
+                }
+            }
+        }
+
+        function triggerUpdate() {
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST', body: new URLSearchParams(formData),
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value }
+            })
+            .then(response => response.json())
+            .then(data => updateUI(data));
+        }
+        
+        document.getElementById('snapshotBtn').addEventListener('click', function() {
+            if (!chart || !chart.data.datasets[0]) return;
+            const currentCurveData = chart.data.datasets[0].data;
+            
+            // ==============================================================================
+            // CORRECTION FINALE : On utilise la date d'évaluation pour le label
+            // ==============================================================================
+            snapshotDataset = {
+                label: `Snapshot (${form.elements['evaluation_date'].value})`,
+                data: [...currentCurveData],
+                borderColor: 'rgba(40, 167, 69, 0.6)',
+                borderWidth: 2,
+                pointRadius: 0,
+                borderDash: [5, 5],
+                tension: 0.1
+            };
+            alert("Courbe actuelle sauvegardée. Changez un paramètre pour voir la comparaison.");
+        });
+        
+        form.addEventListener('change', triggerUpdate);
+        
+        try {
+            const initialDataEl = document.getElementById('initial-data');
+            if (initialDataEl) {
+                const initialData = JSON.parse(initialDataEl.textContent);
+                if (initialData && !initialData.error) {
+                    updateUI(initialData);
+                } else if (initialData.error) {
+                    updateUI(initialData);
+                }
+            }
+        } catch (e) { /* C'est ok */ }
     });
-    </script>
-{% endif %}
+</script>
 {% endblock %}

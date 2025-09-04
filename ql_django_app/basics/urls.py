@@ -12,8 +12,7 @@ urlpatterns = [
     
     path('quantlib-basics/', include('interactive_basics.urls')),
     
-    path('instruments-engines/', include('chapter2_instruments.urls')),
-    
+    path('chapter2/', include('chapter2_instruments.urls', namespace='chapter2_instruments')),    
     path('numerical-greeks/', include('chapter3_greeks.urls')),
     
     path('market-quotes/', include('chapter4_quotes.urls')),

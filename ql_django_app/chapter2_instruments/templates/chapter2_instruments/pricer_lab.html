@@ -1,101 +1,131 @@
 {% extends "basics/base.html" %}
-{% load crispy_forms_tags %}
 
-{% block sub_page_content %}
-    <h3>Chapter 2: Instruments & Pricing Engines Lab</h3>
-    <p class="text-muted">"Select the option parameters and then choose a pricing engine. Observe how the calculated price changes depending on the mathematical model used, demonstrating the core concept of this chapter."</p>
-    <hr>
-    
-    <div class="row">
-        <div class="col-md-5">
-            <div class="card">
-                <div class="card-header font-weight-bold">1. Define the Instrument and Market</div>
-                <div class="card-body">
-                    <form method="post" novalidate>
-                        {% csrf_token %}
-                        {{ form|crispy }}
-                        <button type="submit" class="btn btn-primary mt-3 w-100">Price with Selected Engine</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+{% block title %}Chapter 2 - Instruments Pricer{% endblock %}
 
-        <div class="col-md-7">
-            <div class="card">
-                <div class="card-header font-weight-bold">2. Valuation Result</div>
-                <div class="card-body">
-                    {% if results %}
-                        <div class="alert alert-success text-center">
-                            <span class="result-label">Engine Used: <strong>{{ results.engine_used }}</strong></span>
-                            <hr>
-                            <span class="result-label">Calculated Option Price:</span>
-                            <h2 class="result-value">{{ results.price }}</h2>
-                        </div>
-                    {% else %}
-                         <div class="alert alert-info">Select parameters and a pricing engine to see the result.</div>
-                    {% endif %}
-                </div>
-            </div>
-            
-            <!-- =================================================================== -->
-            <!--   LA PARTIE MANQUANTE EST AJOUTÉE ICI                             -->
-            <!-- =================================================================== -->
-            <div class="card mt-4">
-                <div class="card-header font-weight-bold">3. The Pricing Process Explained</div>
-                <div class="card-body">
-                    <p class="small text-muted">
-                        <strong>Pricing State:</strong> QuantLib separates the <strong>Instrument</strong> (the contract, e.g., the European Option) from the <strong>Pricing Engine</strong> (the mathematical model). When you click the button, the chosen engine is "attached" to the instrument, and the instrument's `NPV()` method is called to trigger the calculation.
-                    </p>
-                    {% if results.plot_data %}
-                        <hr>
-                        <p class="small text-muted">
-                            <strong>Displaying the "Curve":</strong> For the Binomial Engine, we can visualize the tree of all possible future stock prices that the model generates.
-                        </p>
-                        <div style="height: 300px; position: relative;"><canvas id="binomialTreeChart"></canvas></div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .page-wrapper { display: flex; flex-wrap: wrap; gap: 2rem; }
+        .controls { flex: 1; min-width: 350px; background-color: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); align-self: flex-start; }
+        .results-area { flex: 2; min-width: 400px; }
+        h2, h3 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .result-box { background-color: white; border: 1px solid #e0e0e0; padding: 1rem; border-radius: 8px; text-align: center; }
+        .result-box h4 { margin: 0 0 0.5rem 0; color: #007bff; font-size: 1rem; }
+        .result-box p { font-size: 1.2rem; font-weight: bold; margin: 0; color: #333; }
+        #snapshotBtn { width: 100%; padding: 10px; margin-top: 10px; background-color: #28a745; color: white; border: none; cursor: pointer; border-radius: 4px; font-size: 1rem; }
+        .chart-container { background-color: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        #error-message-container { margin-bottom: 1rem; }
+    </style>
 {% endblock %}
 
 
-{% block javascript %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-{% if results.plot_data %}
-    {{ results.plot_data|json_script:"plot-data" }}
-    <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const plotData = JSON.parse(document.getElementById('plot-data').textContent);
-        const ctx = document.getElementById('binomialTreeChart');
-        if(ctx) {
-            new Chart(ctx, {
-                type: 'scatter',
-                data: {
-                    datasets: [{
-                        label: 'Underlying Price Nodes',
-                        data: plotData.nodes, // Use the 'nodes' key
-                        backgroundColor: 'rgba(54, 162, 235, 0.6)'
-                    }]
-                },
-                options: {
-                    parsing: { xAxisKey: 'x', yAxisKey: 'y' },
-                    scales: { 
-                        x: { 
-                            title: {display: true, text: 'Time Steps'},
-                            ticks: { stepSize: 1 } // Ensure integer steps
-                        },
-                        // The y-axis now uses the dynamic min/max values
-                        y: { 
-                            title: {display: true, text: 'Underlying Price'},
-                            min: plotData.min_price, 
-                            max: plotData.max_price
-                        }
-                    }
+{% block sub_page_content %}
+<div class="page-wrapper">
+    <div class="controls">
+        <h2>Paramètres</h2>
+        <form id="pricerForm" method="post" action="{% url 'basics:chapter2_instruments:pricer_lab' %}">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    {{ field.label_tag }}
+                    {{ field }}
+                </div>
+            {% endfor %}
+        </form>
+        <button type="button" id="snapshotBtn">Comparer la courbe actuelle</button>
+    </div>
+
+    <div class="results-area">
+        <h2>Résultats du Pricing</h2>
+        <div id="error-message-container" class="alert alert-danger" style="display: none;"></div>
+        <div class="results-grid">
+            <div class="result-box"><h4>NPV</h4><p id="npv_result">{{ results.npv|floatformat:6|default:"-" }}</p></div>
+            <div class="result-box"><h4>Delta</h4><p id="delta_result">{{ results.delta|floatformat:6|default:"-" }}</p></div>
+            <div class="result-box"><h4>Gamma</h4><p id="gamma_result">{{ results.gamma|floatformat:6|default:"-" }}</p></div>
+            <div class="result-box"><h4>Vega</h4><p id="vega_result">{{ results.vega|floatformat:6|default:"-" }}</p></div>
+        </div>
+        <div class="chart-container">
+            <h3>Graphique : Valeur de l'Option vs. Prix du Sous-jacent</h3>
+            <canvas id="optionValueChart"></canvas>
+        </div>
+    </div>
+</div>
+
+{{ results.chart_data|json_script:"chart-initial-data" }}
+{% endblock sub_page_content %}
+
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof Chart === 'undefined') { return; }
+
+        let chart;
+        let liveDataset = { label: 'Courbe Actuelle', borderColor: 'rgb(0, 123, 255)', tension: 0.1, pointRadius: 0, borderWidth: 2 };
+        let snapshotDataset = null;
+        let chartLabels = [];
+        const form = document.getElementById('pricerForm');
+        const ctx = document.getElementById('optionValueChart').getContext('2d');
+        const errorContainer = document.getElementById('error-message-container');
+
+        function renderChart() {
+            const datasets = [liveDataset];
+            if (snapshotDataset) { datasets.push(snapshotDataset); }
+            if (chart) { chart.destroy(); }
+            chart = new Chart(ctx, { type: 'line', data: { labels: chartLabels, datasets: datasets }, options: { animation: false } });
+        }
+
+        function updateResults() {
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST', body: new URLSearchParams(formData),
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    errorContainer.innerText = `Erreur de calcul : les données sont invalides.`;
+                    errorContainer.style.display = 'block';
+                    document.getElementById('npv_result').innerText = "-";
+                    document.getElementById('delta_result').innerText = "-";
+                    document.getElementById('gamma_result').innerText = "-";
+                    document.getElementById('vega_result').innerText = "-";
+                } else {
+                    errorContainer.style.display = 'none';
+                    document.getElementById('npv_result').innerText = data.npv.toFixed(6);
+                    document.getElementById('delta_result').innerText = data.delta.toFixed(6);
+                    document.getElementById('gamma_result').innerText = data.gamma.toFixed(6);
+                    document.getElementById('vega_result').innerText = data.vega.toFixed(6);
+                    liveDataset.data = data.chart_data.y_values;
+                    chartLabels = data.chart_data.x_values.map(x => x.toFixed(2));
+                    renderChart();
                 }
             });
         }
+
+        document.getElementById('snapshotBtn').addEventListener('click', function() {
+            snapshotDataset = { ...liveDataset, label: `Snapshot (${document.getElementById('id_evaluation_date').value})`, data: [...liveDataset.data], borderColor: 'rgba(255, 99, 132, 0.6)', borderDash: [5, 5] };
+            renderChart();
+        });
+        
+        // =====================================================================================
+        // LA LIGNE LA PLUS IMPORTANTE : On n'écoute que l'événement 'change'.
+        // Cela se déclenche quand on quitte un champ, pas à chaque touche. C'est plus efficace.
+        // =====================================================================================
+        form.addEventListener('change', updateResults);
+        
+        try {
+            const initialData = JSON.parse(document.getElementById('chart-initial-data').textContent);
+            if (initialData && initialData.x_values && initialData.x_values.length > 0) {
+                chartLabels = initialData.x_values.map(x => x.toFixed(2));
+                liveDataset.data = initialData.y_values;
+                renderChart();
+            }
+        } catch (e) { console.error("Erreur lors de l'initialisation du graphique:", e); }
     });
-    </script>
-{% endif %}
+</script>
 {% endblock %}

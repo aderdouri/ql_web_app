@@ -1,50 +1,79 @@
-# File: ql_web_app/interactive_basics/forms.py
+# interactive_basics/forms.py
+
 from django import forms
-from datetime import date
-from django.core.validators import MinValueValidator, MaxValueValidator
+import QuantLib as ql
 
-# --- Form for Experience 1: Creating a `ql.Date` object ---
-class CreateDateForm(forms.Form):
-    MONTH_CHOICES = [
-        (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
-        (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
-        (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
-    ]
+# --- Choices for dropdowns ---
+
+# CORRECTION : Définir la liste des mois manuellement pour éviter les erreurs d'importation
+MONTH_CHOICES = [
+    (1, 'January'), (2, 'February'), (3, 'March'), (4, 'April'),
+    (5, 'May'), (6, 'June'), (7, 'July'), (8, 'August'),
+    (9, 'September'), (10, 'October'), (11, 'November'), (12, 'December')
+]
+
+CALENDAR_CHOICES = [
+    ('us', 'États-Unis (GovernmentBond)'),
+    ('italy', 'Italie'),
+    ('joint', 'Joint (US & Italie)')
+]
+TENOR_CHOICES = [
+    ('monthly', 'Mensuel'),
+    ('quarterly', 'Trimestriel'),
+    ('semiannual', 'Semestriel'),
+    ('annual', 'Annuel')
+]
+CONVENTION_CHOICES = [
+    ('following', 'Following'),
+    ('modified_following', 'Modified Following'),
+    ('preceding', 'Preceding')
+]
+DATE_GEN_CHOICES = [
+    ('forward', 'Forward'),
+    ('backward', 'Backward')
+]
+DAY_COUNT_CHOICES = [
+    ('actual_actual_isda', 'Actual/Actual (ISDA)'),
+    ('thirty_360', '30/360'),
+    ('actual_360', 'Actual/360')
+]
+COMPOUND_CHOICES = [
+    ('compounded', 'Compounded'),
+    ('simple', 'Simple'),
+    ('continuous', 'Continuous')
+]
+FREQUENCY_CHOICES = [
+    ('annual', 'Annuel'),
+    ('semiannual', 'Semestriel'),
+    ('quarterly', 'Trimestriel'),
+    ('monthly', 'Mensuel')
+]
+
+
+class QuantLibBasicsForm(forms.Form):
+    # --- Module 1: Date Class ---
+    date_day = forms.IntegerField(label="Jour", initial=31, required=False)
+    date_month = forms.ChoiceField(label="Mois", choices=MONTH_CHOICES, initial=3, required=False)
+    date_year = forms.IntegerField(label="Année", initial=2015, required=False)
     
-    # ==============================================================================
-    # LA CORRECTION EST ICI : On ajoute une liste de validateurs
-    # ==============================================================================
-    day = forms.IntegerField(
-        label="Day", 
-        initial=31, 
-        # Cette liste garantit que la valeur est entre 1 et 31
-        validators=[MinValueValidator(1), MaxValueValidator(31)] 
-    )
-    month = forms.ChoiceField(label="Month", choices=MONTH_CHOICES, initial=3)
-    year = forms.IntegerField(label="Year", initial=2015)
+    # --- Module 2: Calendar Class ---
+    calendar_start_date = forms.DateField(label="Date de départ", widget=forms.DateInput(attrs={'type': 'date'}), initial="2015-03-31", required=False)
+    calendar_period_days = forms.IntegerField(label="Période (en jours)", initial=60, required=False)
+    calendar_choice = forms.ChoiceField(label="Calendrier", choices=CALENDAR_CHOICES, initial='us', required=False)
 
-# --- Form for Experience 2: Date Arithmetic with `ql.Period` ---
-class AddPeriodForm(forms.Form):
-    start_date = forms.DateField(label="Start Date", initial=date.today(), widget=forms.DateInput(attrs={'type':'date'}))
-    quantity = forms.IntegerField(label="Add Quantity", initial=6)
-    unit = forms.ChoiceField(label="Unit", choices=[('Days', 'Days'), ('Weeks', 'Weeks'), ('Months', 'Months'), ('Years', 'Years')], initial='Months')
+    # --- Module 3: Schedule Class ---
+    schedule_effective_date = forms.DateField(label="Date de début", widget=forms.DateInput(attrs={'type': 'date'}), initial="2015-01-01", required=False)
+    schedule_termination_date = forms.DateField(label="Date de fin", widget=forms.DateInput(attrs={'type': 'date'}), initial="2016-01-01", required=False)
+    schedule_tenor = forms.ChoiceField(label="Périodicité", choices=TENOR_CHOICES, required=False)
+    schedule_calendar = forms.ChoiceField(label="Calendrier", choices=CALENDAR_CHOICES, initial='us', required=False)
+    schedule_convention = forms.ChoiceField(label="Convention Jours Ouvrés", choices=CONVENTION_CHOICES, required=False)
+    schedule_date_generation = forms.ChoiceField(label="Règle de Génération", choices=DATE_GEN_CHOICES, required=False)
+    schedule_end_of_month = forms.BooleanField(label="Fin de mois", required=False)
 
-# --- Form for Experience 3: Business Days with `ql.Calendar` ---
-class AdvanceBusinessDaysForm(forms.Form):
-    start_date_cal = forms.DateField(label="Start Date", initial=date(2015, 3, 31), widget=forms.DateInput(attrs={'type':'date'}))
-    period_days = forms.IntegerField(label="Period (in days)", initial=60)
-    calendar = forms.ChoiceField(label="Calendar", choices=[('UnitedStates','United States'), ('Italy','Italy'), ('TARGET', 'TARGET (Europe)')])
-
-# --- Form for Experience 4: Creating a `ql.Schedule` ---
-class ScheduleForm(forms.Form):
-    effective_date = forms.DateField(label="Effective Date", initial=date(2023, 1, 15), widget=forms.DateInput(attrs={'type':'date'}))
-    termination_date = forms.DateField(label="Termination Date", initial=date(2025, 1, 15), widget=forms.DateInput(attrs={'type':'date'}))
-    tenor = forms.ChoiceField(label="Tenor", choices=[('3M','3 Months'), ('6M','6 Months'), ('1Y','1 Year')])
-    calendar_sched = forms.ChoiceField(label="Calendar", choices=[('UnitedStates','United States'), ('TARGET','TARGET (Europe)')])
-
-# --- Form for Experience 5: Creating a `ql.InterestRate` ---
-class InterestRateForm(forms.Form):
-    rate = forms.FloatField(label="Annual Rate (%)", initial=5.0)
-    day_counter = forms.ChoiceField(label="Day Count", choices=[('ActualActual','Actual/Actual (ISDA)'), ('Thirty360','Thirty/360 (Bond Basis)')])
-    compounding = forms.ChoiceField(label="Compounding", choices=[('Compounded','Compounded'), ('Simple','Simple')])
-    frequency = forms.ChoiceField(label="Frequency", choices=[('Annual','Annual'), ('Semiannual','Semiannual')])
+    # --- Module 4: InterestRate Class ---
+    ir_annual_rate = forms.FloatField(label="Taux Annuel (ex: 0.05)", initial=0.05, required=False)
+    ir_day_count = forms.ChoiceField(label="Convention de décompte", choices=DAY_COUNT_CHOICES, required=False)
+    ir_compound_type = forms.ChoiceField(label="Type de Composition", choices=COMPOUND_CHOICES, required=False)
+    ir_frequency = forms.ChoiceField(label="Fréquence", choices=FREQUENCY_CHOICES, required=False)
+    ir_time_years = forms.FloatField(label="Durée (en années)", initial=2.0, required=False)
+    ir_new_frequency = forms.ChoiceField(label="Nouvelle Fréquence (pour conversion)", choices=FREQUENCY_CHOICES, initial='semiannual', required=False)
