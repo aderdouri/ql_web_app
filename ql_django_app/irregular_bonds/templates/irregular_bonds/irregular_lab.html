@@ -1,0 +1,521 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Building Irregular Bonds - QuantLib Lab{% endblock %}
+
+{% block content %}
+<style>
+    /* Import styles from basics_lab.html for consistency */
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 3rem;
+        text-align: center;
+        border-radius: 0 0 20px 20px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+    }
+    
+    .page-header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .page-header .lead {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        max-width: 800px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+    
+    .chapter-intro {
+        background: #f8f9fa;
+        padding: 2.5rem;
+        margin-bottom: 3rem;
+        border-radius: 12px;
+        border-left: 5px solid #007bff;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    }
+    
+    .chapter-intro h2 {
+        color: #495057;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+        font-weight: 600;
+    }
+    
+    .chapter-intro p {
+        color: #6c757d;
+        line-height: 1.7;
+        margin-bottom: 1rem;
+    }
+    
+    .module { 
+        border: 1px solid #dee2e6; 
+        padding: 2.5rem; 
+        margin-bottom: 3rem; 
+        border-radius: 12px; 
+        background-color: white; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.08); 
+        transition: box-shadow 0.3s ease;
+    }
+    .module:hover { box-shadow: 0 6px 12px rgba(0,0,0,0.12); }
+    
+    .module h3 { 
+        margin-top: 0; 
+        border-bottom: 3px solid #007bff; 
+        padding-bottom: 0.75rem; 
+        color: #495057; 
+        font-size: 1.6em; 
+        font-weight: 600;
+        position: relative;
+    }
+    .module h3::after {
+        content: '';
+        position: absolute;
+        bottom: -3px;
+        left: 0;
+        width: 60px;
+        height: 3px;
+        background: #28a745;
+        border-radius: 2px;
+    }
+    
+    .module .lead {
+        color: #6c757d;
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+    }
+    
+    .bond-type-explanation {
+        background: #e3f2fd;
+        padding: 1.5rem;
+        border-radius: 8px;
+        margin-bottom: 2rem;
+        border-left: 4px solid #2196f3;
+    }
+    
+    .bond-type-explanation h5 {
+        color: #1976d2;
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    .bond-type-explanation p {
+        color: #424242;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+    }
+    
+    .bond-type-explanation ul {
+        margin-bottom: 0;
+        padding-left: 1.5rem;
+    }
+    
+    .bond-type-explanation li {
+        color: #424242;
+        margin-bottom: 0.5rem;
+        line-height: 1.5;
+    }
+    
+    .form-grid { 
+        display: grid; 
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+        gap: 2rem; 
+        align-items: start; 
+        margin-bottom: 2rem; 
+    }
+    
+    .form-field { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 0.5rem; 
+    }
+    
+    .form-field label { 
+        font-weight: 600; 
+        color: #495057; 
+        margin-bottom: 0.5rem; 
+        font-size: 14px;
+    }
+    
+    .form-field input, 
+    .form-field select { 
+        width: 100%; 
+        padding: 12px 16px; 
+        border: 2px solid #e9ecef; 
+        border-radius: 8px; 
+        font-size: 14px; 
+        transition: all 0.3s ease;
+        background: white;
+    }
+    
+    .form-field input:focus, 
+    .form-field select:focus { 
+        outline: none; 
+        border-color: #007bff; 
+        box-shadow: 0 0 0 3px rgba(0,123,255,0.1); 
+    }
+    
+    .form-field .explanation-text { 
+        font-size: 12px; 
+        color: #6c757d; 
+        margin-top: 0.5rem; 
+        line-height: 1.4; 
+        font-style: italic;
+    }
+    
+    .btn-calculate {
+        background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+        margin-top: 1rem;
+    }
+    
+    .btn-calculate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+    }
+    
+    .btn-calculate:active {
+        transform: translateY(0);
+    }
+    
+    .results-table {
+        margin-top: 2rem;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .results-explanation {
+        background: #f8f9fa;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 14px;
+        color: #6c757d;
+        font-style: italic;
+    }
+    
+    .table {
+        width: 100%;
+        margin-bottom: 0;
+        border-collapse: collapse;
+    }
+    
+    .table th {
+        background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+        color: white;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 14px;
+        border: none;
+    }
+    
+    .table td {
+        padding: 1rem;
+        border-bottom: 1px solid #dee2e6;
+        font-size: 14px;
+        vertical-align: middle;
+    }
+    
+    .table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .table tbody tr:last-child td {
+        border-bottom: none;
+        font-weight: 600;
+        background-color: #e9ecef;
+    }
+    
+    .loading {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+    
+    .error {
+        background: #f8d7da;
+        color: #721c24;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #f5c6cb;
+        margin-top: 1rem;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .form-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .module {
+            padding: 1.5rem;
+        }
+        
+        .page-header h1 {
+            font-size: 2rem;
+        }
+        
+        .page-header .lead {
+            font-size: 1rem;
+        }
+    }
+</style>
+
+<div class="page-header">
+    <h1>Chapter 29: Building Irregular Bonds</h1>
+    <p class="lead">An interactive lab to construct and visualize cashflows for non-standard bonds with irregular payment patterns.</p>
+</div>
+
+<div class="chapter-intro">
+    <h2>Understanding Irregular Bonds</h2>
+    <p>Irregular bonds are financial instruments that don't follow standard payment schedules. They can have gaps in coupon payments, mixed fixed and floating rates, or irregular first coupons. This lab demonstrates three common types of irregular bond structures used in real-world financial markets.</p>
+</div>
+
+<!-- Module 1: Last Coupon Gap -->
+<div class="module">
+    <h3>Case 1: Last Coupon Before Maturity</h3>
+    <p class="lead">This bond has a final coupon payment that occurs one period before the actual maturity date.</p>
+    
+    <div class="bond-type-explanation">
+        <h5>What is a Last Coupon Gap Bond?</h5>
+        <p>This type of bond has an irregular payment schedule where the final coupon payment occurs one period before the actual maturity date. This creates a gap between the last coupon payment and the bond's maturity, which affects the bond's pricing and cashflow structure.</p>
+        <ul>
+            <li><strong>Fixed Rate:</strong> Pays a constant coupon rate throughout the bond's life</li>
+            <li><strong>Floating Rate:</strong> Coupon rate adjusts based on market interest rates (e.g., Euribor)</li>
+        </ul>
+    </div>
+    
+    <form class="ajax-form" data-type="last_coupon_gap" data-results-id="results1">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-field">
+                {{ form1.issue_date.label_tag }}
+                <div class="input-group">
+                    {{ form1.issue_date }}
+                </div>
+                <div class="explanation-text">The date when the bond is issued and starts accruing interest. This determines the start of the payment schedule.</div>
+            </div>
+            <div class="form-field">
+                {{ form1.maturity_date.label_tag }}
+                <div class="input-group">
+                    {{ form1.maturity_date }}
+                </div>
+                <div class="explanation-text">The final date when the bond matures and the principal is repaid. The last coupon will be paid one period before this date.</div>
+            </div>
+            <div class="form-field">
+                {{ form1.coupon_rate.label_tag }}
+                {{ form1.coupon_rate }}
+                <div class="explanation-text">Annual coupon rate as a percentage (e.g., 5.0 for 5%). For floating rate bonds, this sets the base rate for calculations.</div>
+            </div>
+            <div class="form-field">
+                {{ form1.bond_type.label_tag }}
+                {{ form1.bond_type }}
+                <div class="explanation-text">Choose between Fixed Rate (constant coupon) or Floating Rate (market-based coupon) bond structure.</div>
+            </div>
+        </div>
+        <button type="submit" class="btn-calculate">Calculate Bond Cashflows</button>
+    </form>
+    <div id="results1" class="results-table"></div>
+</div>
+
+<!-- Module 2: Fixed to Floater -->
+<div class="module">
+    <h3>Case 2: Fixed-to-Floating Rate Bond</h3>
+    <p class="lead">This bond pays a fixed coupon rate for the first N years, then switches to a floating rate for the remaining period.</p>
+    
+    <div class="bond-type-explanation">
+        <h5>What is a Fixed-to-Floating Rate Bond?</h5>
+        <p>This hybrid bond structure combines the stability of fixed-rate payments with the flexibility of floating-rate payments. It's commonly used in corporate finance and structured products where issuers want to manage interest rate risk over different time horizons.</p>
+        <ul>
+            <li><strong>Fixed Period:</strong> Pays a predetermined coupon rate for the initial years</li>
+            <li><strong>Floating Period:</strong> Coupon rate adjusts based on market rates plus a spread</li>
+        </ul>
+    </div>
+    
+    <form class="ajax-form" data-type="fixed_to_floater" data-results-id="results2">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-field">
+                {{ form2.issue_date.label_tag }}
+                <div class="input-group">
+                    {{ form2.issue_date }}
+                </div>
+                <div class="explanation-text">The date when the bond is issued and starts accruing interest.</div>
+            </div>
+            <div class="form-field">
+                {{ form2.maturity_date.label_tag }}
+                <div class="input-group">
+                    {{ form2.maturity_date }}
+                </div>
+                <div class="explanation-text">The final maturity date of the bond.</div>
+            </div>
+            <div class="form-field">
+                {{ form2.fixed_years.label_tag }}
+                {{ form2.fixed_years }}
+                <div class="explanation-text">Number of years the bond will pay the fixed coupon rate before switching to floating.</div>
+            </div>
+            <div class="form-field">
+                {{ form2.fixed_rate.label_tag }}
+                {{ form2.fixed_rate }}
+                <div class="explanation-text">Fixed coupon rate (as percentage) for the initial period.</div>
+            </div>
+            <div class="form-field">
+                {{ form2.float_spread.label_tag }}
+                {{ form2.float_spread }}
+                <div class="explanation-text">Additional spread (as percentage) added to the floating rate during the floating period.</div>
+            </div>
+        </div>
+        <button type="submit" class="btn-calculate">Calculate Bond Cashflows</button>
+    </form>
+    <div id="results2" class="results-table"></div>
+</div>
+
+<!-- Module 3: Stub Coupon -->
+<div class="module">
+    <h3>Case 3: Stub Coupon Bond</h3>
+    <p class="lead">This bond has an irregular first coupon period that doesn't follow the standard annual schedule.</p>
+    
+    <div class="bond-type-explanation">
+        <h5>What is a Stub Coupon Bond?</h5>
+        <p>A stub coupon bond has an irregular first coupon period that doesn't align with the bond's regular payment schedule. This often occurs when bonds are issued between regular coupon dates or when payment schedules are adjusted for market conventions.</p>
+        <ul>
+            <li><strong>Irregular First Period:</strong> The first coupon covers a non-standard time period</li>
+            <li><strong>Floating Rate Structure:</strong> Typically uses floating rates to accommodate irregular periods</li>
+        </ul>
+    </div>
+    
+    <form class="ajax-form" data-type="stub_coupon" data-results-id="results3">
+        {% csrf_token %}
+        <div class="form-grid">
+            <div class="form-field">
+                {{ form3.start_date.label_tag }}
+                <div class="input-group">
+                    {{ form3.start_date }}
+                </div>
+                <div class="explanation-text">The start date of the irregular coupon period.</div>
+            </div>
+            <div class="form-field">
+                {{ form3.end_date.label_tag }}
+                <div class="input-group">
+                    {{ form3.end_date }}
+                </div>
+                <div class="explanation-text">The end date of the irregular coupon period.</div>
+            </div>
+        </div>
+        <button type="submit" class="btn-calculate">Calculate Stub Coupon</button>
+    </form>
+    <div id="results3" class="results-table"></div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle form submissions
+    const forms = document.querySelectorAll('.ajax-form');
+    
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formType = this.dataset.type;
+            const resultsId = this.dataset.resultsId;
+            const resultsDiv = document.getElementById(resultsId);
+            
+            // Show loading
+            resultsDiv.innerHTML = '<div class="loading">Calculating bond cashflows...</div>';
+            
+            // Get form data
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            data.type = formType;
+            
+            // Send AJAX request
+            fetch('/irregular_bonds/calculate/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': data.csrfmiddlewaretoken
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultsDiv.innerHTML = `<div class="error">Error: ${data.error}</div>`;
+                } else {
+                    displayResults(data, resultsDiv, formType);
+                }
+            })
+            .catch(error => {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            });
+        });
+    });
+    
+    function displayResults(data, resultsDiv, formType) {
+        if (!data.cashflows || data.cashflows.length === 0) {
+            resultsDiv.innerHTML = '<div class="error">No cashflows generated for the given parameters.</div>';
+            return;
+        }
+        
+        let html = '<div class="results-explanation">';
+        if (formType === 'last_coupon_gap') {
+            html += 'Bond cashflows showing the last coupon paid one period before maturity.';
+        } else if (formType === 'fixed_to_floater') {
+            html += 'Bond cashflows showing fixed rate period followed by floating rate period.';
+        } else if (formType === 'stub_coupon') {
+            html += 'Stub coupon cashflows showing irregular first period with start and end dates.';
+        }
+        html += '</div>';
+        
+        // Check if this is case 3 (stub coupon) to show start/end dates
+        const isCase3 = formType === 'stub_coupon';
+        
+        html += '<table class="table">';
+        html += '<thead><tr>';
+        html += '<th>Payment Date</th>';
+        html += '<th>Rate</th>';
+        html += '<th>Amount</th>';
+        if (isCase3) {
+            html += '<th>Start Date</th>';
+            html += '<th>End Date</th>';
+        }
+        html += '</tr></thead>';
+        html += '<tbody>';
+        
+        data.cashflows.forEach(cf => {
+            html += '<tr>';
+            html += `<td>${cf.payment_date}</td>`;
+            html += `<td>${cf.rate} %</td>`;
+            html += `<td>${cf.amount}</td>`;
+            if (isCase3 && cf.is_floating) {
+                html += `<td>${cf.start_date}</td>`;
+                html += `<td>${cf.end_date}</td>`;
+            } else if (isCase3) {
+                html += '<td>N/A</td>';
+                html += '<td>N/A</td>';
+            }
+            html += '</tr>';
+        });
+        
+        html += '</tbody></table>';
+        resultsDiv.innerHTML = html;
+    }
+});
+</script>
+{% endblock %}
