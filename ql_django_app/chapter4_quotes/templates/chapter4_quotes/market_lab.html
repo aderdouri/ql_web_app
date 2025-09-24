@@ -1,209 +1,1005 @@
-{% extends "basics/base.html" %}
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
 
-{% block title %}Chapter 4 - Market Quotes{% endblock %}
+{% block title %}Chapter 4: Market Quotes - Interactive Lab{% endblock %}
 
 {% block styles %}
     {{ block.super }}
     <style>
-        /* ======================================================= */
-        /* CSS POUR LA MISE EN PAGE PROFESSIONNELLE À DEUX COLONNES */
-        /* ======================================================= */
-        .page-wrapper { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 2rem; 
+        /* Professional styling */
+        .bg-gradient-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
         }
-        .controls { 
-            flex: 1; /* Prend 1 part de l'espace */
-            min-width: 380px; 
-            background-color: white; 
-            padding: 1.5rem; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            align-self: flex-start; 
+        
+        .chart-container { 
+            height: 300px; 
+            position: relative;
         }
-        .results-area { 
-            flex: 2; /* Prend 2 parts de l'espace (plus large) */
-            min-width: 400px; 
+        
+        .price-change { font-weight: bold; }
+        .price-increase { color: #28a745; }
+        .price-decrease { color: #dc3545; }
+        .price-no-change { color: #6c757d; }
+        
+        /* Compact table styling */
+        .table-sm td, .table-sm th { 
+            padding: 0.25rem 0.5rem; 
+            font-size: 0.875rem;
         }
-        h2, h3 { 
-            color: #333; 
-            border-bottom: 2px solid #eee; 
-            padding-bottom: 0.5rem; 
-            margin-bottom: 1rem; 
+        .table-sm input { 
+            padding: 0.125rem 0.25rem; 
+            font-size: 0.875rem;
+            border: 1px solid #dee2e6;
         }
-        .result-box { 
-            background-color: #f8f9fa; 
-            padding: 1.5rem; 
-            border-radius: 8px; 
-            margin-bottom: 2rem; 
-            text-align: center; 
+        .sticky-top { 
+            position: sticky; 
+            top: 0; 
+            z-index: 10; 
         }
-        .result-box h4 { margin-top: 0; color: #555; }
-        .result-box p { font-size: 1.5rem; font-weight: bold; margin-bottom: 0; font-family: monospace; color: #007bff; }
-        .btn-simulate { width: 100%; padding: 10px; margin-top: 10px; color: white; border: none; cursor: pointer; border-radius: 4px; font-size: 1rem; }
-        .btn-naive { background-color: #dc3545; }
-        .btn-pull { background-color: #28a745; }
-        .chart-container { background-color: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        #error-message-container { margin-bottom: 1rem; }
-        .simulation-section { 
-            background-color: white; 
-            padding: 1.5rem; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            margin-bottom: 2rem;
+        
+        /* Professional card styling */
+        .card {
+            border: none;
+            border-radius: 0.75rem;
         }
-        #marketUpdateForm .form-group { margin-bottom: 0; }
-        #marketUpdateForm label { font-weight: bold; color: #555; display: block; margin-bottom: .5rem; }
-        #marketUpdateForm input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        
+        .card-header {
+            border-radius: 0.75rem 0.75rem 0 0 !important;
+            border-bottom: none;
+        }
+        
+        /* Enhanced shadows */
+        .shadow-sm {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+        }
+        
+        /* Professional spacing */
+        .container-fluid {
+            max-width: 1400px;
+        }
+        
+        /* Badge styling */
+        .badge {
+            font-weight: 500;
+        }
     </style>
 {% endblock %}
 
-
-{% block sub_page_content %}
-<div class="page-wrapper">
-
-    <!-- ======================================================= -->
-    <!-- COLONNE DE GAUCHE : CONFIGURATION FIXE -->
-    <!-- ======================================================= -->
-    <div class="controls">
-        <h2>Configuration</h2>
-        <p><strong>Date d'évaluation :</strong> 17 Octobre 2016</p>
-        <p class="small text-muted">La scène est prête : une courbe de taux a été construite à partir des prix de 15 obligations différentes.</p>
-        
-        <div class="result-box">
-            <h4>Prix initial de l'obligation</h4>
-            <p id="initial_price">{{ initial_price|floatformat:6|default:"-" }}</p>
-        </div>
-
-        <div class="chart-container">
-            <h3>Courbe de Taux Initiale</h3>
-            <canvas id="curveChart"></canvas>
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi bi-graph-up me-3"></i>Chapter 4: Bond Curve Lab
+                            </h1>
+                            <p class="card-text lead mb-0">Build Nelson-Siegel yield curves and analyze bond price evolution with real-time market quote updates.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'basics:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Chapters
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- ======================================================= -->
-    <!-- COLONNE DE DROITE : SIMULATION INTERACTIVE -->
-    <!-- ======================================================= -->
-    <div class="results-area">
-        <h2>Simulation de Mise à Jour du Marché</h2>
-        <div id="error-message-container" class="alert alert-danger" style="display: none;"></div>
-        
-        <div class="simulation-section">
-            <form id="marketUpdateForm" method="post" action="{% url 'basics:chapter4_quotes:market_lab' %}">
-                {% csrf_token %}
-                <div class="form-group">
-                    <label for="{{ form.new_price.id_for_label }}">{{ form.new_price.label }}</label>
-                    {{ form.new_price }}
+
+    <!-- Chapter Content -->
+    <div class="row g-4">
+        <!-- Left Column - Input Parameters -->
+        <div class="col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-sliders me-2 fs-5"></i>
+                        <h5 class="card-title mb-0 fw-bold">Input Parameters</h5>
+                    </div>
                 </div>
-            </form>
-        </div>
-        
-        <div class="simulation-section">
-            <h3>1. Méthode Naïve ("Push")</h3>
-            <p class="small text-muted">On met à jour chaque prix un par un. Chaque mise à jour déclenche un recalcul.</p>
-            <button type="button" id="naiveSimBtn" class="btn-simulate btn-naive">Simuler la Mise à Jour Naïve</button>
-            <div id="naive_results" class="mt-3" style="display: none;">
-                <h4>Historique des prix recalculés :</h4>
-                <div class="chart-container">
-                    <canvas id="updateChart"></canvas>
+                <div class="card-body">
+                    <form method="post" id="bondCurveForm">
+                        {% csrf_token %}
+                        
+                        
+                        <!-- Evaluation Date -->
+                        <div class="mb-3">
+                            <label for="{{ form.evaluation_date.id_for_label }}" class="form-label">
+                                <i class="bi bi-calendar-date me-1"></i>{{ form.evaluation_date.label }}
+                            </label>
+                            {{ form.evaluation_date }}
+                            <div class="form-text small">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>Tip:</strong> This is the reference date for all bond calculations. Default is 2016-10-17 as in the book example.
+                            </div>
+                        </div>
+                        
+                        <!-- Coupon Matrix -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-table me-1"></i>Coupon Matrix
+                            </label>
+                            <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
+                                <table class="table table-sm table-bordered mb-0" id="couponMatrix">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th class="py-1">Maturity</th>
+                                            <th class="py-1">Rate (%)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="form-text small">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>Tip:</strong> Edit the coupon rates for each maturity. Higher rates = higher bond prices. Values are in percentage (e.g., 2.5 for 2.5%).
+                            </div>
+                        </div>
+                        
+                        <!-- Bond Quotes -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-currency-dollar me-1"></i>Market Prices
+                            </label>
+                            <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
+                                <table class="table table-sm table-bordered mb-0" id="bondQuotes">
+                                    <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th class="py-1">Maturity</th>
+                                            <th class="py-1">Price</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="form-text small">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>Tip:</strong> Edit the market prices for each bond. Higher prices = lower yields = higher test bond price. Default is 100.0 for all bonds.
+                            </div>
+                        </div>
+                        
+                        <!-- Advanced Options -->
+                        <div class="mb-3">
+                            <div class="form-check mb-2">
+                                {{ form.enable_observer }}
+                                <label class="form-check-label" for="{{ form.enable_observer.id_for_label }}">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>{{ form.enable_observer.label }}
+                                </label>
+                            </div>
+                            <div class="form-text small mb-2">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>Observer:</strong> When enabled, results update automatically when you change inputs. When disabled, you need to click "Calculate Results" manually.
+                            </div>
+                            
+                            <div class="d-flex gap-2 align-items-center">
+                                <button type="button" class="btn btn-warning btn-sm" id="freezeBtn">
+                                    <i class="bi bi-pause me-1"></i>Freeze
+                                </button>
+                                <button type="button" class="btn btn-info btn-sm" id="unfreezeBtn" disabled>
+                                    <i class="bi bi-play me-1"></i>Unfreeze
+                                </button>
+                                <span class="badge bg-success ms-2" id="freezeStatus">Active</span>
+                            </div>
+                            <div class="form-text mt-1">
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>Freeze:</strong> Stop automatic updates while you modify multiple inputs. <strong>Unfreeze:</strong> Resume updates and recalculate with all changes.
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden fields for JSON data -->
+                        {{ form.coupon_matrix }}
+                        {{ form.bond_quotes }}
+                        {{ form.is_frozen }}
+                        
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary" id="calculateBtn">
+                                <i class="bi bi-calculator me-2"></i>Calculate Results
+                            </button>
+                        </div>
+                        <div class="form-text small mt-2 text-center">
+                            <i class="bi bi-info-circle me-1"></i>
+                            <strong>Note:</strong> If Observer is enabled, results update automatically. If disabled, click this button to calculate manually.
+                        </div>
+                    </form>
                 </div>
-                <p class="mt-2 small text-muted">Les valeurs intermédiaires sont incorrectes.</p>
             </div>
         </div>
 
-        <div class="simulation-section">
-            <h3>2. Méthode Correcte ("Pull")</h3>
-            <p class="small text-muted">On met à jour tous les prix, PUIS on demande le prix final.</p>
-            <button type="button" id="pullSimBtn" class="btn-simulate btn-pull">Simuler la Mise à Jour Correcte</button>
-             <div id="pull_results" class="result-box mt-3" style="display: none;">
-                <h4>Prix final correct</h4>
-                <p id="final_price"></p>
+        <!-- Right Column - Results & Analysis -->
+        <div class="col-lg-8">
+            <!-- Pricing Results -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-calculator me-2 fs-5"></i>
+                        <h5 class="card-title mb-0 fw-bold">Pricing Results</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-light mb-3">
+                        <h6 class="alert-heading mb-2">
+                            <i class="bi bi-info-circle me-2"></i>Test Bond Results
+                        </h6>
+                        <p class="mb-0 small">
+                            15-year, 4% coupon bond priced using Nelson-Siegel yield curve
+                        </p>
+                    </div>
+                    
+                    <div id="error-message-container" class="alert alert-danger" style="display: none;"></div>
+                    
+                    <div class="row g-2 mb-3">
+                        <div class="col-4">
+                            <div class="text-center p-2 border rounded bg-light">
+                                <h6 class="text-muted mb-1 small">Initial Price</h6>
+                                <h5 class="mb-0 text-primary" id="initial_price">
+                                    {% if results %}{{ results.initial_price|floatformat:6 }}{% else %}--{% endif %}
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-center p-2 border rounded bg-light">
+                                <h6 class="text-muted mb-1 small">Final Price</h6>
+                                <h5 class="mb-0 text-primary" id="final_price">
+                                    {% if results %}{{ results.final_price|floatformat:6 }}{% else %}--{% endif %}
+                                </h5>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-center p-2 border rounded bg-light">
+                                <h6 class="text-muted mb-1 small">Change</h6>
+                                <h5 class="mb-0" id="price_change">
+                                    {% if results %}
+                                        {% if results.price_change > 0 %}
+                                            <span class="price-increase">+{{ results.price_change|floatformat:6 }}</span>
+                                        {% elif results.price_change < 0 %}
+                                            <span class="price-decrease">{{ results.price_change|floatformat:6 }}</span>
+                                        {% else %}
+                                            <span class="price-no-change">0.000000</span>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">--</span>
+                                    {% endif %}
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if not results %}
+                    <div class="text-center py-3">
+                        <i class="bi bi-calculator text-muted" style="font-size: 2rem;"></i>
+                        <p class="text-muted small mb-0 mt-2">Click "Build Curve & Calculate Prices" to see results</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Simple Price Change Explanation -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-lightbulb me-2 fs-5"></i>
+                        <h5 class="card-title mb-0 fw-bold">How Prices Change</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-light mb-3">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-question-circle me-2"></i>What happens when you change a price?
+                        </h6>
+                        <p class="mb-0">
+                            When you modify a bond price in the table above, here's what happens step by step:
+                        </p>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
+                                <span class="fw-bold fs-5">1</span>
+                            </div>
+                            <h6 class="text-primary mb-1">You Change Price</h6>
+                            <p class="small text-muted mb-0">
+                                You edit a bond price from 100.0 to 101.0 in the table
+                            </p>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
+                                <span class="fw-bold fs-5">2</span>
+                            </div>
+                            <h6 class="text-success mb-1">Curve Updates</h6>
+                            <p class="small text-muted mb-0">
+                                The yield curve automatically recalculates with the new price
+                            </p>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
+                                <span class="fw-bold fs-5">3</span>
+                            </div>
+                            <h6 class="text-warning mb-1">Bond Reprices</h6>
+                            <p class="small text-muted mb-0">
+                                Our test bond (15 years, 4%) gets a new price using the updated curve
+                            </p>
+                        </div>
+                        <div class="col-md-3 text-center mb-3">
+                            <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
+                                <span class="fw-bold fs-5">4</span>
+                            </div>
+                            <h6 class="text-info mb-1">Results Update</h6>
+                            <p class="small text-muted mb-0">
+                                You see the new price in the results and charts automatically
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-check-circle me-2"></i>Simple Example
+                        </h6>
+                        <p class="mb-2">
+                            <strong>If you increase all bond prices from 100.0 to 101.0:</strong>
+                        </p>
+                        <ul class="mb-0 small">
+                            <li>✅ Bond yields go down (higher prices = lower yields)</li>
+                            <li>✅ Our test bond price goes up (from ~105.77 to ~106.52)</li>
+                            <li>✅ The discount curve becomes flatter</li>
+                            <li>✅ Charts update to show the new curve and price evolution</li>
+                        </ul>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-info-circle me-2"></i>Why This Happens
+                        </h6>
+                        <p class="mb-0 small">
+                            <strong>Higher bond prices = Lower yields = Higher bond values</strong><br>
+                            This is the basic relationship in bond markets. When market prices go up, 
+                            the yield curve shifts down, making all bonds more valuable.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bond Price History -->
+            <div class="card mb-3 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-clock-history me-2 fs-5"></i>
+                        <h5 class="card-title mb-0 fw-bold">Bond Price History</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                        <table class="table table-sm mb-0" id="priceHistoryTable">
+                            <thead class="table-light sticky-top">
+                                <tr>
+                                    <th class="py-1">Update #</th>
+                                    <th class="py-1">Price</th>
+                                    <th class="py-1">Change</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% if results and results.all_prices %}
+                                    {% for price in results.all_prices %}
+                                    <tr>
+                                        <td class="py-1">{{ forloop.counter0 }}</td>
+                                        <td class="py-1" id="price_{{ forloop.counter0 }}">{{ price|floatformat:6 }}</td>
+                                        <td class="py-1 price-change" id="change_{{ forloop.counter0 }}">
+                                            {% if forloop.first %}
+                                                -
+                                            {% else %}
+                                                <span class="text-muted">Calculating...</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr>
+                                        <td colspan="3" class="text-center py-4">
+                                            <i class="bi bi-clock-history text-muted" style="font-size: 2rem;"></i>
+                                            <p class="text-muted small mb-0 mt-2">Click "Build Curve & Calculate Prices" to see price history</p>
+                                        </td>
+                                    </tr>
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row g-3 mt-2">
+        <!-- Discount Curve Chart -->
+        <div class="col-lg-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-graph-up me-2 fs-5"></i>
+                        <h5 class="card-title mb-0 fw-bold">Discount Factor Curve</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="curveChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Price Evolution Chart -->
+        <div class="col-lg-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <div class="d-flex align-items-center">
+                        <i class="bi bi-graph-up-arrow me-2 fs-5"></i>
+                        <h5 class="card-title mb-0 fw-bold">Price Evolution</h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="priceEvolutionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Navigation -->
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'basics:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-{{ curve_chart_data|json_script:"curve-initial-data" }}
-{% endblock sub_page_content %}
-
+<!-- Chart Data -->
+{% if results.curve_chart_data %}
+    {{ results.curve_chart_data|json_script:"curve-chart-data" }}
+{% endif %}
+{% if results.price_chart_data %}
+    {{ results.price_chart_data|json_script:"price-chart-data" }}
+{% endif %}
+{% endblock page_content %}
 
 {% block scripts %}
 <script>
-    // Le JavaScript est déjà parfait et n'a pas besoin de changer.
-    document.addEventListener('DOMContentLoaded', function () {
-        if (typeof Chart === 'undefined') { return; }
+// Default coupon data
+const defaultCouponData = [
+    [2, 0.02], [4, 0.0225], [6, 0.025], [8, 0.0275], [10, 0.03],
+    [12, 0.0325], [14, 0.035], [16, 0.0375], [18, 0.04], [20, 0.0425],
+    [22, 0.045], [24, 0.0475], [26, 0.05], [28, 0.0525], [30, 0.055]
+];
 
-        const errorContainer = document.getElementById('error-message-container');
-        let updateChartInstance;
+// Default bond quotes
+const defaultBondQuotes = Array(15).fill(100.0);
 
-        try {
-            const curveChartData = JSON.parse(document.getElementById('curve-initial-data').textContent);
-            const curveChartCtx = document.getElementById('curveChart').getContext('2d');
-            new Chart(curveChartCtx, {
-                type: 'line',
-                data: {
-                    labels: curveChartData.times.map(t => t.toFixed(1)),
-                    datasets: [{
-                        label: "Facteur d'Actualisation",
-                        data: curveChartData.discounts,
-                        borderColor: 'rgb(0, 123, 255)',
-                        borderWidth: 2, pointRadius: 0
-                    }]
+// Global chart variables
+let curveChart = null;
+let priceEvolutionChart = null;
+
+// Initialize tables
+function initializeTables() {
+    // Initialize coupon matrix
+    const couponTableBody = document.querySelector('#couponMatrix tbody');
+    couponTableBody.innerHTML = '';
+    
+    defaultCouponData.forEach(([maturity, coupon]) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="py-1"><input type="number" class="form-control form-control-sm" value="${maturity}" min="1" max="50" step="1" style="padding: 0.125rem 0.25rem; font-size: 0.875rem;"></td>
+            <td class="py-1"><input type="number" class="form-control form-control-sm" value="${(coupon * 100).toFixed(2)}" min="0" max="100" step="0.01" style="padding: 0.125rem 0.25rem; font-size: 0.875rem;"></td>
+        `;
+        couponTableBody.appendChild(row);
+    });
+
+    // Initialize bond quotes
+    const quotesTableBody = document.querySelector('#bondQuotes tbody');
+    quotesTableBody.innerHTML = '';
+    
+    defaultCouponData.forEach(([maturity], index) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td class="py-1">${maturity}</td>
+            <td class="py-1"><input type="number" class="form-control form-control-sm" value="${defaultBondQuotes[index]}" min="0" step="0.01" style="padding: 0.125rem 0.25rem; font-size: 0.875rem;"></td>
+        `;
+        quotesTableBody.appendChild(row);
+    });
+}
+
+// Update hidden fields
+function updateHiddenFields() {
+    const couponData = [];
+    document.querySelectorAll('#couponMatrix tbody tr').forEach(row => {
+        const maturity = parseFloat(row.cells[0].querySelector('input').value);
+        const coupon = parseFloat(row.cells[1].querySelector('input').value) / 100; // Convert to decimal
+        couponData.push([maturity, coupon]);
+    });
+
+    const bondQuotes = [];
+    document.querySelectorAll('#bondQuotes tbody tr').forEach(row => {
+        const quote = parseFloat(row.cells[1].querySelector('input').value);
+        bondQuotes.push(quote);
+    });
+
+    document.getElementById('id_coupon_matrix').value = JSON.stringify(couponData);
+    document.getElementById('id_bond_quotes').value = JSON.stringify(bondQuotes);
+}
+
+// Global variable to track if updates are frozen
+let isFrozen = false;
+
+// Update results dynamically
+function updateResults() {
+    // Check if calculations are frozen
+    if (isFrozen) {
+        console.log('Calculations are frozen - skipping update');
+        return;
+    }
+    
+    updateHiddenFields();
+    
+    const couponData = JSON.parse(document.getElementById('id_coupon_matrix').value);
+    const bondQuotes = JSON.parse(document.getElementById('id_bond_quotes').value);
+    const evaluationDate = document.getElementById('id_evaluation_date').value;
+    
+    // Show loading indicator
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Calculating...';
+    submitBtn.disabled = true;
+    
+    // Send AJAX request
+    fetch('{% url "chapter4_quotes:update_quotes" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            evaluation_date: evaluationDate,
+            coupon_data: couponData,
+            bond_quotes: bondQuotes,
+            enable_observer: document.getElementById('id_enable_observer').checked,
+            is_frozen: document.getElementById('id_is_frozen').checked
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update results
+            updateResultsDisplay(data);
+            updateCharts(data.curve_chart_data, data.price_chart_data);
+        } else {
+            console.error('Error:', data.error);
+            alert('Error updating results: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating results: ' + error.message);
+    })
+    .finally(() => {
+        // Restore button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+// Update results display
+function updateResultsDisplay(data) {
+    // Update pricing results
+    document.getElementById('initial_price').textContent = data.initial_price.toFixed(6);
+    document.getElementById('final_price').textContent = data.final_price.toFixed(6);
+    
+    const priceChangeElement = document.getElementById('price_change');
+    const change = data.price_change;
+    priceChangeElement.innerHTML = '';
+    if (change > 0) {
+        priceChangeElement.innerHTML = `<span class="price-increase">+${change.toFixed(6)}</span>`;
+    } else if (change < 0) {
+        priceChangeElement.innerHTML = `<span class="price-decrease">${change.toFixed(6)}</span>`;
+    } else {
+        priceChangeElement.innerHTML = '<span class="price-no-change">0.000000</span>';
+    }
+    
+    // Update price history table
+    updatePriceHistoryTable(data.all_prices);
+}
+
+// Update price history table
+function updatePriceHistoryTable(allPrices) {
+    const tbody = document.querySelector('#priceHistoryTable tbody');
+    tbody.innerHTML = '';
+    
+    allPrices.forEach((price, index) => {
+        const row = document.createElement('tr');
+        const change = index === 0 ? '-' : (price - allPrices[index - 1]).toFixed(6);
+        
+        row.innerHTML = `
+            <td class="py-1">${index}</td>
+            <td class="py-1">${price.toFixed(6)}</td>
+            <td class="py-1">
+                ${index === 0 ? '-' : 
+                    (change > 0 ? `<span class="price-increase">+${change}</span>` :
+                     change < 0 ? `<span class="price-decrease">${change}</span>` :
+                     '<span class="price-no-change">0.000000</span>')}
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+        // Calculate price changes for all prices
+        function calculatePriceChanges() {
+            const rows = document.querySelectorAll('#priceHistoryTable tbody tr');
+            rows.forEach((row, index) => {
+                if (index === 0) return; // Skip first row
+                
+                const priceCell = row.cells[1];
+                const changeCell = row.cells[2];
+                const currentPrice = parseFloat(priceCell.textContent);
+                const previousPrice = parseFloat(rows[index - 1].cells[1].textContent);
+                const change = currentPrice - previousPrice;
+                
+                changeCell.innerHTML = '';
+                if (change > 0) {
+                    changeCell.innerHTML = `<span class="price-increase">+${change.toFixed(6)}</span>`;
+                } else if (change < 0) {
+                    changeCell.innerHTML = `<span class="price-decrease">${change.toFixed(6)}</span>`;
+                } else {
+                    changeCell.innerHTML = '<span class="price-no-change">0.000000</span>';
                 }
             });
-        } catch (e) {
-            console.error("Erreur lors de l'initialisation du graphique de la courbe :", e);
+            
+            // Also update the price change in the results grid
+            updatePriceChangeInResults();
         }
 
-        function handleResponse(data, resultsContainerId) {
-            const container = document.getElementById(resultsContainerId);
-            if (data.error) {
-                errorContainer.innerText = `Erreur : ${data.error}`;
-                errorContainer.style.display = 'block';
-                container.style.display = 'none';
-            } else {
-                errorContainer.style.display = 'none';
-                container.style.display = 'block';
+// Update price change in the results grid
+function updatePriceChangeInResults() {
+    const initialPriceElement = document.getElementById('initial_price');
+    const finalPriceElement = document.getElementById('final_price');
+    const priceChangeElement = document.getElementById('price_change');
+    
+    if (initialPriceElement && finalPriceElement && priceChangeElement) {
+        const initialPrice = parseFloat(initialPriceElement.textContent);
+        const finalPrice = parseFloat(finalPriceElement.textContent);
+        const change = finalPrice - initialPrice;
+        
+        priceChangeElement.innerHTML = '';
+        if (change > 0) {
+            priceChangeElement.innerHTML = `<span class="price-increase">+${change.toFixed(6)}</span>`;
+        } else if (change < 0) {
+            priceChangeElement.innerHTML = `<span class="price-decrease">${change.toFixed(6)}</span>`;
+        } else {
+            priceChangeElement.innerHTML = '<span class="price-no-change">0.000000</span>';
+        }
+    }
+}
 
-                if (data.update_chart_data) {
-                    const updateChartCtx = document.getElementById('updateChart').getContext('2d');
-                    if (updateChartInstance) { updateChartInstance.destroy(); }
-                    updateChartInstance = new Chart(updateChartCtx, {
-                        type: 'line',
-                        data: {
-                            labels: Array.from(Array(data.update_chart_data.length).keys()),
-                            datasets: [{
-                                label: "Prix de l'Obligation",
-                                data: data.update_chart_data,
-                                borderColor: 'rgb(220, 53, 69)',
-                                borderWidth: 2, pointRadius: 2
-                            }]
-                        }
-                    });
+// Chart.js functions
+function renderCurveChart(curveData) {
+    const ctx = document.getElementById('curveChart').getContext('2d');
+    
+    if (curveChart) {
+        curveChart.destroy();
+    }
+    
+    curveChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: curveData.x_values,
+            datasets: [{
+                label: curveData.dataset_label,
+                data: curveData.y_values,
+                borderColor: 'rgb(0, 123, 255)',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                fill: false,
+                tension: 0.1,
+                pointRadius: 2,
+                pointHoverRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: curveData.x_label
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: curveData.y_label
+                    },
+                    beginAtZero: false
                 }
-                
-                if (data.final_price) {
-                    document.getElementById('final_price').innerText = data.final_price.toFixed(6);
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: curveData.title
                 }
             }
         }
-        
-        function triggerSimulation(simulationType) {
-            const form = document.getElementById('marketUpdateForm');
-            const formData = new FormData(form);
-            formData.append('simulation_type', simulationType);
-
-            fetch(form.action, {
-                method: 'POST', body: new URLSearchParams(formData),
-                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value }
-            })
-            .then(response => response.json())
-            .then(data => handleResponse(data, `${simulationType}_results`));
-        }
-
-        document.getElementById('naiveSimBtn').addEventListener('click', () => triggerSimulation('naive'));
-        document.getElementById('pullSimBtn').addEventListener('click', () => triggerSimulation('pull'));
     });
+}
+
+function renderPriceChart(priceData) {
+    const ctx = document.getElementById('priceEvolutionChart').getContext('2d');
+    
+    if (priceEvolutionChart) {
+        priceEvolutionChart.destroy();
+    }
+    
+    priceEvolutionChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: priceData.x_values,
+            datasets: [{
+                label: priceData.dataset_label,
+                data: priceData.y_values,
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                fill: false,
+                tension: 0.1,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: priceData.x_label
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: priceData.y_label
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: priceData.title
+                }
+            }
+        }
+    });
+}
+
+// Add event listeners for dynamic updates
+function addEventListeners() {
+    // Only add listeners if not frozen
+    if (isFrozen) return;
+    
+    // Add event listeners to all input fields for real-time updates
+    const inputs = document.querySelectorAll('input[type="number"], input[type="date"]');
+    inputs.forEach(input => {
+        input.addEventListener('input', debounce(updateResults, 1000)); // Debounce to avoid too many requests
+    });
+    
+    // Add event listeners to checkboxes (except freeze checkbox)
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        if (checkbox.id !== 'id_is_frozen') {
+            checkbox.addEventListener('change', updateResults);
+        }
+    });
+}
+
+// Debounce function to limit the number of API calls
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Freeze/Unfreeze management functions
+function showFreezeMessage(frozen) {
+    let freezeAlert = document.getElementById('freezeAlert');
+    if (!freezeAlert) {
+        freezeAlert = document.createElement('div');
+        freezeAlert.id = 'freezeAlert';
+        freezeAlert.className = 'alert alert-warning alert-dismissible fade show';
+        freezeAlert.style.position = 'fixed';
+        freezeAlert.style.top = '20px';
+        freezeAlert.style.right = '20px';
+        freezeAlert.style.zIndex = '9999';
+        freezeAlert.style.minWidth = '300px';
+        document.body.appendChild(freezeAlert);
+    }
+    
+    if (frozen) {
+        freezeAlert.innerHTML = `
+            <i class="bi bi-snow me-2"></i>
+            <strong>Calculations Frozen!</strong> 
+            <br>Modify inputs without triggering updates. Click "Unfreeze" to recalculate.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        freezeAlert.style.display = 'block';
+    } else {
+        freezeAlert.style.display = 'none';
+    }
+}
+
+function disableAutomaticUpdates() {
+    isFrozen = true;
+    // Remove event listeners from inputs
+    const inputs = document.querySelectorAll('input[type="number"], input[type="date"]');
+    inputs.forEach(input => {
+        input.removeEventListener('input', debounce(updateResults, 1000));
+    });
+    
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        if (checkbox.id !== 'id_is_frozen') {
+            checkbox.removeEventListener('change', updateResults);
+        }
+    });
+}
+
+function enableAutomaticUpdates() {
+    isFrozen = false;
+    // Re-add event listeners to inputs
+    const inputs = document.querySelectorAll('input[type="number"], input[type="date"]');
+    inputs.forEach(input => {
+        input.addEventListener('input', debounce(updateResults, 1000));
+    });
+    
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        if (checkbox.id !== 'id_is_frozen') {
+            checkbox.addEventListener('change', updateResults);
+        }
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize coupon matrix and bond quotes tables
+    initializeTables();
+    
+    // Calculate price changes
+    calculatePriceChanges();
+    
+    // Initialize charts if data is available
+    const curveDataElement = document.getElementById('curve-chart-data');
+    if (curveDataElement) {
+        const curveData = JSON.parse(curveDataElement.textContent);
+        renderCurveChart(curveData);
+    }
+    
+    const priceDataElement = document.getElementById('price-chart-data');
+    if (priceDataElement) {
+        const priceData = JSON.parse(priceDataElement.textContent);
+        renderPriceChart(priceData);
+    }
+    
+    // Add event listeners for dynamic updates
+    addEventListeners();
+    
+    // Form submission handling
+    document.getElementById('bondCurveForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        updateResults();
+    });
+    
+    // Freeze/Unfreeze functionality
+    document.getElementById('freezeBtn').addEventListener('click', function() {
+        document.getElementById('id_is_frozen').checked = true;
+        this.disabled = true;
+        document.getElementById('unfreezeBtn').disabled = false;
+        
+        // Update status badge
+        const statusBadge = document.getElementById('freezeStatus');
+        statusBadge.textContent = 'Frozen';
+        statusBadge.className = 'badge bg-warning ms-2';
+        
+        // Show freeze message
+        showFreezeMessage(true);
+        
+        // Disable automatic updates
+        disableAutomaticUpdates();
+    });
+    
+    document.getElementById('unfreezeBtn').addEventListener('click', function() {
+        document.getElementById('id_is_frozen').checked = false;
+        this.disabled = true;
+        document.getElementById('freezeBtn').disabled = false;
+        
+        // Update status badge
+        const statusBadge = document.getElementById('freezeStatus');
+        statusBadge.textContent = 'Active';
+        statusBadge.className = 'badge bg-success ms-2';
+        
+        // Hide freeze message
+        showFreezeMessage(false);
+        
+        // Re-enable automatic updates
+        enableAutomaticUpdates();
+        
+        // Trigger immediate recalculation
+        updateResults();
+    });
+});
+
+        function updateCharts(curveChartData, priceChartData) {
+            // Update discount chart
+            if (curveChartData) {
+                renderCurveChart(curveChartData);
+            }
+            
+            // Update price evolution chart
+            if (priceChartData) {
+                renderPriceChart(priceChartData);
+            }
+        }
+        
 </script>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'basics:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

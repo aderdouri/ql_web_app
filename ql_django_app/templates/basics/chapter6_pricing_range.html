@@ -1,0 +1,200 @@
+{% extends "basics/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter demonstrates how to price financial instruments over a range of dates and time periods. 
+                    Learn to analyze price evolution, create time series, and perform historical analysis.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Time series pricing</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Historical analysis</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Price evolution tracking</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Risk monitoring</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Applications:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-graph-up text-primary me-2"></i>Portfolio monitoring</li>
+                            <li><i class="bi bi-calendar text-primary me-2"></i>Historical backtesting</li>
+                            <li><i class="bi bi-speedometer text-primary me-2"></i>Risk analysis</li>
+                            <li><i class="bi bi-bar-chart text-primary me-2"></i>Performance tracking</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Analyze how instrument prices change over time with different market scenarios. 
+                    Create time series and perform historical analysis with interactive tools.
+                </p>
+                <div class="text-center">
+                    <a href="{% url 'basics:chapter6_pricing_range:price_history_lab' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Launch Pricing Range Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pricing Over Time Concepts -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="fw-bold text-dark mb-4">
+            <i class="bi bi-calendar-range me-2"></i>Pricing Over Time
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Time Series Analysis -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-graph-up text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Time Series Analysis</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Track how instrument prices evolve over time with different market parameters and scenarios.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Price evolution tracking</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Parameter sensitivity</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Scenario analysis</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historical Backtesting -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calendar text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Historical Backtesting</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Test pricing models and strategies using historical market data to validate performance.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Historical data analysis</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Model validation</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Performance metrics</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Monitoring -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-speedometer text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Risk Monitoring</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Monitor portfolio risk metrics over time and identify potential issues before they materialize.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Greeks evolution</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>VaR calculations</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Stress testing</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Performance Tracking -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-bar-chart text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Performance Tracking</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Track portfolio performance over time and compare against benchmarks and targets.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Return calculations</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Benchmark comparison</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Performance attribution</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Analysis Methods -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Analysis Methods
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Monte Carlo Simulation</h5>
+                        <p class="text-muted">Generate multiple price paths using random sampling techniques.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Multiple scenarios</li>
+                            <li>• Statistical analysis</li>
+                            <li>• Risk quantification</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Scenario Analysis</h5>
+                        <p class="text-muted">Test specific market scenarios to understand potential outcomes.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Stress testing</li>
+                            <li>• What-if analysis</li>
+                            <li>• Sensitivity analysis</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Historical Simulation</h5>
+                        <p class="text-muted">Use historical market data to simulate future price movements.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Real market data</li>
+                            <li>• Empirical distributions</li>
+                            <li>• Backtesting validation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

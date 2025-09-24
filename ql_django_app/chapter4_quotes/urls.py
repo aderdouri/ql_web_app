@@ -1,10 +1,10 @@
-# chapter4_quotes/urls.py (VERSION FINALE ET COMPLÈTE)
-
 from django.urls import path
-from .views import market_lab_view
+from . import views
 
 app_name = 'chapter4_quotes'
 
 urlpatterns = [
-    path('market-lab/', market_lab_view, name='market_lab'),
+    path('', views.bond_curve_lab_view, name='bond_curve_lab'),
+    path('update-quotes/', views.update_quotes_ajax, name='update_quotes'),
+    path('freeze-unfreeze/', views.freeze_unfreeze_ajax, name='freeze_unfreeze'),
 ]

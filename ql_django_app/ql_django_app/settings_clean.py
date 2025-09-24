@@ -27,8 +27,6 @@ INSTALLED_APPS = [
     'interactive_basics',
       
     # --- Applications de Chapitres Actives ---
-    
-    
     'chapter2_instruments',
     'chapter3_numerical_greeks',
     'chapter4_quotes',
@@ -49,8 +47,8 @@ INSTALLED_APPS = [
     'chapter_calibration',
     'chapter_heston_option',
     'chapter_mc_convergence',
-    'chapter_par_vs_indexed', ]
-
+    'chapter_par_vs_indexed',
+]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -69,12 +67,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        
-       
         'DIRS': [
             os.path.join(BASE_DIR, 'templates'),
         ],
-        
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

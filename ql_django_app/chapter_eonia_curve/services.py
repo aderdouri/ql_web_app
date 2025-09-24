@@ -81,3 +81,4 @@ def build_eonia_curve(interpolation_type: str, include_jump: bool, evaluation_dt
             break
             
     return plot_points
+

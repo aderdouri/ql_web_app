@@ -1,0 +1,548 @@
+{% extends "basics/lab_base.html" %}
+
+{% block lab_content %}
+<!-- Option Pricing Form -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-calculator me-2"></i>Option Pricing Calculator
+                </h3>
+            </div>
+            <div class="card-body">
+                <form id="optionPricingForm">
+                    {% csrf_token %}
+                    
+                    <!-- Display form errors -->
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <h6 class="fw-bold">Please correct the following errors:</h6>
+                            <ul class="mb-0">
+                                {% for field, errors in form.errors.items %}
+                                    {% for error in errors %}
+                                        <li>{{ field|title }}: {{ error }}</li>
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                    <div class="row g-3">
+                        <!-- Basic Parameters -->
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-primary mb-3">Basic Parameters</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="{{ form.underlying_price.id_for_label }}" class="form-label">{{ form.underlying_price.label }}</label>
+                                    {{ form.underlying_price }}
+                                    <small class="text-muted">Current stock price</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.strike_price.id_for_label }}" class="form-label">{{ form.strike_price.label }}</label>
+                                    {{ form.strike_price }}
+                                    <small class="text-muted">Price at which the option can be exercised</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.risk_free_rate.id_for_label }}" class="form-label">{{ form.risk_free_rate.label }}</label>
+                                    {{ form.risk_free_rate }}
+                                    <small class="text-muted">Annual interest rate as a decimal</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.volatility.id_for_label }}" class="form-label">{{ form.volatility.label }}</label>
+                                    {{ form.volatility }}
+                                    <small class="text-muted">Market uncertainty as a decimal</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.evaluation_date.id_for_label }}" class="form-label">{{ form.evaluation_date.label }}</label>
+                                    {{ form.evaluation_date }}
+                                    <small class="text-muted">Today's date when pricing the option</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.maturity_date.id_for_label }}" class="form-label">{{ form.maturity_date.label }}</label>
+                                    {{ form.maturity_date }}
+                                    <small class="text-muted">Date when the option expires</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.option_type.id_for_label }}" class="form-label">{{ form.option_type.label }}</label>
+                                    {{ form.option_type }}
+                                    <small class="text-muted">Call: right to buy, Put: right to sell</small>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="{{ form.pricing_engine.id_for_label }}" class="form-label">{{ form.pricing_engine.label }}</label>
+                                    {{ form.pricing_engine }}
+                                    <small class="text-muted">Method used to calculate the option price</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Parameters -->
+                        <div class="col-md-6" id="advancedParamsSection" style="display: none;">
+                            <h5 class="fw-bold text-primary mb-3">Advanced Parameters</h5>
+                            
+                            <!-- Heston Parameters -->
+                            <div id="hestonParams" class="mb-3" style="display: none;">
+                                <h6 class="fw-bold text-dark">Heston Model Parameters</h6>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label for="{{ form.v0.id_for_label }}" class="form-label">{{ form.v0.label }}</label>
+                                        {{ form.v0 }}
+                                        <small class="text-muted">Initial variance level</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="{{ form.kappa.id_for_label }}" class="form-label">{{ form.kappa.label }}</label>
+                                        {{ form.kappa }}
+                                        <small class="text-muted">Mean reversion speed</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="{{ form.theta.id_for_label }}" class="form-label">{{ form.theta.label }}</label>
+                                        {{ form.theta }}
+                                        <small class="text-muted">Long-term variance level</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="{{ form.sigma.id_for_label }}" class="form-label">{{ form.sigma.label }}</label>
+                                        {{ form.sigma }}
+                                        <small class="text-muted">Volatility of variance</small>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <label for="{{ form.rho.id_for_label }}" class="form-label">{{ form.rho.label }}</label>
+                                        {{ form.rho }}
+                                        <small class="text-muted">Correlation between price and variance</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Monte Carlo Parameters -->
+                            <div id="monteCarloParams" class="mb-3" style="display: none;">
+                                <h6 class="fw-bold text-dark">Monte Carlo Parameters</h6>
+                                <div class="row g-2">
+                                    <div class="col-md-6">
+                                        <label for="{{ form.time_steps.id_for_label }}" class="form-label">{{ form.time_steps.label }}</label>
+                                        {{ form.time_steps }}
+                                        <small class="text-muted">Number of time steps in simulation</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="{{ form.required_samples.id_for_label }}" class="form-label">{{ form.required_samples.label }}</label>
+                                        {{ form.required_samples }}
+                                        <small class="text-muted">Number of simulation paths</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12 text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-calculator me-2"></i>Calculate Option Price
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Section -->
+<div class="row mb-5" id="resultsSection" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-check-circle me-2"></i>Pricing Results
+                </h3>
+            </div>
+            <div class="card-body">
+                <div id="pricingResults"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>How Option Price Changes with Stock Price
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12">
+                        <canvas id="optionChart" width="800" height="400"></canvas>
+                        <div class="mt-3">
+                            <p class="text-muted small text-center mb-3">
+                                This chart shows how much the option is worth at different stock prices. 
+                                The black line shows your current scenario, and orange lines show what happens when you change other settings.
+                            </p>
+                            <div class="text-center">
+                                <button class="btn btn-outline-primary" id="updateChart">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>Update Chart
+                                </button>
+                                <button class="btn btn-outline-secondary ms-2" id="clearChart">
+                                    <i class="bi bi-trash me-1"></i>Clear All Lines
+                                </button>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <strong>How to use:</strong> First, calculate your option price to create the black line. 
+                                Then change any setting (like interest rate or volatility) and click "Update Chart" to see the orange line. 
+                                This shows you how sensitive the option is to different market conditions.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Explanations Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Understanding the Results
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h5 class="fw-bold text-primary">Understanding Your Results</h5>
+                        <p class="text-muted mb-3">
+                            The results above show the calculated option price and Greeks based on your input parameters. 
+                            Each metric provides specific information about how the option behaves under different market conditions.
+                        </p>
+                        <div class="alert alert-info">
+                            <h6 class="fw-bold mb-2">How to Read the Results:</h6>
+                            <ul class="mb-0">
+                                <li><strong>NPV:</strong> The fair price of the option today</li>
+                                <li><strong>Delta:</strong> If the stock goes up $1, the option price changes roughly $X</li>
+                                <li><strong>Gamma:</strong> Shows how Delta changes if the stock price changes a bit</li>
+                                <li><strong>Vega:</strong> Shows how the option price reacts if the market becomes a bit more volatile</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+// Chart instance
+let optionChart;
+let hasBaseline = false;
+
+// Initialize chart
+function initializeChart() {
+    const ctx = document.getElementById('optionChart').getContext('2d');
+    optionChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 41}, (_, i) => 80 + i), // 80 to 120
+            datasets: []
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Underlying Price (S)'
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Option Value (NPV)'
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+}
+
+// Show/hide advanced parameters based on pricing engine
+function toggleAdvancedParams() {
+    const engine = document.getElementById('id_pricing_engine').value;
+    const advancedParamsSection = document.getElementById('advancedParamsSection');
+    const hestonParams = document.getElementById('hestonParams');
+    const monteCarloParams = document.getElementById('monteCarloParams');
+    
+    // Hide all advanced parameters first
+    hestonParams.style.display = 'none';
+    monteCarloParams.style.display = 'none';
+    advancedParamsSection.style.display = 'none';
+    
+    // Show relevant parameters based on engine
+    if (engine === 'heston') {
+        advancedParamsSection.style.display = 'block';
+        hestonParams.style.display = 'block';
+    } else if (engine === 'monte_carlo') {
+        advancedParamsSection.style.display = 'block';
+        monteCarloParams.style.display = 'block';
+    }
+}
+
+
+// Calculate option price
+async function calculateOptionPrice(formData) {
+    try {
+        const response = await fetch('{% url "chapter2_instruments:calculate_price_api" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        return result;
+    } catch (error) {
+        console.error('Error calculating option price:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Display results
+function displayResults(result) {
+    const resultsSection = document.getElementById('resultsSection');
+    const resultsDiv = document.getElementById('pricingResults');
+    
+    if (result.success) {
+        let html = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-primary">Option Price</h5>
+                    <div class="result-value">$${result.npv.toFixed(2)}</div>
+                    <p class="text-muted small mb-2">This is how much the option is worth today. If you wanted to buy this option, you would pay approximately $${result.npv.toFixed(2)}.</p>
+                    <p class="text-muted small">Calculation time: ${(result.calculation_time * 1000).toFixed(2)} ms</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-primary">Risk Measures</h5>
+        `;
+        
+        if (result.greeks && Object.keys(result.greeks).length > 0) {
+            const delta = result.greeks.delta ? result.greeks.delta.toFixed(15) : 'N/A';
+            const gamma = result.greeks.gamma ? result.greeks.gamma.toFixed(15) : 'N/A';
+            const vega = result.greeks.vega ? result.greeks.vega.toFixed(15) : 'N/A';
+            
+            html += `
+                <ul class="list-unstyled">
+                    <li class="mb-3">
+                        <strong>Delta:</strong> ${delta}
+                        ${delta !== 'N/A' ? `<br><small class="text-muted">If the stock goes up $1, the option price changes roughly $${delta}</small>` : ''}
+                    </li>
+                    <li class="mb-3">
+                        <strong>Gamma:</strong> ${gamma}
+                        ${gamma !== 'N/A' ? `<br><small class="text-muted">Shows how Delta changes if the stock price changes a bit</small>` : ''}
+                    </li>
+                    <li class="mb-3">
+                        <strong>Vega:</strong> ${vega}
+                        ${vega !== 'N/A' ? `<br><small class="text-muted">Shows how the option price reacts if the market becomes a bit more volatile</small>` : ''}
+                    </li>
+                </ul>
+            `;
+        } else {
+            html += '<p class="text-muted">Greeks not available for this pricing engine</p>';
+        }
+        
+        html += `
+                </div>
+            </div>
+        `;
+        
+        resultsDiv.innerHTML = html;
+        resultsSection.style.display = 'block';
+        } else {
+            let errorMessage = result.error;
+            if (result.form_errors) {
+                errorMessage += '<br><br><strong>Form Errors:</strong><ul>';
+                for (const [field, errors] of Object.entries(result.form_errors)) {
+                    for (const error of errors) {
+                        errorMessage += `<li>${field}: ${error}</li>`;
+                    }
+                }
+                errorMessage += '</ul>';
+            }
+            
+            resultsDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <h5>Error</h5>
+                    <p>${errorMessage}</p>
+                </div>
+            `;
+            resultsSection.style.display = 'block';
+        }
+}
+
+// Update chart with new parameter set
+async function updateChart(formData) {
+    try {
+        const response = await fetch('{% url "chapter2_instruments:price_series_api" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                form_data: formData,
+                underlying_prices: Array.from({length: 41}, (_, i) => 80 + i)
+            })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+            // Create dataset label based on current parameters
+            const label = createDatasetLabel(formData);
+            
+            if (!hasBaseline) {
+                // First calculation - create baseline solid black line
+                optionChart.data.datasets.push({
+                    label: label + ' (Baseline)',
+                    data: data.series.map(item => item.npv),
+                    borderColor: '#000000', // Solid black line
+                    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.1,
+                    pointRadius: 0,
+                    pointHoverRadius: 4
+                });
+                hasBaseline = true;
+            } else {
+                // Subsequent calculations - replace dashed orange line
+                // Remove any existing dashed line (index 1)
+                if (optionChart.data.datasets.length > 1) {
+                    optionChart.data.datasets.splice(1, 1);
+                }
+                
+                // Add new dashed orange line
+                optionChart.data.datasets.push({
+                    label: label + ' (Scenario)',
+                    data: data.series.map(item => item.npv),
+                    borderColor: '#ff8c00', // Dashed orange line
+                    backgroundColor: 'rgba(255, 140, 0, 0.1)',
+                    borderWidth: 2,
+                    borderDash: [5, 5], // Dashed line
+                    tension: 0.1,
+                    pointRadius: 0,
+                    pointHoverRadius: 4
+                });
+            }
+            
+            optionChart.update();
+        }
+    } catch (error) {
+        console.error('Error updating chart:', error);
+    }
+}
+
+// Create descriptive label for dataset
+function createDatasetLabel(formData) {
+    const r = (parseFloat(formData.risk_free_rate) * 100).toFixed(1);
+    const sigma = (parseFloat(formData.volatility) * 100).toFixed(0);
+    const evalDate = formData.evaluation_date;
+    const engine = formData.pricing_engine.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+    
+    return `${engine} (r=${r}%, σ=${sigma}%, ${evalDate})`;
+}
+
+// Clear all chart datasets
+function clearChart() {
+    optionChart.data.datasets = [];
+    hasBaseline = false;
+    optionChart.update();
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    initializeChart();
+    
+    // Form submission
+    document.getElementById('optionPricingForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+        
+        const result = await calculateOptionPrice(data);
+        displayResults(result);
+        
+        if (result.success) {
+            updateChart(data);
+        }
+    });
+    
+    // Pricing engine change
+    document.getElementById('id_pricing_engine').addEventListener('change', toggleAdvancedParams);
+    
+    
+    // Chart update button
+    document.getElementById('updateChart').addEventListener('click', function() {
+        const formData = new FormData(document.getElementById('optionPricingForm'));
+        const data = Object.fromEntries(formData.entries());
+        updateChart(data);
+    });
+    
+    // Clear chart button
+    document.getElementById('clearChart').addEventListener('click', function() {
+        clearChart();
+    });
+    
+    // Compare engines button
+    document.getElementById('compareEnginesBtn').addEventListener('click', async function() {
+        const formData = new FormData(document.getElementById('optionPricingForm'));
+        const data = Object.fromEntries(formData.entries());
+        
+        const result = await fetch('{% url "chapter2_instruments:compare_engines_api" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify(data)
+        });
+        
+        const comparisonResult = await result.json();
+        if (comparisonResult.success) {
+            displayResults(comparisonResult);
+            updateChart(data);
+        }
+    });
+});
+</script>
+{% endblock %}

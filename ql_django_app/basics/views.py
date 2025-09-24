@@ -14,7 +14,7 @@ def quantlib_basics_view(request):
     return render(request, 'basics/quantlib_basics.html')
 
 def market_quotes_view(request):
-    return render(request, 'basics/market_quotes.html')
+    return render(request, 'basics/chapter4_quotes.html')
 
 def numerical_greeks_view(request):
     return render(request, 'basics/numerical_greeks.html')

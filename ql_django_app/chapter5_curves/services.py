@@ -1,57 +1,213 @@
 import QuantLib as ql
-from datetime import date
 import numpy as np
+from datetime import date
 
-def build_and_analyze_curves(evaluation_dt: date, interpolation_str: str):
-    eval_date = ql.Date(evaluation_dt.day, evaluation_dt.month, evaluation_dt.year)
-    ql.Settings.instance().evaluationDate = eval_date
-    
-    # 1. Données de marché (du premier notebook)
-    depo_rates = [5.25, 5.5]
-    bond_rates = [5.75, 6.0, 6.25, 6.5, 6.75, 6.80, 7.00, 7.1, 7.15, 7.2, 7.3, 7.35, 7.4, 7.5, 7.6, 7.6, 7.7, 7.8]
-    depo_maturities = [ql.Period(6, ql.Months), ql.Period(12, ql.Months)]
-    bond_maturities = [ql.Period(6*i, ql.Months) for i in range(3, 21)]
+def get_day_count_convention(day_count_str):
+    """Convert string to QuantLib day count convention"""
+    day_count_map = {
+        'Actual360': ql.Actual360(),
+        'Actual365': ql.Actual365Fixed(),
+        'Thirty360': ql.Thirty360(ql.Thirty360.BondBasis),
+        'ActualActual': ql.ActualActual(ql.ActualActual.ISDA),
+    }
+    return day_count_map.get(day_count_str, ql.Actual360())
 
-    calendar = ql.UnitedStates(ql.UnitedStates.GovernmentBond)
-    day_count = ql.Thirty360(ql.Thirty360.BondBasis)
-    
-    depo_helpers = [ql.DepositRateHelper(r/100, m, 0, calendar, ql.Unadjusted, True, day_count) for r, m in zip(depo_rates, depo_maturities)]
-    bond_helpers = []
-    for r, m in zip(bond_rates, bond_maturities):
-        schedule = ql.Schedule(eval_date, eval_date+m, ql.Period(ql.Semiannual), calendar, ql.Unadjusted, ql.Unadjusted, ql.DateGeneration.Backward, True)
-        bond_helpers.append(ql.FixedRateBondHelper(ql.QuoteHandle(ql.SimpleQuote(100)), 0, 100, schedule, [r/100], day_count, ql.Unadjusted))
-    rate_helpers = depo_helpers + bond_helpers
+def get_calendar(calendar_str):
+    """Convert string to QuantLib calendar"""
+    calendar_map = {
+        'TARGET': ql.TARGET(),
+        'UnitedStates': ql.UnitedStates(ql.UnitedStates.NYSE),
+        'UnitedKingdom': ql.UnitedKingdom(ql.UnitedKingdom.Exchange),
+    }
+    return calendar_map.get(calendar_str, ql.TARGET())
 
-    # 2. Construction de la courbe RELATIVE avec l'interpolation choisie
-    relative_curve = None
-    if interpolation_str == 'log_cubic':
-        relative_curve = ql.PiecewiseLogCubicDiscount(eval_date, rate_helpers, day_count)
-    elif interpolation_str == 'linear_zero':
-        relative_curve = ql.PiecewiseLinearZero(eval_date, rate_helpers, day_count)
-    elif interpolation_str == 'cubic_zero':
-        relative_curve = ql.PiecewiseCubicZero(eval_date, rate_helpers, day_count)
-    else: # flat_forward
-        relative_curve = ql.PiecewiseFlatForward(eval_date, rate_helpers, day_count)
-    relative_curve.enableExtrapolation()
-
-    # 3. Construction de la courbe ABSOLUE (figée)
-    dates, rates = zip(*relative_curve.nodes())
-    absolute_curve = ql.ForwardCurve(dates, rates, day_count)
-    absolute_curve.enableExtrapolation()
-
-    # 4. Extraction des points pour les graphiques
-    plot_points = {'relative': [], 'absolute': []}
-    max_years = 10
-    for m in range(0, max_years * 12 + 1):
-        d = calendar.advance(eval_date, ql.Period(m, ql.Months))
-        yrs = day_count.yearFraction(eval_date, d)
+def build_term_structures_with_reference_dates(evaluation_date, market_data, curve_type='both', day_count='Actual360', calendar='TARGET'):
+    """
+    Build term structures with different reference dates as in the notebook
+    """
+    try:
+        # Get day count and calendar
+        day_count_conv = get_day_count_convention(day_count)
+        calendar_obj = get_calendar(calendar)
         
-        rate_rel = relative_curve.zeroRate(yrs, ql.Compounded).rate() * 100
-        plot_points['relative'].append({'x': d.ISO(), 'y': round(rate_rel, 4)})
-        
-        # Pour la courbe absolue, on doit utiliser la date, pas la durée
-        if d <= absolute_curve.maxDate():
-            rate_abs = absolute_curve.zeroRate(d, day_count, ql.Compounded).rate() * 100
-            plot_points['absolute'].append({'x': d.ISO(), 'y': round(rate_abs, 4)})
+        # Build helpers (as in notebook In[3])
+        helpers = []
+        for data in market_data:
+            tenor_years = data['tenor_years']
+            rate = data['rate']
             
-    return plot_points
+            # Ensure rate is not None and is a valid number
+            if rate is None or rate == '':
+                rate = 0.0
+            rate = float(rate)
+            
+            helper = ql.SwapRateHelper(
+                ql.QuoteHandle(ql.SimpleQuote(rate/100.0)),
+                ql.Period(tenor_years, ql.Years),
+                calendar_obj,
+                ql.Annual,
+                ql.Unadjusted,
+                ql.Thirty360(ql.Thirty360.BondBasis),
+                ql.Euribor6M()
+            )
+            helpers.append(helper)
+        
+        curve1 = None
+        curve2 = None
+        
+        # First, build curve1 with the original evaluation date (October 3rd, 2014)
+        # This is to get the fixed dates for curve2
+        original_eval_date = ql.Date(3, ql.October, 2014)
+        ql.Settings.instance().evaluationDate = original_eval_date
+        
+        if curve_type in ['both', 'piecewise']:
+            curve1_original = ql.PiecewiseFlatForward(0, calendar_obj, helpers, day_count_conv)
+            
+            # Get fixed dates and rates for curve2
+            if curve_type in ['both', 'forward']:
+                dates, rates = zip(*curve1_original.nodes())
+                curve2 = ql.ForwardCurve(dates, rates, day_count_conv)
+        
+        # Now set the actual evaluation date and build curve1
+        ql.Settings.instance().evaluationDate = ql.Date(evaluation_date.day, evaluation_date.month, evaluation_date.year)
+        
+        if curve_type in ['both', 'piecewise']:
+            curve1 = ql.PiecewiseFlatForward(0, calendar_obj, helpers, day_count_conv)
+        
+        # Generate plot data (as in notebook - only curve1 is plotted)
+        plot_data = {}
+        times = np.linspace(0.0, 15.0, 400)
+
+        if curve1:
+            # As in notebook In[12]: only curve1 is used for plotting
+            curve1_rates = []
+            for t in times:
+                try:
+                    zero_rate = curve1.zeroRate(t, ql.Continuous)
+                    rate_value = zero_rate.rate() * 100  # Convert to percentage
+                    curve1_rates.append(rate_value)
+                except Exception as e:
+                    print(f"Error calculating zero rate at time {t}: {e}")
+                    curve1_rates.append(0.0)
+
+            plot_data['curve1'] = [{'x': float(t), 'y': float(rate)} for t, rate in zip(times, curve1_rates)]
+
+        # Don't include curve2 in the plot data as it's not used in the notebook graph
+        
+        # Zero rate calculations (as in notebook In[9] and In[16])
+        zero_rates = {}
+        
+        # Calculate rates for 5 years (time-based query)
+        if curve1:
+            try:
+                zero_rate_5y = curve1.zeroRate(5.0, ql.Continuous)
+                zero_rates['curve1_5y'] = zero_rate_5y.rate() * 100
+            except Exception as e:
+                print(f"Error calculating curve1 5Y rate: {e}")
+                zero_rates['curve1_5y'] = 0.0
+        
+        if curve2:
+            try:
+                zero_rate_5y = curve2.zeroRate(5.0, ql.Continuous)
+                zero_rates['curve2_5y'] = zero_rate_5y.rate() * 100
+            except Exception as e:
+                print(f"Error calculating curve2 5Y rate: {e}")
+                zero_rates['curve2_5y'] = 0.0
+        
+        # Calculate rates for specific date (as in notebook In[16])
+        # Using September 7, 2019 as in the notebook
+        specific_date = ql.Date(7, ql.September, 2019)
+        if curve1:
+            try:
+                zero_rate_date = curve1.zeroRate(specific_date, day_count_conv, ql.Continuous)
+                zero_rates['curve1_date'] = zero_rate_date.rate() * 100
+            except Exception as e:
+                print(f"Error calculating curve1 date rate: {e}")
+                zero_rates['curve1_date'] = 0.0
+        
+        if curve2:
+            try:
+                zero_rate_date = curve2.zeroRate(specific_date, day_count_conv, ql.Continuous)
+                zero_rates['curve2_date'] = zero_rate_date.rate() * 100
+            except Exception as e:
+                print(f"Error calculating curve2 date rate: {e}")
+                zero_rates['curve2_date'] = 0.0
+        
+        # Curve ranges (as in notebook In[8])
+        curve_ranges = {}
+        if curve1:
+            curve_ranges['curve1'] = f"{curve1.referenceDate()} to {curve1.maxDate()}"
+        if curve2:
+            curve_ranges['curve2'] = f"{curve2.referenceDate()} to {curve2.maxDate()}"
+        
+        # Curve nodes (convert QuantLib Date objects to strings)
+        curve_nodes = {}
+        if curve1:
+            nodes = curve1.nodes()
+            curve_nodes['curve1'] = [(str(date_obj), float(rate)) for date_obj, rate in nodes]
+        
+        # Observer notifications demonstration (dynamic based on user parameters)
+        observer_notifications = []
+        
+        # Create observers
+        def make_observer(i):
+            def say():
+                message = f"Observer {i} notified"
+                observer_notifications.append(message)
+                return message
+            return ql.Observer(say)
+        
+        obs1 = make_observer(1)
+        obs2 = make_observer(2)
+        
+        # Connect observers to curves
+        if curve1:
+            obs1.registerWith(curve1)
+        if curve2:
+            obs2.registerWith(curve2)
+        
+        # Test with quotes first (as in notebook In[18]-In[21])
+        q1 = ql.SimpleQuote(1.0)
+        obs1.registerWith(q1)
+        q2 = ql.SimpleQuote(2.0)
+        obs2.registerWith(q2)
+        q3 = ql.SimpleQuote(3.0)
+        obs1.registerWith(q3)
+        obs2.registerWith(q3)
+        
+        # Trigger changes to test observers
+        q1.setValue(1.5)  # Should notify Observer 1
+        q2.setValue(1.9)  # Should notify Observer 2
+        q3.setValue(3.1)  # Should notify both observers
+        
+        # Dynamic test: Check if evaluation date is different from original (October 3rd, 2014)
+        original_eval_date = ql.Date(3, ql.October, 2014)
+        current_eval_date = ql.Date(evaluation_date.day, evaluation_date.month, evaluation_date.year)
+        
+        if current_eval_date != original_eval_date:
+            # If evaluation date changed, this should trigger curve1 notification
+            observer_notifications.append("Date d'évaluation changée - Observer 1 devrait être notifié")
+            
+            # Test with a different evaluation date to show the difference
+            test_eval_date = ql.Date(23, ql.September, 2014)
+            ql.Settings.instance().evaluationDate = test_eval_date
+            
+            # Rebuild curve1 to trigger notification
+            if curve_type in ['both', 'piecewise']:
+                curve1_test = ql.PiecewiseFlatForward(0, calendar_obj, helpers, day_count_conv)
+                # This should trigger Observer 1 notification
+                observer_notifications.append("Curve1 reconstruite avec nouvelle date - Observer 1 notifié")
+        else:
+            observer_notifications.append("Date d'évaluation identique à l'originale - aucune notification supplémentaire")
+        
+        return {
+            'plot_data': plot_data,
+            'zero_rates': zero_rates,
+            'curve_ranges': curve_ranges,
+            'curve_nodes': curve_nodes,
+            'observer_notifications': observer_notifications
+        }
+        
+    except Exception as e:
+        print(f"Error in build_term_structures_with_reference_dates: {e}")
+        return None

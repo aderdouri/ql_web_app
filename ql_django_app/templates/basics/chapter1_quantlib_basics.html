@@ -1,0 +1,148 @@
+{% extends "basics/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter covers the fundamental building blocks of QuantLib, including date handling, 
+                    calendar management, schedule generation, and interest rate calculations. These core concepts 
+                    form the foundation for all advanced quantitative finance applications.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Date arithmetic and manipulation</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Business calendar handling</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Payment schedule generation</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Interest rate calculations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Use the interactive lab below to experiment with QuantLib's core classes. 
+                    Try different parameters to see how they affect the results.
+                </p>
+                <div class="text-center">
+                    <a href="{% url 'basics:interactive_basics:quantlib_basics_lab' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Learning Modules -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="fw-bold text-dark mb-4">
+            <i class="bi bi-list-ul me-2"></i>Learning Modules
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Module 1: Date Class -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calendar-date text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">1. The Date Class</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Learn how to create, manipulate, and perform arithmetic operations on dates using QuantLib's Date class.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Date creation and validation</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Date arithmetic operations</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Weekday and business day logic</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Module 2: Calendar Class -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calendar3 text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">2. The Calendar Class</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Understand how QuantLib handles business calendars and date adjustments for different markets.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Business day conventions</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Holiday calendar management</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Date adjustment rules</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Module 3: Schedule Class -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calendar-range text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">3. The Schedule Class</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Generate payment schedules for financial instruments with various conventions and rules.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Schedule generation rules</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Tenor and frequency handling</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>End-of-month conventions</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Module 4: Interest Rate Class -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-percent text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">4. The InterestRate Class</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Work with interest rates, compounding conventions, and perform rate conversions.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Compounding types</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Day count conventions</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Rate conversions</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,236 @@
+{% extends "basics/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter covers random number generation in QuantLib, which is essential for Monte Carlo 
+                    simulations and other numerical methods. Learn about different random number generators and 
+                    their applications in quantitative finance.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Random number generators</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Monte Carlo methods</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Variance reduction techniques</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Simulation applications</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Applications:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-shuffle text-primary me-2"></i>Monte Carlo pricing</li>
+                            <li><i class="bi bi-graph-up text-primary me-2"></i>Path generation</li>
+                            <li><i class="bi bi-speedometer text-primary me-2"></i>Risk simulation</li>
+                            <li><i class="bi bi-bar-chart text-primary me-2"></i>Scenario analysis</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Experiment with different random number generators and Monte Carlo methods. 
+                    See how different generators affect simulation results and convergence.
+                </p>
+                <div class="text-center">
+                    <a href="{% url 'basics:chapter7_random:random_lab' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Launch Random Numbers Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Random Number Generators -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="fw-bold text-dark mb-4">
+            <i class="bi bi-shuffle me-2"></i>Random Number Generators
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Linear Congruential Generator -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-shuffle text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Linear Congruential Generator</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Simple and fast random number generator using linear recurrence relations.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Fast generation</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Deterministic sequences</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Limited period length</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mersenne Twister -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-shuffle text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Mersenne Twister</h5>
+                </div>
+                <p class="card-text text-muted">
+                    High-quality random number generator with very long period and good statistical properties.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Very long period</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Excellent statistical properties</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Widely used in finance</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sobol Sequences -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-grid text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Sobol Sequences</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Low-discrepancy sequences that provide better coverage of the unit hypercube.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Quasi-random sequences</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Faster convergence</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Deterministic</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Halton Sequences -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-grid text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Halton Sequences</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Another type of low-discrepancy sequence useful for Monte Carlo integration.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Low discrepancy</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Easy to implement</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Good for high dimensions</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monte Carlo Methods -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Monte Carlo Methods
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Crude Monte Carlo</h5>
+                        <p class="text-muted">Basic Monte Carlo simulation using random sampling.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Simple implementation</li>
+                            <li>• Slow convergence</li>
+                            <li>• High variance</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Antithetic Variates</h5>
+                        <p class="text-muted">Variance reduction technique using negatively correlated samples.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Reduces variance</li>
+                            <li>• Easy to implement</li>
+                            <li>• Works well for symmetric payoffs</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Control Variates</h5>
+                        <p class="text-muted">Variance reduction using correlated random variables with known expectations.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Significant variance reduction</li>
+                            <li>• Requires known expectations</li>
+                            <li>• More complex implementation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Applications -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-lightbulb me-2"></i>Applications in Finance
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Option Pricing</h5>
+                        <p class="text-muted">Use Monte Carlo methods to price complex options and exotic derivatives.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Path-dependent options</li>
+                            <li>• Multi-asset options</li>
+                            <li>• American options</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Risk Management</h5>
+                        <p class="text-muted">Simulate portfolio scenarios for risk assessment and stress testing.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Value at Risk (VaR)</li>
+                            <li>• Expected Shortfall</li>
+                            <li>• Stress testing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

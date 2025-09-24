@@ -6,7 +6,12 @@ from . import services
 
 def basics_lab_view(request):
     form = QuantLibBasicsForm(request.POST or None)
-    context = {'form': form}
+    context = {
+        'form': form,
+        'lab_title': 'Chapter 1: QuantLib Basics - Interactive Lab',
+        'lab_icon': 'bi-flask',
+        'lab_description': 'An interactive laboratory to experiment with the core QuantLib objects for handling dates, time, schedules, and interest rates.'
+    }
 
     if request.method == 'POST' and form.is_valid():
         data = form.cleaned_data

@@ -1,16 +1,155 @@
 {% extends 'base.html' %}
 
-<!-- 2. On définit le titre de la page -->
-{% block title %}Accueil - {{ block.super }}{% endblock %}
+{% block title %}Home - {{ block.super }}{% endblock %}
 
-<!-- 3. CHANGEMENT : On utilise le nom de bloc "page_content" défini dans base.html -->
 {% block page_content %}
-<div class="container text-center mt-5">
-    <div class="jumbotron">
-        <h1 class="display-4">Bienvenue sur l'Application de Finance Quantitative</h1>
-        <p class="lead">Développée par SASU myGenAI</p>
-        <hr class="my-4">
-        <p>Sélectionnez une catégorie de produits financiers dans le menu principal pour commencer l'analyse.</p>
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="fade-in">Welcome to SASU myGenAI</h1>
+                <p class="lead fade-in">Advanced quantitative finance tools and interactive laboratories for financial professionals.</p>
+                <div class="mt-4 fade-in">
+                    <a href="{% url 'basics:home' %}" class="btn btn-primary btn-lg me-3">
+                        <i class="bi bi-play-circle me-2"></i>Get Started
+                    </a>
+                    <a href="#features" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-info-circle me-2"></i>Learn More
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-4 text-center">
+                <div class="hero-icon">
+                    <i class="bi bi-graph-up-arrow" style="font-size: 8rem; opacity: 0.8;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="container" id="features">
+    <div class="row mb-5">
+        <div class="col-12 text-center mb-5">
+            <h2 class="display-5 fw-bold text-dark">Powerful Financial Tools</h2>
+            <p class="lead text-muted">Comprehensive suite of quantitative finance applications</p>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        <!-- Basics Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-calculator text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">QuantLib Basics</h5>
+                    <p class="card-text text-muted">Master the fundamental concepts of quantitative finance with interactive laboratories covering dates, calendars, schedules, and interest rates.</p>
+                    <a href="{% url 'basics:home' %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>Explore Basics
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interest Rate Curves Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-graph-up text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Interest Rate Curves</h5>
+                    <p class="card-text text-muted">Build and analyze yield curves, forward curves, and term structures with advanced calibration and fitting techniques.</p>
+                    <a href="{% url 'interest_rate_curves:home' %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>View Curves
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interest Rate Models Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-diagram-3 text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Interest Rate Models</h5>
+                    <p class="card-text text-muted">Implement and calibrate sophisticated interest rate models including Hull-White, Heston, and other advanced frameworks.</p>
+                    <a href="{% url 'interest_rate_models:home' %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>Explore Models
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Equity Models Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-bar-chart text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Equity Models</h5>
+                    <p class="card-text text-muted">Price and analyze equity derivatives using Black-Scholes, Monte Carlo methods, and other sophisticated pricing models.</p>
+                    <a href="{% url 'equity_models:home' %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-1"></i>View Models
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bonds Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-bank text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Bond Analytics</h5>
+                    <p class="card-text text-muted">Comprehensive bond pricing, yield calculations, and risk analysis tools for fixed income securities.</p>
+                    <button class="btn btn-secondary" disabled>
+                        <i class="bi bi-clock me-1"></i>Coming Soon
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Advanced Analytics Card -->
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="bi bi-gear text-primary" style="font-size: 3rem;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">Advanced Analytics</h5>
+                    <p class="card-text text-muted">Sophisticated risk management, sensitivity analysis, and portfolio optimization tools for institutional use.</p>
+                    <button class="btn btn-secondary" disabled>
+                        <i class="bi bi-clock me-1"></i>Coming Soon
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action Section -->
+<div class="container my-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center py-5">
+                    <h3 class="card-title fw-bold mb-3">Ready to Get Started?</h3>
+                    <p class="card-text lead mb-4">Begin your quantitative finance journey with our comprehensive suite of tools and interactive laboratories.</p>
+                    <a href="{% url 'basics:home' %}" class="btn btn-light btn-lg">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Start with Basics
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

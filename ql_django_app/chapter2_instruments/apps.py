@@ -1,5 +1,6 @@
-from django.apps import AppConfig
+# chapter2_instruments/apps.py
 
+from django.apps import AppConfig
 
 class Chapter2InstrumentsConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'

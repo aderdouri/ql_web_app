@@ -1,0 +1,253 @@
+{% extends "basics/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter demonstrates how to set up term structures so that they track (or don't track) 
+                    the global evaluation date in QuantLib. Learn about reference dates, curve construction methods, 
+                    and the observer pattern for automatic recalculation.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Setting up term structures with reference dates</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>PiecewiseFlatForward vs ForwardCurve construction</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Impact of evaluation date changes</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Observer pattern for automatic updates</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Key Concepts:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i>Reference Date</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i>Evaluation Date</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i>SwapRateHelper</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i>Observer Pattern</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Explore the concepts from this chapter with our interactive lab. 
+                    Modify the inputs and see how they affect the curve construction and outputs.
+                </p>
+                <div class="text-center">
+                    <a href="{% url 'chapter5_curves:curve_lab' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Launch Term Structures Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notebook Inputs Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-code-square me-2"></i>Notebook Inputs
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Input 1: Evaluation Date Setup</h5>
+                        <div class="bg-light p-3 rounded">
+                            <div class="text-muted small">In [1]:</div>
+                            <div class="font-monospace">import QuantLib as ql</div>
+                            <br>
+                            <div class="text-muted small">In [2]:</div>
+                            <div class="font-monospace">ql.Settings.instance().evaluationDate = ql.Date(3, ql.October, 2014)</div>
+                        </div>
+                        <p class="small text-muted mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Sets the global evaluation date for all QuantLib calculations.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Input 2: Swap Rate Helpers</h5>
+                        <div class="bg-light p-3 rounded">
+                            <div class="text-muted small">In [3]:</div>
+                            <div class="font-monospace">helpers = [</div>
+                            <div class="font-monospace">&nbsp;&nbsp;ql.SwapRateHelper(</div>
+                            <div class="font-monospace">&nbsp;&nbsp;&nbsp;&nbsp;ql.QuoteHandle(ql.SimpleQuote(rate/100.0)),</div>
+                            <div class="font-monospace">&nbsp;&nbsp;&nbsp;&nbsp;ql.Period(*tenor), ql.TARGET(),</div>
+                            <div class="font-monospace">&nbsp;&nbsp;&nbsp;&nbsp;ql.Annual, ql.Unadjusted,</div>
+                            <div class="font-monospace">&nbsp;&nbsp;&nbsp;&nbsp;ql.Thirty360(ql.Thirty360.BondBasis),</div>
+                            <div class="font-monospace">&nbsp;&nbsp;&nbsp;&nbsp;ql.Euribor6M())</div>
+                            <div class="font-monospace">&nbsp;&nbsp;for tenor, rate in [</div>
+                            <div class="font-monospace">&nbsp;&nbsp;&nbsp;&nbsp;((2,ql.Years), 0.201),</div>
+                            <div class="font-monospace">&nbsp;&nbsp;&nbsp;&nbsp;((3,ql.Years), 0.258),</div>
+                            <div class="font-monospace">&nbsp;&nbsp;&nbsp;&nbsp;((5,ql.Years), 0.464),</div>
+                            <div class="font-monospace">&nbsp;&nbsp;&nbsp;&nbsp;((10,ql.Years), 1.151),</div>
+                            <div class="font-monospace">&nbsp;&nbsp;&nbsp;&nbsp;((15,ql.Years), 1.588)]</div>
+                            <div class="font-monospace">]</div>
+                        </div>
+                        <p class="small text-muted mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Creates swap rate helpers for curve construction with market data.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Input 3: PiecewiseFlatForward Curve</h5>
+                        <div class="bg-light p-3 rounded">
+                            <div class="text-muted small">In [4]:</div>
+                            <div class="font-monospace">curve1 = ql.PiecewiseFlatForward(</div>
+                            <div class="font-monospace">&nbsp;&nbsp;0, ql.TARGET(), helpers, ql.Actual360())</div>
+                        </div>
+                        <p class="small text-muted mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Creates a curve with reference date relative to evaluation date (0 days offset).
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Input 4: ForwardCurve Construction</h5>
+                        <div class="bg-light p-3 rounded">
+                            <div class="text-muted small">In [5-7]:</div>
+                            <div class="font-monospace">dates, rates = zip(*curve1.nodes())</div>
+                            <div class="font-monospace">curve2 = ql.ForwardCurve(dates, rates, ql.Actual360())</div>
+                        </div>
+                        <p class="small text-muted mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Creates a curve with explicit reference date (first date in the list).
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notebook Outputs Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Notebook Outputs
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Output 1: Curve Nodes (Out [6])</h5>
+                        <div class="bg-light p-3 rounded border-start border-success border-4">
+                            <div class="text-muted small">Out[6]:</div>
+                            <div class="font-monospace">((Date(3,10,2014), 0.0019777694879293093),</div>
+                            <div class="font-monospace">&nbsp;(Date(7,10,2016), 0.0019777694879293093),</div>
+                            <div class="font-monospace">&nbsp;(Date(9,10,2017), 0.0036475517704509294),</div>
+                            <div class="font-monospace">&nbsp;(Date(7,10,2019), 0.007660760701876805),</div>
+                            <div class="font-monospace">&nbsp;(Date(7,10,2024), 0.018414773669420893),</div>
+                            <div class="font-monospace">&nbsp;(Date(8,10,2029), 0.025311634328221498))</div>
+                        </div>
+                        <p class="small text-muted mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Shows the dates and rates used to construct the ForwardCurve.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Output 2: Curve Ranges (Out [8])</h5>
+                        <div class="bg-light p-3 rounded border-start border-success border-4">
+                            <div class="text-muted small">Out[8]:</div>
+                            <div class="font-monospace">October 3rd, 2014 to October 8th, 2029</div>
+                            <div class="font-monospace">October 3rd, 2014 to October 8th, 2029</div>
+                        </div>
+                        <p class="small text-muted mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Both curves have the same date range, confirming they're equivalent.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Output 3: Zero Rate Comparison (Out [9])</h5>
+                        <div class="bg-light p-3 rounded border-start border-success border-4">
+                            <div class="text-muted small">Out[9]:</div>
+                            <div class="font-monospace">0.452196 % Actual/360 continuous compounding</div>
+                            <div class="font-monospace">0.452196 % Actual/360 continuous compounding</div>
+                        </div>
+                        <p class="small text-muted mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Both curves return identical zero rates for the same time period (5 years).
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Output 4: Yield Curve Plot (In [12])</h5>
+                        <div class="alert alert-info">
+                            <i class="bi bi-graph-up me-2"></i>
+                            <strong>Interactive Plot:</strong> The notebook generates a yield curve plot showing 
+                            zero rates from 0 to 15 years with 400 data points.
+                        </div>
+                        <p class="small text-muted mt-2">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Visual representation of the term structure using matplotlib.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Takeaways -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-lightbulb me-2"></i>Key Takeaways
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Reference Date Concepts:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>PiecewiseFlatForward:</strong> Reference date relative to evaluation date</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>ForwardCurve:</strong> Reference date explicitly specified</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>Both methods:</strong> Can produce equivalent results</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Practical Applications:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>Risk Management:</strong> Understanding date dependencies</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>Model Validation:</strong> Comparing different curve constructions</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>System Design:</strong> Observer pattern for automatic updates</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

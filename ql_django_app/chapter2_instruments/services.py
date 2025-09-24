@@ -1,75 +1,279 @@
-# chapter2_instruments/services.py (VERSION FINALE ET PARFAITE)
+# chapter2_instruments/services.py
 
 import QuantLib as ql
-import numpy as np
-import datetime
+import time
+from datetime import datetime, date
+from typing import Dict, Any, Tuple
 
-def calculate_option_values(data):
-    """
-    Calcule la NPV, les Greeks et les données du graphique.
-    Version de production finale, optimisée et robuste.
-    """
+def quantlib_date_from_python_date(python_date):
+    """Convert Python date to QuantLib Date"""
+    if isinstance(python_date, str):
+        python_date = datetime.strptime(python_date, '%Y-%m-%d').date()
+    return ql.Date(python_date.day, python_date.month, python_date.year)
+
+def create_black_scholes_engine(underlying_price, risk_free_rate, volatility, evaluation_date):
+    """Create Black-Scholes pricing engine"""
+    # Set evaluation date
+    ql.Settings.instance().evaluationDate = evaluation_date
+    
+    # Create market data exactly like the reference code
+    spot_handle = ql.QuoteHandle(ql.SimpleQuote(underlying_price))
+    rate_handle = ql.YieldTermStructureHandle(
+        ql.FlatForward(0, ql.TARGET(), risk_free_rate, ql.Actual360())
+    )
+    vol_handle = ql.BlackVolTermStructureHandle(
+        ql.BlackConstantVol(0, ql.TARGET(), volatility, ql.Actual360())
+    )
+    
+    # Create process exactly like the reference code
+    process = ql.BlackScholesProcess(spot_handle, rate_handle, vol_handle)
+    
+    # Create engine
+    engine = ql.AnalyticEuropeanEngine(process)
+    
+    return engine, process
+
+def create_heston_engine(underlying_price, risk_free_rate, volatility, evaluation_date, 
+                        v0, kappa, theta, sigma, rho):
+    """Create Heston pricing engine"""
+    # Set evaluation date
+    ql.Settings.instance().evaluationDate = evaluation_date
+    
+    # Create market data exactly like the reference code
+    spot_handle = ql.QuoteHandle(ql.SimpleQuote(underlying_price))
+    rate_handle = ql.YieldTermStructureHandle(
+        ql.FlatForward(0, ql.TARGET(), risk_free_rate, ql.Actual360())
+    )
+    
+    # Create Heston process exactly like the reference code
+    process = ql.HestonProcess(
+        rate_handle,
+        ql.YieldTermStructureHandle(ql.FlatForward(0, ql.TARGET(), 0.0, ql.Actual360())),
+        spot_handle,
+        v0, kappa, theta, sigma, rho
+    )
+    
+    # Create engine
+    engine = ql.AnalyticHestonEngine(ql.HestonModel(process))
+    
+    return engine, process
+
+def create_monte_carlo_engine(underlying_price, risk_free_rate, volatility, evaluation_date,
+                             time_steps=20, required_samples=100000):
+    """Create Monte Carlo pricing engine"""
+    # Set evaluation date
+    ql.Settings.instance().evaluationDate = evaluation_date
+    
+    # Create market data exactly like the reference code
+    spot_handle = ql.QuoteHandle(ql.SimpleQuote(underlying_price))
+    rate_handle = ql.YieldTermStructureHandle(
+        ql.FlatForward(0, ql.TARGET(), risk_free_rate, ql.Actual360())
+    )
+    vol_handle = ql.BlackVolTermStructureHandle(
+        ql.BlackConstantVol(0, ql.TARGET(), volatility, ql.Actual360())
+    )
+    
+    # Create process exactly like the reference code
+    process = ql.BlackScholesProcess(spot_handle, rate_handle, vol_handle)
+    
+    # Create Monte Carlo engine
+    engine = ql.MCEuropeanEngine(process, "PseudoRandom", timeSteps=time_steps, 
+                                requiredSamples=required_samples)
+    
+    return engine, process
+
+def calculate_option_price(form_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Calculate option price using the specified engine"""
     try:
-        # 1. Valider et configurer les dates
-        eval_date = data['evaluation_date']
-        exp_date = data['expiry_date']
-
-        if not isinstance(eval_date, datetime.date) or not isinstance(exp_date, datetime.date):
-            return {'error': 'Invalid date object provided'}
-
-        ql_evaluation_date = ql.Date(eval_date.day, eval_date.month, eval_date.year)
-        ql.Settings.instance().evaluationDate = ql_evaluation_date
+        # Extract parameters
+        underlying_price = float(form_data['underlying_price'])
+        strike_price = float(form_data['strike_price'])
+        risk_free_rate = float(form_data['risk_free_rate'])
+        volatility = float(form_data['volatility'])
+        evaluation_date = quantlib_date_from_python_date(form_data['evaluation_date'])
+        maturity_date = quantlib_date_from_python_date(form_data['maturity_date'])
+        option_type = ql.Option.Call if form_data['option_type'] == 'call' else ql.Option.Put
+        pricing_engine = form_data['pricing_engine']
         
-        ql_expiry_date = ql.Date(exp_date.day, exp_date.month, exp_date.year)
-
-        if ql_expiry_date < ql_evaluation_date:
-            return {'error': "La date d'échéance doit être après la date d'évaluation."}
-
-        # 2. Valider et configurer les paramètres numériques
-        strike = float(data['strike_price'])
-        underlying_price = float(data['underlying_price'])
-        risk_free_rate = float(data['risk_free_rate'])
-        volatility = float(data['volatility'])
-        option_type = ql.Option.Call if data['option_type'] == 'Call' else ql.Option.Put
+        # Special case: evaluation date equals maturity date
+        if evaluation_date == maturity_date:
+            return {
+                'success': True,
+                'npv': 0.0,
+                'greeks': {
+                    'delta': 0.0,
+                    'gamma': 0.0,
+                    'vega': 0.0
+                },
+                'calculation_time': 0.0,
+                'engine_used': 'analytic_european',
+                'parameters': {
+                    'underlying_price': underlying_price,
+                    'strike_price': strike_price,
+                    'risk_free_rate': risk_free_rate,
+                    'volatility': volatility,
+                    'evaluation_date': evaluation_date.to_date(),
+                    'maturity_date': maturity_date.to_date(),
+                    'option_type': form_data['option_type']
+                }
+            }
         
-        # 3. Construire l'instrument (l'option)
-        payoff = ql.PlainVanillaPayoff(option_type, strike)
-        exercise = ql.EuropeanExercise(ql_expiry_date)
-        option = ql.EuropeanOption(payoff, exercise)
-
-        # 4. Construire les objets de marché
-        underlying_quote = ql.SimpleQuote(underlying_price)
-        u_handle = ql.QuoteHandle(underlying_quote)
-        r_handle = ql.YieldTermStructureHandle(ql.FlatForward(ql_evaluation_date, risk_free_rate, ql.Actual365Fixed()))
-        sigma_handle = ql.BlackVolTermStructureHandle(ql.BlackConstantVol(ql_evaluation_date, ql.TARGET(), volatility, ql.Actual365Fixed()))
+        # Create option exactly like the reference code
+        option = ql.EuropeanOption(ql.PlainVanillaPayoff(option_type, strike_price),
+                                   ql.EuropeanExercise(maturity_date))
         
-        # 5. Construire et attacher le moteur de pricing
-        process = ql.BlackScholesProcess(u_handle, r_handle, sigma_handle)
-        engine = ql.AnalyticEuropeanEngine(process)
+        # Create appropriate engine
+        start_time = time.time()
+        
+        if pricing_engine == 'black_scholes':
+            engine, process = create_black_scholes_engine(
+                underlying_price, risk_free_rate, volatility, evaluation_date
+            )
+        elif pricing_engine == 'heston':
+            v0 = float(form_data.get('v0', 0.04))
+            kappa = float(form_data.get('kappa', 0.1))
+            theta = float(form_data.get('theta', 0.01))
+            sigma = float(form_data.get('sigma', 0.05))
+            rho = float(form_data.get('rho', -0.75))
+            engine, process = create_heston_engine(
+                underlying_price, risk_free_rate, volatility, evaluation_date,
+                v0, kappa, theta, sigma, rho
+            )
+        elif pricing_engine == 'monte_carlo':
+            time_steps = int(form_data.get('time_steps', 20))
+            required_samples = int(form_data.get('required_samples', 100000))
+            engine, process = create_monte_carlo_engine(
+                underlying_price, risk_free_rate, volatility, evaluation_date,
+                time_steps, required_samples
+            )
+        else:
+            raise ValueError(f"Unknown pricing engine: {pricing_engine}")
+        
+        # Set engine and calculate price
         option.setPricingEngine(engine)
-
-        # 6. Effectuer les calculs
-        results = {
-            'npv': option.NPV(), 'delta': option.delta(),
-            'gamma': option.gamma(), 'vega': option.vega()
+        npv = option.NPV()
+        
+        calculation_time = time.time() - start_time
+        
+        # Calculate Greeks (only for Black-Scholes) - Chapter 2: Delta, Gamma, Vega only
+        greeks = {}
+        if pricing_engine == 'black_scholes':
+            try:
+                greeks = {
+                    'delta': option.delta(),
+                    'gamma': option.gamma(),
+                    'vega': option.vega()
+                }
+            except:
+                greeks = {}
+        
+        return {
+            'success': True,
+            'npv': npv,
+            'greeks': greeks,
+            'calculation_time': calculation_time,
+            'engine_used': pricing_engine,
+            'parameters': {
+                'underlying_price': underlying_price,
+                'strike_price': strike_price,
+                'risk_free_rate': risk_free_rate,
+                'volatility': volatility,
+                'evaluation_date': evaluation_date.to_date(),
+                'maturity_date': maturity_date.to_date(),
+                'option_type': form_data['option_type']
+            }
+        }
+        
+    except Exception as e:
+        return {
+            'success': False,
+            'error': str(e),
+            'npv': None,
+            'greeks': {},
+            'calculation_time': 0
         }
 
-        # 7. Générer les données pour le graphique interactif
-        chart_data = {'x_values': [], 'y_values': []}
+def calculate_price_series(underlying_prices, form_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Calculate option prices for a range of underlying prices"""
+    results = []
+    
+    for price in underlying_prices:
+        # Create modified form data with new underlying price
+        modified_data = form_data.copy()
+        modified_data['underlying_price'] = price
         
-        xs = np.linspace(strike * 0.8, strike * 1.2, 100)
-        for x in xs:
-            underlying_quote.setValue(x) # On modifie la quote pour chaque point du graphique
-            chart_data['x_values'].append(x)
-            chart_data['y_values'].append(option.NPV())
-        
-        underlying_quote.setValue(underlying_price) # Important: On remet la valeur d'origine
-        
-        results['chart_data'] = chart_data
-        
-        return results
+        result = calculate_option_price(modified_data)
+        if result['success']:
+            results.append({
+                'underlying_price': price,
+                'npv': result['npv']
+            })
+    
+    return {
+        'success': True,
+        'series': results
+    }
 
-    except Exception as e:
-        # En cas d'erreur de calcul, on l'affiche dans la console du serveur
-        print(f"ERREUR QUANTLIB: {e}")
-        return {'error': str(e)}
+def calculate_volatility_series(volatilities, form_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Calculate option prices for a range of volatilities"""
+    results = []
+    
+    for vol in volatilities:
+        # Create modified form data with new volatility
+        modified_data = form_data.copy()
+        modified_data['volatility'] = vol
+        
+        result = calculate_option_price(modified_data)
+        if result['success']:
+            results.append({
+                'volatility': vol,
+                'npv': result['npv']
+            })
+    
+    return {
+        'success': True,
+        'series': results
+    }
+
+def calculate_time_decay_series(evaluation_dates, form_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Calculate option prices for different evaluation dates"""
+    results = []
+    
+    for eval_date in evaluation_dates:
+        # Create modified form data with new evaluation date
+        modified_data = form_data.copy()
+        modified_data['evaluation_date'] = eval_date
+        
+        result = calculate_option_price(modified_data)
+        if result['success']:
+            results.append({
+                'evaluation_date': eval_date,
+                'npv': result['npv']
+            })
+    
+    return {
+        'success': True,
+        'series': results
+    }
+
+def compare_engines(form_data: Dict[str, Any]) -> Dict[str, Any]:
+    """Compare results from different pricing engines"""
+    engines = ['black_scholes', 'heston', 'monte_carlo']
+    results = {}
+    
+    for engine in engines:
+        modified_data = form_data.copy()
+        modified_data['pricing_engine'] = engine
+        
+        result = calculate_option_price(modified_data)
+        if result['success']:
+            results[engine] = {
+                'npv': result['npv'],
+                'calculation_time': result['calculation_time'],
+                'engine_name': engine.replace('_', ' ').title()
+            }
+    
+    return {
+        'success': True,
+        'comparison': results
+    }

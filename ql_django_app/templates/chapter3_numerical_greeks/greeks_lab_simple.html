@@ -1,0 +1,197 @@
+{% extends "basics/lab_base.html" %}
+
+{% block lab_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Chapter 3: Numerical Greeks Lab
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5>Simple Chart Test</h5>
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-primary" onclick="showSimpleChart()">
+                                    Show Simple Chart
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="showGreeksChart()">
+                                    Show Greeks Chart
+                                </button>
+                            </div>
+                            <div class="chart-container" style="height: 400px;">
+                                <canvas id="simpleChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Debug Info</h5>
+                            <div id="debugInfo" class="alert alert-info">
+                                Click buttons to see chart data
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let simpleChart = null;
+
+// Initialize chart
+function initializeSimpleChart() {
+    const canvas = document.getElementById('simpleChart');
+    if (!canvas) {
+        console.error('Canvas not found');
+        return;
+    }
+    
+    const ctx = canvas.getContext('2d');
+    simpleChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: []
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Underlying Price ($)'
+                    },
+                    min: 80,
+                    max: 120
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Value'
+                    },
+                    min: -2,
+                    max: 2
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                }
+            }
+        }
+    });
+    console.log('Chart initialized');
+}
+
+// Show simple chart
+function showSimpleChart() {
+    if (!simpleChart) {
+        initializeSimpleChart();
+    }
+    
+    const data = {
+        labels: ['80', '90', '100', '110', '120'],
+        datasets: [{
+            label: 'Test Line',
+            data: [1, 2, 3, 2, 1],
+            borderColor: 'rgb(255, 99, 132)',
+            backgroundColor: 'rgba(255, 99, 132, 0.1)',
+            tension: 0.1,
+            fill: false,
+            pointRadius: 5,
+            borderWidth: 3
+        }]
+    };
+    
+    simpleChart.data = data;
+    simpleChart.update();
+    
+    document.getElementById('debugInfo').innerHTML = `
+        <strong>Simple Chart Data:</strong><br>
+        Labels: ${data.labels.join(', ')}<br>
+        Data: ${data.datasets[0].data.join(', ')}<br>
+        Datasets: ${simpleChart.data.datasets.length}
+    `;
+    
+    console.log('Simple chart updated:', data);
+}
+
+// Show Greeks chart
+function showGreeksChart() {
+    if (!simpleChart) {
+        initializeSimpleChart();
+    }
+    
+    const S_range = [80, 85, 90, 95, 100, 105, 110, 115, 120];
+    const delta = [0.5, 0.3, 0.1, -0.1, -0.3, -0.5, -0.7, -0.9, -1.1];
+    const gamma = [0.1, 0.2, 0.3, 0.4, 0.5, 0.4, 0.3, 0.2, 0.1];
+    const vega = [0.8, 0.9, 1.0, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4];
+    
+    const data = {
+        labels: S_range.map(s => s.toString()),
+        datasets: [
+            {
+                label: 'Delta',
+                data: delta,
+                borderColor: 'rgb(220, 53, 69)',
+                backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                tension: 0.1,
+                fill: false,
+                pointRadius: 4,
+                borderWidth: 3
+            },
+            {
+                label: 'Gamma',
+                data: gamma,
+                borderColor: 'rgb(25, 135, 84)',
+                backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                tension: 0.1,
+                fill: false,
+                pointRadius: 4,
+                borderWidth: 3
+            },
+            {
+                label: 'Vega',
+                data: vega,
+                borderColor: 'rgb(111, 66, 193)',
+                backgroundColor: 'rgba(111, 66, 193, 0.1)',
+                tension: 0.1,
+                fill: false,
+                pointRadius: 4,
+                borderWidth: 3
+            }
+        ]
+    };
+    
+    simpleChart.data = data;
+    simpleChart.update();
+    
+    document.getElementById('debugInfo').innerHTML = `
+        <strong>Greeks Chart Data:</strong><br>
+        Labels: ${data.labels.join(', ')}<br>
+        Delta: ${delta.join(', ')}<br>
+        Gamma: ${gamma.join(', ')}<br>
+        Vega: ${vega.join(', ')}<br>
+        Datasets: ${simpleChart.data.datasets.length}
+    `;
+    
+    console.log('Greeks chart updated:', data);
+}
+
+// Initialize on page load
+window.addEventListener('load', function() {
+    console.log('Page loaded, initializing chart...');
+    initializeSimpleChart();
+});
+</script>
+{% endblock %}
+

@@ -12,7 +12,6 @@ urlpatterns = [
     path('chapter2-instruments/', include('chapter2_instruments.urls')),
     path('chapter3-numerical-greeks/', include('chapter3_numerical_greeks.urls')),
     path('chapter4-quotes/', include('chapter4_quotes.urls')),
-    path('chapter5-curves/', include('chapter5_curves.urls')),
     path('interest-rate-curves/', include('interest_rate_curves.urls')),
     path('interest-rate-models/', include('interest_rate_models.urls')),
     path('equity-models/', include('equity_models.urls')),

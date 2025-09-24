@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}QuantLib Learning Platform - SASU myGenAI{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid py-4">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="jumbotron bg-primary text-white rounded-3 p-5">
+                <div class="container-fluid py-5">
+                    <h1 class="display-5 fw-bold">QuantLib Learning Platform</h1>
+                    <p class="col-md-8 fs-4">
+                        Master quantitative finance with interactive laboratories and real-world examples. 
+                        Learn QuantLib through hands-on practice with professional-grade tools.
+                    </p>
+                    <a class="btn btn-light btn-lg" href="#chapters" role="button">
+                        <i class="bi bi-play-circle me-2"></i>Start Learning
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Available Chapters -->
+    <div class="row mb-5" id="chapters">
+        <div class="col-12">
+            <h2 class="fw-bold text-dark mb-4">
+                <i class="bi bi-book me-2"></i>Available Chapters
+            </h2>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for chapter in chapters %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="me-3">
+                            <i class="bi {{ chapter.icon }} text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <div>
+                            <h5 class="card-title fw-bold mb-0">Chapter {{ chapter.number }}</h5>
+                            <p class="text-muted mb-0">{{ chapter.title }}</p>
+                        </div>
+                    </div>
+                    
+                    <p class="card-text text-muted flex-grow-1">
+                        {{ chapter.description }}
+                    </p>
+                    
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-{% if chapter.status == 'completed' %}success{% else %}secondary{% endif %}">
+                                {% if chapter.status == 'completed' %}
+                                    <i class="bi bi-check-circle me-1"></i>Completed
+                                {% else %}
+                                    <i class="bi bi-clock me-1"></i>In Progress
+                                {% endif %}
+                            </span>
+                        </div>
+                        
+                        <a href="{% url chapter.url %}" class="btn btn-primary w-100">
+                            <i class="bi bi-arrow-right me-2"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Features Section -->
+    <div class="row mb-5 mt-5">
+        <div class="col-12">
+            <h2 class="fw-bold text-dark mb-4">
+                <i class="bi bi-star me-2"></i>Platform Features
+            </h2>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-calculator text-primary mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="card-title fw-bold">Interactive Labs</h5>
+                    <p class="card-text text-muted">
+                        Hands-on experience with real financial calculations using QuantLib's powerful engine.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-graph-up text-primary mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="card-title fw-bold">Visual Analytics</h5>
+                    <p class="card-text text-muted">
+                        Dynamic charts and graphs to visualize complex financial concepts and relationships.
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <i class="bi bi-book text-primary mb-3" style="font-size: 3rem;"></i>
+                    <h5 class="card-title fw-bold">Comprehensive Learning</h5>
+                    <p class="card-text text-muted">
+                        From basic concepts to advanced quantitative finance techniques.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-light">
+                <div class="card-body text-center py-5">
+                    <h3 class="fw-bold text-dark mb-3">Ready to Start Your Journey?</h3>
+                    <p class="text-muted mb-4">
+                        Begin with Chapter 1 to learn the fundamentals of QuantLib and quantitative finance.
+                    </p>
+                    <a href="{% url 'basics:chapter1' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Start with Chapter 1
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

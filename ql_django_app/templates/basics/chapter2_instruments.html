@@ -1,0 +1,163 @@
+{% extends "basics/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter introduces you to financial instruments and pricing engines in QuantLib. 
+                    Learn how to create various financial instruments and use different pricing methodologies 
+                    to calculate their values.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Creating financial instruments</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Understanding pricing engines</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Black-Scholes pricing</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Monte Carlo methods</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Instruments Covered:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>European Options</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>American Options</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Bonds and Swaps</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Futures and Forwards</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Experiment with different financial instruments and pricing engines using our interactive lab.
+                    Compare different pricing methodologies and see how market parameters affect instrument values.
+                </p>
+                <div class="text-center">
+                    <a href="{% url 'chapter2_instruments:pricer_lab' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Launch Pricing Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Concepts -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="fw-bold text-dark mb-4">
+            <i class="bi bi-lightbulb me-2"></i>Key Concepts
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Financial Instruments -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-gear text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Financial Instruments</h5>
+                </div>
+                <p class="card-text text-muted">
+                    QuantLib provides a comprehensive set of financial instruments including options, 
+                    bonds, swaps, and more. Each instrument has specific characteristics and pricing requirements.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Instrument constructors</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Payoff functions</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Exercise conditions</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Engines -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calculator text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Pricing Engines</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Pricing engines implement different methodologies for valuing financial instruments. 
+                    Choose the appropriate engine based on your instrument type and market conditions.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Analytical solutions</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Numerical methods</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Monte Carlo simulation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pricing Methods -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Pricing Methodologies
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Black-Scholes</h5>
+                        <p class="text-muted">Analytical solution for European options under the Black-Scholes model.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Fast and accurate</li>
+                            <li>• Assumes log-normal returns</li>
+                            <li>• Constant volatility</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Binomial Tree</h5>
+                        <p class="text-muted">Numerical method using discrete time steps to model price movements.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Handles American options</li>
+                            <li>• Flexible and intuitive</li>
+                            <li>• Can be computationally intensive</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Monte Carlo</h5>
+                        <p class="text-muted">Simulation-based method using random sampling for complex instruments.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Handles complex payoffs</li>
+                            <li>• Multiple underlying assets</li>
+                            <li>• Requires many simulations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

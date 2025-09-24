@@ -1,0 +1,201 @@
+{% extends "basics/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter focuses on market quotes and bond curve construction using QuantLib. 
+                    Learn how to build Nelson-Siegel curves from bond market data and analyze pricing dynamics 
+                    with real-time quote updates and observer patterns.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Building bond discount curves</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Nelson-Siegel curve fitting</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Market quote management</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Observer pattern implementation</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Key Features:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Real-time quote updates</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Interactive curve visualization</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Price evolution tracking</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Freeze/Unfreeze functionality</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Build Nelson-Siegel curves from bond market data and analyze pricing dynamics. 
+                    Experiment with different coupon rates, bond quotes, and observe how curve updates 
+                    affect bond pricing in real-time.
+                </p>
+                <div class="text-center">
+                    <a href="{% url 'chapter4_quotes:bond_curve_lab' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Launch Bond Curve Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Concepts -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="fw-bold text-dark mb-4">
+            <i class="bi bi-lightbulb me-2"></i>Key Concepts
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Bond Curve Construction -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-graph-up text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Bond Curve Construction</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Learn how to construct discount curves from bond market data using QuantLib's 
+                    FittedBondDiscountCurve with Nelson-Siegel fitting methodology.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>FixedRateBondHelper creation</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Nelson-Siegel curve fitting</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Discount factor calculation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Quotes -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-currency-exchange text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Market Quotes</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Understand how market quotes drive curve construction and how quote updates 
+                    propagate through the pricing system using QuantLib's observer pattern.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>SimpleQuote management</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Observer pattern</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Real-time updates</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Dynamics -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-speedometer2 text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Pricing Dynamics</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Explore how bond prices evolve as market quotes change and understand the 
+                    relationship between curve updates and instrument pricing.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Price evolution tracking</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Freeze/Unfreeze controls</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Historical price analysis</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Visualization -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-bar-chart text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Interactive Visualization</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Visualize discount curves and price evolution with interactive charts that 
+                    update in real-time as you modify market parameters.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Discount curve plotting</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Price evolution charts</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Interactive zoom and hover</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Practical Example -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-book me-2"></i>Practical Example
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    In this lab, you'll work with a portfolio of 15 bonds with maturities ranging from 2 to 30 years. 
+                    Each bond has different coupon rates and market quotes. You'll learn how to:
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-1-circle text-primary me-2"></i>Set up bond schedules and helpers</li>
+                            <li><i class="bi bi-2-circle text-primary me-2"></i>Build Nelson-Siegel discount curves</li>
+                            <li><i class="bi bi-3-circle text-primary me-2"></i>Price test bonds using the curve</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-4-circle text-primary me-2"></i>Update market quotes in real-time</li>
+                            <li><i class="bi bi-5-circle text-primary me-2"></i>Observe price evolution patterns</li>
+                            <li><i class="bi bi-6-circle text-primary me-2"></i>Analyze curve sensitivity</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="alert alert-info mt-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Expected Results:</strong> You should see initial bond prices around 105.77, 
+                    evolving to approximately 106.52 as quotes are updated, matching the book's examples.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

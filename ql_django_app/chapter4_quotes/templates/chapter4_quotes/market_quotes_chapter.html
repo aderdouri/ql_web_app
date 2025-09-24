@@ -1,0 +1,172 @@
+{% extends "basics/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter demonstrates how to build yield curves from market quotes in QuantLib. 
+                    Learn how to construct discount curves, handle market data, and understand the relationship 
+                    between market quotes and yield curve construction.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Building yield curves from market data</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Understanding discount factors</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Market quote interpolation</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Bond pricing with yield curves</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Market Data Covered:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Deposit Rates</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Futures Prices</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Swap Rates</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Bond Coupons</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Experiment with different market quotes and see how they affect yield curve construction. 
+                    Modify deposit rates, swap rates, and bond coupons to understand their impact on discount curves.
+                </p>
+                <div class="text-center">
+                    <a href="{% url 'chapter4_quotes:market_quotes' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Launch Market Quotes Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Concepts -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="fw-bold text-dark mb-4">
+            <i class="bi bi-lightbulb me-2"></i>Key Concepts
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Yield Curve Construction -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-graph-up text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Yield Curve Construction</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Yield curves are built from market quotes using various interpolation methods. 
+                    QuantLib provides sophisticated tools for constructing smooth and arbitrage-free curves.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Market data interpolation</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Discount factor calculation</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Zero rate derivation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Quotes -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calculator text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Market Quotes</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Market quotes represent the current market prices and rates for various financial instruments. 
+                    These quotes are the foundation for building yield curves and pricing other instruments.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Deposit rate quotes</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Futures price quotes</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Swap rate quotes</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Market Data Types -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Market Data Types
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <h5 class="fw-bold text-dark">Deposit Rates</h5>
+                        <p class="text-muted">Short-term interest rates for deposits, typically used for the short end of the yield curve.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Overnight to 1 year</li>
+                            <li>• Simple interest</li>
+                            <li>• High liquidity</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h5 class="fw-bold text-dark">Futures Prices</h5>
+                        <p class="text-muted">Interest rate futures prices used to derive forward rates for the medium-term curve.</p>
+                        <ul class="list-unstyled small">
+                            <li>• 3-month to 2 years</li>
+                            <li>• Forward rate derivation</li>
+                            <li>• Convexity adjustment</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h5 class="fw-bold text-dark">Swap Rates</h5>
+                        <p class="text-muted">Interest rate swap rates for the medium to long-term portion of the yield curve.</p>
+                        <ul class="list-unstyled small">
+                            <li>• 2 to 30 years</li>
+                            <li>• Par swap rates</li>
+                            <li>• Semi-annual payments</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h5 class="fw-bold text-dark">Bond Coupons</h5>
+                        <p class="text-muted">Government bond coupon rates used for the long-term portion of the yield curve.</p>
+                        <ul class="list-unstyled small">
+                            <li>• 2 to 30 years</li>
+                            <li>• Fixed coupon bonds</li>
+                            <li>• Par pricing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,663 @@
+{% extends "basics/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter focuses on the numerical calculation of Greeks - the sensitivities of option prices 
+                    to various market parameters. Learn how to compute Delta, Gamma, Rho, and Vega using 
+                    QuantLib's numerical methods for barrier options.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Understanding option sensitivities</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Numerical differentiation methods</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Greeks calculation techniques for barrier options</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Risk management applications</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Greeks Covered:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-graph-up text-primary me-2"></i>Delta - Price sensitivity</li>
+                            <li><i class="bi bi-graph-up text-primary me-2"></i>Gamma - Delta sensitivity</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Rho - Interest rate sensitivity</li>
+                            <li><i class="bi bi-speedometer text-primary me-2"></i>Vega - Volatility sensitivity</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Laboratory -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Calculate Numerical Greeks for barrier options and market scenarios. See how Greeks change 
+                    with different parameters and understand their practical implications for risk management.
+                </p>
+                
+                <!-- Form Section -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <form id="greeksForm" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <!-- Barrier Parameters -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h5 class="fw-bold text-primary mb-3">
+                                        <i class="bi bi-shield me-2"></i>Barrier Parameters
+                                    </h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="barrier_type" class="form-label">Barrier Type</label>
+                                    <select class="form-control" id="barrier_type" name="barrier_type" required>
+                                        <option value="up_and_in">Up-and-In</option>
+                                        <option value="up_and_out">Up-and-Out</option>
+                                        <option value="down_and_in">Down-and-In</option>
+                                        <option value="down_and_out">Down-and-Out</option>
+                                    </select>
+                                    <small class="text-muted">Type of barrier option</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="barrier_level" class="form-label">Barrier Level</label>
+                                    <input type="number" class="form-control" id="barrier_level" name="barrier_level" 
+                                           value="120.0" step="0.1" required>
+                                    <small class="text-muted">Barrier trigger level</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="rebate" class="form-label">Rebate</label>
+                                    <input type="number" class="form-control" id="rebate" name="rebate" 
+                                           value="0.0" step="0.1" required>
+                                    <small class="text-muted">Rebate if barrier is hit</small>
+                                </div>
+                            </div>
+
+                            <!-- Option Parameters -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h5 class="fw-bold text-primary mb-3">
+                                        <i class="bi bi-graph-up me-2"></i>Option Parameters
+                                    </h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="option_type" class="form-label">Option Type</label>
+                                    <select class="form-control" id="option_type" name="option_type" required>
+                                        <option value="call">Call</option>
+                                        <option value="put">Put</option>
+                                    </select>
+                                    <small class="text-muted">Call or Put option</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="strike_price" class="form-label">Strike Price (K)</label>
+                                    <input type="number" class="form-control" id="strike_price" name="strike_price" 
+                                           value="100.0" step="0.1" required>
+                                    <small class="text-muted">Exercise price of the option</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="evaluation_date" class="form-label">Evaluation Date</label>
+                                    <input type="date" class="form-control" id="evaluation_date" name="evaluation_date" 
+                                           value="2014-10-08" required>
+                                    <small class="text-muted">Date for pricing calculation</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="maturity_date" class="form-label">Maturity Date</label>
+                                    <input type="date" class="form-control" id="maturity_date" name="maturity_date" 
+                                           value="2015-01-08" required>
+                                    <small class="text-muted">Option expiration date</small>
+                                </div>
+                            </div>
+
+                            <!-- Market Parameters -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h5 class="fw-bold text-primary mb-3">
+                                        <i class="bi bi-currency-dollar me-2"></i>Market Parameters
+                                    </h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="underlying_price" class="form-label">Underlying Price (u)</label>
+                                    <input type="number" class="form-control" id="underlying_price" name="underlying_price" 
+                                           value="100.0" step="0.01" required>
+                                    <small class="text-muted">Current stock price</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="risk_free_rate" class="form-label">Risk-free Rate (r)</label>
+                                    <input type="number" class="form-control" id="risk_free_rate" name="risk_free_rate" 
+                                           value="0.01" step="0.0001" required>
+                                    <small class="text-muted">Annual interest rate as decimal</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="volatility" class="form-label">Volatility (σ)</label>
+                                    <input type="number" class="form-control" id="volatility" name="volatility" 
+                                           value="0.20" step="0.0001" required>
+                                    <small class="text-muted">Annual volatility as decimal</small>
+                                </div>
+                            </div>
+
+                            <!-- Perturbation Parameters -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <h5 class="fw-bold text-primary mb-3">
+                                        <i class="bi bi-sliders me-2"></i>Perturbation Parameters
+                                    </h5>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="underlying_perturbation" class="form-label">h for Underlying</label>
+                                    <input type="number" class="form-control" id="underlying_perturbation" name="underlying_perturbation" 
+                                           value="0.01" step="0.001" required>
+                                    <small class="text-muted">Step size for Delta/Gamma calculation</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="rate_perturbation" class="form-label">h for Rate</label>
+                                    <input type="number" class="form-control" id="rate_perturbation" name="rate_perturbation" 
+                                           value="0.0001" step="0.00001" required>
+                                    <small class="text-muted">Step size for Rho calculation</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="volatility_perturbation" class="form-label">h for Volatility</label>
+                                    <input type="number" class="form-control" id="volatility_perturbation" name="volatility_perturbation" 
+                                           value="0.0001" step="0.00001" required>
+                                    <small class="text-muted">Step size for Vega calculation</small>
+                                </div>
+                            </div>
+
+                            <div class="text-center">
+                                <button type="button" class="btn btn-primary btn-lg" onclick="calculateGreeks()">
+                                    <i class="bi bi-calculator me-2"></i>Calculate Greeks
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Results Section -->
+                <div id="pricingResults" class="row mb-4" style="display: none;">
+                    <div class="col-12">
+                        <h5 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-graph-up me-2"></i>Calculated Results
+                        </h5>
+                        <div class="row g-2" id="resultsContainer">
+                            <!-- Results will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Section -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h5 class="fw-bold text-primary mb-3">
+                            <i class="bi bi-graph-up me-2"></i>Greeks Visualization
+                        </h5>
+                        
+                        <!-- Chart Controls -->
+                        <div class="row mb-3">
+                            <div class="col-12">
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="showNPV" checked>
+                                    <label class="form-check-label" for="showNPV">NPV</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="showDelta" checked>
+                                    <label class="form-check-label" for="showDelta">Delta</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="showGamma" checked>
+                                    <label class="form-check-label" for="showGamma">Gamma</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="showRho">
+                                    <label class="form-check-label" for="showRho">Rho</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="checkbox" id="showVega">
+                                    <label class="form-check-label" for="showVega">Vega</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chart Container -->
+                        <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                            <canvas id="greeksChart"></canvas>
+                        </div>
+                        
+                        <small class="text-muted">
+                            <strong>How to use:</strong> First, calculate your Greeks to create the chart. 
+                            Then change any setting and click "Calculate Greeks" again to see how the curves change. 
+                            Use the checkboxes to toggle which curves are visible.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Concepts -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-lightbulb me-2"></i>Key Concepts
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-primary">Delta (Δ)</h5>
+                        <p class="text-muted">
+                            Measures how much the option price changes when the underlying asset price changes by $1.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-primary">Gamma (Γ)</h5>
+                        <p class="text-muted">
+                            Measures how fast Delta itself changes, indicating the curvature of the option price.
+                        </p>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-primary">Rho (ρ)</h5>
+                        <p class="text-muted">
+                            Measures how much the option price changes when the interest rate changes by 1%.
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-primary">Vega (ν)</h5>
+                        <p class="text-muted">
+                            Measures how much the option price changes when volatility changes by 1%.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mathematical Foundation -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-calculator me-2"></i>Mathematical Foundation
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    Greeks are calculated using numerical differentiation methods. For a given option price function V(S, r, σ),
+                    we compute the partial derivatives using finite differences:
+                </p>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Delta (First Order)</h6>
+                        <p class="text-muted small">Δ = ∂V/∂S ≈ (V(S+h) - V(S-h)) / (2h)</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Gamma (Second Order)</h6>
+                        <p class="text-muted small">Γ = ∂²V/∂S² ≈ (V(S+h) - 2V(S) + V(S-h)) / h²</p>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Rho (Interest Rate)</h6>
+                        <p class="text-muted small">ρ = ∂V/∂r ≈ (V(r+h) - V(r-h)) / (2h)</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Vega (Volatility)</h6>
+                        <p class="text-muted small">ν = ∂V/∂σ ≈ (V(σ+h) - V(σ-h)) / (2h)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Explanations Section - same structure as Chapter 2 -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Understanding the Results
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h5 class="fw-bold text-primary">Understanding Your Results</h5>
+                        <p class="text-muted mb-3">
+                            The results above show the calculated option price and numerical Greeks based on your input parameters. 
+                            Each metric provides specific information about how the option behaves under different market conditions.
+                        </p>
+                        <div class="alert alert-info">
+                            <h6 class="fw-bold mb-2">How to Read the Results:</h6>
+                            <ul class="mb-0">
+                                <li><strong>NPV:</strong> The fair price of the option today</li>
+                                <li><strong>Delta:</strong> If the stock goes up $1, the option price changes roughly $X</li>
+                                <li><strong>Gamma:</strong> Shows how Delta changes if the stock price changes a bit</li>
+                                <li><strong>Rho:</strong> Shows how the option price reacts if interest rates change</li>
+                                <li><strong>Vega:</strong> Shows how the option price reacts if volatility changes</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+// Chart instance - same structure as Chapter 2
+let greeksChart;
+let hasBaseline = false;
+
+// Initialize chart - same structure as Chapter 2
+function initializeChart() {
+    const ctx = document.getElementById('greeksChart').getContext('2d');
+    greeksChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array.from({length: 21}, (_, i) => 90 + i), // 90 to 110
+            datasets: []
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Underlying Price (u)'
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Value'
+                    },
+                    grid: {
+                        color: 'rgba(0,0,0,0.1)'
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+}
+
+// Show default chart with dummy data - same structure as Chapter 2
+function showDefaultChart() {
+    if (!greeksChart) {
+        initializeChart();
+    }
+
+    // Dummy data as specified - EXACT VALUES
+    const u_values = [90, 95, 100, 105, 110];
+    const npv_values = [2, 4, 6, 8, 10];
+    const delta_values = [0.1, 0.2, 0.3, 0.4, 0.5];
+    const gamma_values = [0.05, 0.06, 0.05, 0.04, 0.03];
+    const rho_values = [5.0, 5.5, 6.0, 6.3, 6.5];
+    const vega_values = [20, 23, 26, 28, 30];
+
+    // Clear existing datasets
+    greeksChart.data.datasets = [];
+    greeksChart.data.labels = u_values.map(p => p.toString());
+
+    // Add curves based on checkbox states - same structure as Chapter 2
+    if (document.getElementById('showNPV') && document.getElementById('showNPV').checked) {
+        greeksChart.data.datasets.push({
+            label: 'Option Price (NPV)',
+            data: npv_values,
+            borderColor: '#000000', // Black line like Chapter 2
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            borderWidth: 3,
+            tension: 0.1,
+            pointRadius: 0,
+            pointHoverRadius: 4
+        });
+    }
+
+    if (document.getElementById('showDelta') && document.getElementById('showDelta').checked) {
+        greeksChart.data.datasets.push({
+            label: 'Delta (Δ)',
+            data: delta_values,
+            borderColor: '#ff8c00', // Orange line like Chapter 2
+            backgroundColor: 'rgba(255, 140, 0, 0.1)',
+            borderWidth: 2,
+            borderDash: [5, 5], // Dashed line like Chapter 2
+            tension: 0.1,
+            pointRadius: 0,
+            pointHoverRadius: 4
+        });
+    }
+
+    if (document.getElementById('showGamma') && document.getElementById('showGamma').checked) {
+        greeksChart.data.datasets.push({
+            label: 'Gamma (Γ)',
+            data: gamma_values,
+            borderColor: '#28a745', // Green line
+            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+            borderWidth: 2,
+            borderDash: [5, 5], // Dashed line
+            tension: 0.1,
+            pointRadius: 0,
+            pointHoverRadius: 4
+        });
+    }
+
+    if (document.getElementById('showRho') && document.getElementById('showRho').checked) {
+        greeksChart.data.datasets.push({
+            label: 'Rho (ρ)',
+            data: rho_values,
+            borderColor: '#6f42c1', // Purple line
+            backgroundColor: 'rgba(111, 66, 193, 0.1)',
+            borderWidth: 2,
+            borderDash: [5, 5], // Dashed line
+            tension: 0.1,
+            pointRadius: 0,
+            pointHoverRadius: 4
+        });
+    }
+
+    if (document.getElementById('showVega') && document.getElementById('showVega').checked) {
+        greeksChart.data.datasets.push({
+            label: 'Vega (ν)',
+            data: vega_values,
+            borderColor: '#dc3545', // Red line
+            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+            borderWidth: 2,
+            borderDash: [5, 5], // Dashed line
+            tension: 0.1,
+            pointRadius: 0,
+            pointHoverRadius: 4
+        });
+    }
+
+    greeksChart.update();
+}
+
+// Calculate Greeks function
+function calculateGreeks() {
+    const form = document.getElementById('greeksForm');
+    if (!form) {
+        console.error('Form not found');
+        return;
+    }
+
+    const formData = new FormData(form);
+    const formObject = {};
+    for (let [key, value] of formData.entries()) {
+        formObject[key] = value;
+    }
+
+    // Show loading state
+    const button = document.querySelector('button[onclick="calculateGreeks()"]');
+    if (button) {
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Calculating...';
+        button.disabled = true;
+
+        // Simulate calculation for now
+        setTimeout(() => {
+            // Mock results
+            const mockResult = {
+                success: true,
+                npv: 5.25,
+                delta: 0.301,
+                gamma: 0.0517,
+                rho: 6.53,
+                vega: 26.52
+            };
+            
+            displayResults(mockResult);
+            updateChart();
+            
+            // Restore button state
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }, 1000);
+    }
+}
+
+// Display results - same structure as Chapter 2
+function displayResults(result) {
+    const resultsDiv = document.getElementById('pricingResults');
+    const container = document.getElementById('resultsContainer');
+
+    if (result.success) {
+        let html = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-primary">Option Price</h5>
+                    <div class="result-value">$${result.npv.toFixed(4)}</div>
+                    <p class="text-muted small mb-2">This is how much the option is worth today.</p>
+                </div>
+                <div class="col-md-6">
+                    <h5 class="fw-bold text-primary">Numerical Greeks</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <strong>Delta:</strong> ${result.delta.toFixed(4)}
+                            <br><small class="text-muted">If the stock goes up $1, the option price changes roughly $${result.delta.toFixed(4)}</small>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Gamma:</strong> ${result.gamma.toFixed(4)}
+                            <br><small class="text-muted">Shows how Delta changes if the stock price changes a bit</small>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Rho:</strong> ${result.rho.toFixed(4)}
+                            <br><small class="text-muted">Shows how the option price reacts if interest rates change</small>
+                        </li>
+                        <li class="mb-3">
+                            <strong>Vega:</strong> ${result.vega.toFixed(4)}
+                            <br><small class="text-muted">Shows how the option price reacts if volatility changes</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        `;
+        
+        if (container) {
+            container.innerHTML = html;
+        }
+        if (resultsDiv) {
+            resultsDiv.style.display = 'block';
+        }
+    } else {
+        displayError(result.error || 'Calculation failed');
+    }
+}
+
+// Display error
+function displayError(message) {
+    const resultsDiv = document.getElementById('pricingResults');
+    const container = document.getElementById('resultsContainer');
+    
+    if (container) {
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                <h5>Error</h5>
+                <p>${message}</p>
+            </div>
+        `;
+    }
+    
+    if (resultsDiv) {
+        resultsDiv.style.display = 'block';
+    }
+}
+
+// Update chart with new data - same structure as Chapter 2
+function updateChart() {
+    if (greeksChart) {
+        showDefaultChart();
+    }
+}
+
+// Clear all chart datasets - same as Chapter 2
+function clearChart() {
+    greeksChart.data.datasets = [];
+    hasBaseline = false;
+    greeksChart.update();
+}
+
+// Event listeners - same structure as Chapter 2
+document.addEventListener('DOMContentLoaded', function() {
+    initializeChart();
+    showDefaultChart();
+    
+    // Setup checkbox event listeners
+    const checkboxes = ['showNPV', 'showDelta', 'showGamma', 'showRho', 'showVega'];
+    checkboxes.forEach(id => {
+        const checkbox = document.getElementById(id);
+        if (checkbox) {
+            checkbox.addEventListener('change', function() {
+                if (greeksChart) {
+                    showDefaultChart();
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}

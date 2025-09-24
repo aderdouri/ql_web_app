@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'chapter_calibration',
     'chapter_heston_option',
     'chapter_mc_convergence',
-    'chapter_par_vs_indexed', ]
+    'chapter_par_vs_indexed',
+    'market_quotes', ]
 
 
 MIDDLEWARE = [
