@@ -1,0 +1,442 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Chapter 3: Numerical Greeks Lab{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="mb-0"><i class="bi bi-calculator me-2"></i>Chapter 3: Numerical Greeks Lab</h1>
+                </div>
+                <div class="card-body">
+                    <p class="lead">Calculate option sensitivities (Greeks) using numerical differentiation methods for barrier options.</p>
+                    
+                    <!-- Form Section -->
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-info text-white">
+                                    <h3><i class="bi bi-gear me-2"></i>Input Parameters</h3>
+                                </div>
+                                <div class="card-body">
+                                    <form id="greeksForm" method="post">
+                                        {% csrf_token %}
+                                        
+                                        <!-- Barrier Option Parameters -->
+                                        <div class="mb-3">
+                                            <label for="barrier_type" class="form-label">Barrier Type</label>
+                                            <select id="barrier_type" name="barrier_type" class="form-select">
+                                                <option value="UpIn">Up-and-In (activated when price rises above barrier)</option>
+                                                <option value="UpOut">Up-and-Out (deactivated when price rises above barrier)</option>
+                                                <option value="DownIn">Down-and-In (activated when price falls below barrier)</option>
+                                                <option value="DownOut">Down-and-Out (deactivated when price falls below barrier)</option>
+                                            </select>
+                                            <div class="form-text">Choose the barrier option type. The system will automatically adjust the barrier level if needed.</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="barrier_level" class="form-label">Barrier Level</label>
+                                            <input type="number" id="barrier_level" name="barrier_level" value="120.0" step="0.1" class="form-control">
+                                            <div class="form-text">Price level that triggers the barrier. For Up barriers, use values above current price. For Down barriers, use values below current price.</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="rebate" class="form-label">Rebate</label>
+                                            <input type="number" id="rebate" name="rebate" value="0.0" step="0.1" class="form-control">
+                                            <div class="form-text">Payment made to the holder if the barrier is touched (typically 0 for most options).</div>
+                                        </div>
+                                        
+                                        <!-- Option Parameters -->
+                                        <div class="mb-3">
+                                            <label for="option_type" class="form-label">Option Type</label>
+                                            <select id="option_type" name="option_type" class="form-select">
+                                                <option value="Call">Call (right to buy)</option>
+                                                <option value="Put">Put (right to sell)</option>
+                                            </select>
+                                            <div class="form-text">Type of underlying option contract.</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="strike_price" class="form-label">Strike Price (K)</label>
+                                            <input type="number" id="strike_price" name="strike_price" value="100.0" step="0.1" class="form-control">
+                                            <div class="form-text">Price at which the option can be exercised. Use values around the current underlying price for realistic scenarios.</div>
+                                        </div>
+                                        
+                                        <!-- Dates -->
+                                        <div class="mb-3">
+                                            <label for="evaluation_date" class="form-label">Evaluation Date</label>
+                                            <input type="date" id="evaluation_date" name="evaluation_date" value="2014-10-08" class="form-control">
+                                            <div class="form-text">Date for which the option is being valued (today's date).</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="maturity_date" class="form-label">Maturity Date</label>
+                                            <input type="date" id="maturity_date" name="maturity_date" value="2015-01-08" class="form-control">
+                                            <div class="form-text">Expiration date of the option. Must be after the evaluation date.</div>
+                                        </div>
+                                        
+                                        <!-- Market Data -->
+                                        <div class="mb-3">
+                                            <label for="underlying_price" class="form-label">Underlying Price (Spot Price, S)</label>
+                                            <input type="number" id="underlying_price" name="underlying_price" value="100.0" step="0.1" class="form-control">
+                                            <div class="form-text">Current market price of the underlying asset. This is the most important parameter affecting option value.</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="risk_free_rate" class="form-label">Risk-free Rate (r)</label>
+                                            <input type="number" id="risk_free_rate" name="risk_free_rate" value="0.01" step="0.001" class="form-control">
+                                            <div class="form-text">Annual risk-free interest rate (e.g., 0.01 = 1%). Use current market rates for realistic scenarios.</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="volatility" class="form-label">Volatility (σ)</label>
+                                            <input type="number" id="volatility" name="volatility" value="0.20" step="0.01" class="form-control">
+                                            <div class="form-text">Annual volatility of the underlying asset (e.g., 0.20 = 20%). Higher volatility increases option value.</div>
+                                        </div>
+                                        
+                                        <!-- Perturbation Parameters -->
+                                        <div class="mb-3">
+                                            <label for="h_underlying" class="form-label">Perturbation h for Underlying</label>
+                                            <input type="number" id="h_underlying" name="h_underlying" value="0.01" step="0.001" class="form-control">
+                                            <div class="form-text">Step size for Delta and Gamma calculations. Smaller values give more accurate results but may cause numerical issues.</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="h_rate" class="form-label">Perturbation h for Rate</label>
+                                            <input type="number" id="h_rate" name="h_rate" value="0.0001" step="0.00001" class="form-control">
+                                            <div class="form-text">Step size for Rho calculation. Use small values (0.0001) for interest rate sensitivity.</div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="h_volatility" class="form-label">Perturbation h for Volatility</label>
+                                            <input type="number" id="h_volatility" name="h_volatility" value="0.0001" step="0.00001" class="form-control">
+                                            <div class="form-text">Step size for Vega calculation. Use small values (0.0001) for volatility sensitivity.</div>
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                                            <i class="bi bi-calculator me-2"></i>Calculate Greeks
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Results Section -->
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-success text-white">
+                                    <h3><i class="bi bi-graph-up me-2"></i>Results</h3>
+                                </div>
+                                <div class="card-body">
+                                    <div id="error-message" class="alert alert-danger" style="display: none;"></div>
+                                    <div id="loading" class="text-center" style="display: none;">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Calculating...</span>
+                                        </div>
+                                        <p class="mt-2">Calculating Greeks...</p>
+                                    </div>
+                                    
+                                    <!-- Intermediate Calculations -->
+                                    <div id="intermediate-calculations" style="display: none;">
+                                        <h5><i class="bi bi-list-ol me-2"></i>Intermediate Calculations (Notebook Steps)</h5>
+                                        <div class="row mb-3">
+                                            <div class="col-4">
+                                                <div class="card text-center">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Step 1: Base Price (Out[11])</h6>
+                                                        <p class="card-text h5 text-primary" id="p0-value">-</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="card text-center">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Step 2: Price with S+h (Out[12])</h6>
+                                                        <p class="card-text h5 text-success" id="p-plus-value">-</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-4">
+                                                <div class="card text-center">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Step 3: Price with S-h (Out[13])</h6>
+                                                        <p class="card-text h5 text-warning" id="p-minus-value">-</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Final Results -->
+                                    <div id="results-grid" style="display: none;">
+                                        <h5><i class="bi bi-trophy me-2"></i>Final Results</h5>
+                                        <div class="row">
+                                            <div class="col-6 mb-3">
+                                                <div class="card text-center">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Option Price (NPV)</h6>
+                                                        <p class="card-text h4 text-primary" id="npv-value">-</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-3">
+                                                <div class="card text-center">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Delta (Δ)</h6>
+                                                        <p class="card-text h4 text-success" id="delta-value">-</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-3">
+                                                <div class="card text-center">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Gamma (Γ)</h6>
+                                                        <p class="card-text h4 text-info" id="gamma-value">-</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-3">
+                                                <div class="card text-center">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Rho (ρ)</h6>
+                                                        <p class="card-text h4 text-warning" id="rho-value">-</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-3">
+                                                <div class="card text-center">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Vega (ν)</h6>
+                                                        <p class="card-text h4 text-danger" id="vega-value">-</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-3">
+                                                <div class="card text-center">
+                                                    <div class="card-body">
+                                                        <h6 class="card-title">Theta (Θ)</h6>
+                                                        <p class="card-text h4 text-secondary" id="theta-value">-</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Chart Section -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-warning text-dark">
+                                    <h3><i class="bi bi-graph-up me-2"></i>Interactive Chart</h3>
+                                </div>
+                                <div class="card-body">
+                                    <p>Visualize the relationship between underlying price and option value, along with the Greeks.</p>
+                                    <div class="chart-container" style="position: relative; height: 400px;">
+                                        <canvas id="greeksChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('greeksForm');
+    const errorMessage = document.getElementById('error-message');
+    const loading = document.getElementById('loading');
+    const resultsGrid = document.getElementById('results-grid');
+    const intermediateCalculations = document.getElementById('intermediate-calculations');
+    
+    let chart = null;
+    
+    // Form submission
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Show loading
+        loading.style.display = 'block';
+        errorMessage.style.display = 'none';
+        resultsGrid.style.display = 'none';
+        intermediateCalculations.style.display = 'none';
+        
+        // Clear any existing info messages
+        const existingMessages = document.querySelectorAll('.alert.alert-info');
+        existingMessages.forEach(msg => msg.remove());
+        
+        // Collect form data
+        const formData = new FormData(form);
+        
+        // Send request
+        fetch('{% url "chapter3_numerical_greeks:numerical_greeks_lab_api" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            loading.style.display = 'none';
+            
+            if (data.success) {
+                displayResults(data);
+                updateChart(data.chart_data);
+            } else {
+                showError(data.error);
+            }
+        })
+        .catch(error => {
+            loading.style.display = 'none';
+            showError('Network error: ' + error.message);
+        });
+    });
+    
+    function displayResults(data) {
+        // Display intermediate calculations (Notebook steps)
+        document.getElementById('p0-value').textContent = data.npv.toFixed(6);
+        document.getElementById('p-plus-value').textContent = data.P_plus ? data.P_plus.toFixed(6) : '-';
+        document.getElementById('p-minus-value').textContent = data.P_minus ? data.P_minus.toFixed(6) : '-';
+        
+        // Display final results
+        document.getElementById('npv-value').textContent = data.npv.toFixed(6);
+        document.getElementById('delta-value').textContent = data.delta.toFixed(6);
+        document.getElementById('gamma-value').textContent = data.gamma.toFixed(6);
+        document.getElementById('rho-value').textContent = data.rho.toFixed(6);
+        document.getElementById('vega-value').textContent = data.vega.toFixed(6);
+        document.getElementById('theta-value').textContent = data.theta.toFixed(6);
+        
+        // Show barrier adjustment message if applicable
+        if (data.barrier_adjusted) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'alert alert-info';
+            messageDiv.innerHTML = `<strong>Info:</strong> ${data.message}`;
+            resultsGrid.parentNode.insertBefore(messageDiv, resultsGrid);
+        }
+        
+        intermediateCalculations.style.display = 'block';
+        resultsGrid.style.display = 'block';
+    }
+    
+    function showError(message) {
+        errorMessage.textContent = message;
+        errorMessage.style.display = 'block';
+        resultsGrid.style.display = 'none';
+        intermediateCalculations.style.display = 'none';
+    }
+    
+    function updateChart(chartData) {
+        const ctx = document.getElementById('greeksChart').getContext('2d');
+        
+        if (chart) {
+            chart.destroy();
+        }
+        
+        chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartData.u_values.map(u => u.toFixed(2)),
+                datasets: [
+                    {
+                        label: 'NPV',
+                        data: chartData.npv_values,
+                        borderColor: 'rgb(0, 123, 255)',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        fill: true,
+                        tension: 0.1,
+                        borderWidth: 3
+                    },
+                    {
+                        label: 'Delta',
+                        data: chartData.delta_values,
+                        borderColor: 'rgb(40, 167, 69)',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        fill: false,
+                        tension: 0.1,
+                        borderDash: [5, 5]
+                    },
+                    {
+                        label: 'Gamma',
+                        data: chartData.gamma_values,
+                        borderColor: 'rgb(255, 193, 7)',
+                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                        fill: false,
+                        tension: 0.1,
+                        borderDash: [2, 2]
+                    },
+                    {
+                        label: 'Rho',
+                        data: chartData.rho_values,
+                        borderColor: 'rgb(220, 53, 69)',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        fill: false,
+                        tension: 0.1,
+                        borderDash: [5, 2, 2, 2]
+                    },
+                    {
+                        label: 'Vega',
+                        data: chartData.vega_values,
+                        borderColor: 'rgb(108, 117, 125)',
+                        backgroundColor: 'rgba(108, 117, 125, 0.1)',
+                        fill: false,
+                        tension: 0.1,
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                        labels: {
+                            boxWidth: 20
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Underlying Price (S)'
+                        },
+                        grid: {
+                            display: true
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Value'
+                        },
+                        grid: {
+                            display: true
+                        }
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

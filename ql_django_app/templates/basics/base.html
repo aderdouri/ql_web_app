@@ -4,15 +4,6 @@
 
 {% block page_content %}
 <div class="container py-5">
-    <!-- Page Header -->
-    <div class="row mb-5">
-        <div class="col-12 text-center">
-            <h1 class="display-4 fw-bold text-dark mb-3">
-                <i class="bi bi-calculator text-primary me-3"></i>QuantLib Basics
-            </h1>
-            <p class="lead text-muted">Master the fundamental concepts of quantitative finance with interactive laboratories</p>
-        </div>
-    </div>
 
     <!-- Chapter Navigation -->
     {% block chapter_navigation %}
@@ -59,11 +50,11 @@
                 <div class="card h-100">
                     <div class="card-body text-center">
                         <div class="mb-3">
-                            <i class="bi bi-graph-up text-primary" style="font-size: 2.5rem;"></i>
+                            <i class="bi bi-calculator text-primary" style="font-size: 2.5rem;"></i>
                         </div>
-                        <h5 class="card-title fw-bold">3. Greeks Calculation</h5>
-                        <p class="card-text text-muted small">Numerical Greeks calculation methods and techniques</p>
-                        <a href="{% url 'basics:chapter3' %}" class="btn btn-primary btn-sm">
+                        <h5 class="card-title fw-bold">3. Numerical Greeks</h5>
+                        <p class="card-text text-muted small">Calculate option sensitivities using numerical differentiation</p>
+                        <a href="{% url 'chapter3_numerical_greeks:greeks_lab' %}" class="btn btn-primary btn-sm">
                             <i class="bi bi-play-circle me-1"></i>View Chapter
                         </a>
                     </div>
@@ -108,7 +99,7 @@
                         </div>
                         <h5 class="card-title fw-bold">6. Pricing Over Time</h5>
                         <p class="card-text text-muted small">Pricing instruments over a range of days and time periods</p>
-                        <a href="{% url 'basics:chapter6' %}" class="btn btn-primary btn-sm">
+                        <a href="{% url 'chapter6_pricing_range:pricing_range_lab' %}" class="btn btn-primary btn-sm">
                             <i class="bi bi-play-circle me-1"></i>View Chapter
                         </a>
                     </div>

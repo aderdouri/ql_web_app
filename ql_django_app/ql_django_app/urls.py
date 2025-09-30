@@ -13,6 +13,8 @@ urlpatterns = [
     path('chapter3-numerical-greeks/', include('chapter3_numerical_greeks.urls')),
     path('chapter4-quotes/', include('chapter4_quotes.urls')),
     path('chapter5-curves/', include('chapter5_curves.urls')),
+    path('chapter6-pricing-range/', include('chapter6_pricing_range.urls')),
+    path('chapter7-random/', include('chapter7_random.urls')),
     path('interest-rate-curves/', include('interest_rate_curves.urls')),
     path('interest-rate-models/', include('interest_rate_models.urls')),
     path('equity-models/', include('equity_models.urls')),

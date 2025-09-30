@@ -1,39 +1,96 @@
 from django.shortcuts import render
-from .forms import RandomGeneratorForm
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
+import json
+from .forms import RandomNumbersForm
 from . import services
 
-def random_lab_view(request):
-    """
-    Manages the "Random Numbers Lab" page.
-    It handles both displaying the form and processing the submitted data
-    to generate and display random sequences.
-    """
-    
-    # Initialize with an empty form for a GET request, or a populated one for POST
-    form = RandomGeneratorForm(request.POST or None)
+def random_numbers_view(request):
+    """Main view for Chapter 7: Random Numbers and Dimensionality"""
+    form = RandomNumbersForm()
     results = None
     
-    # Process the form only if the method is POST and the form is valid
-    if request.method == 'POST' and form.is_valid():
-        try:
-            # Call the service with the cleaned data from the form
-            results = services.generate_random_sequence(
-                generator_type=form.cleaned_data['generator_type'],
-                num_points=form.cleaned_data['num_points'],
-                seed=form.cleaned_data['seed'],
-                dimensionality=form.cleaned_data['dimensionality']
-            )
-        except Exception as e:
-            # Handle potential errors from the service, although it's robust
-            print(f"Error in random number generation service: {e}")
-            # You could add a Django message here if you want
-            # messages.error(request, f"Calculation failed: {e}")
-
-    # Prepare the context to be passed to the template
-    context = {
-        'form': form, 
-        'results': results
-    }
+    # Always attempt to get results, even on initial GET request
+    if request.method == 'GET':
+        # For initial GET, use default form data to get demo results
+        form = RandomNumbersForm()
+        
+        # Get all parameters
+        rng_params = form.get_rng_parameters()
+        option_params = form.get_option_parameters()
+        
+        # Calculate all results
+        results = services.calculate_all_results(rng_params, option_params)
+        
+    elif request.method == 'POST':
+        form = RandomNumbersForm(request.POST)
+        if form.is_valid():
+            # For POST requests, validate form
+            rng_params = form.get_rng_parameters()
+            option_params = form.get_option_parameters()
+            
+            # Calculate all results
+            results = services.calculate_all_results(rng_params, option_params)
     
-    # Render the final HTML page
+        # Include all chart data for the complete notebook implementation
+        if results:
+            # Keep all data for complete notebook reproduction
+            complete_results = {
+                'success': results.get('success', False),
+                'random_numbers': results.get('random_numbers', []),
+                'unit_square_data': results.get('unit_square_data', None),
+                'sobol_1d_data': results.get('sobol_1d_data', None),
+                'sobol_2d_data': results.get('sobol_2d_data', None),
+                'correlated_stocks_data': results.get('correlated_stocks_data', None),
+                'black_scholes_price': results.get('black_scholes_price', 0.0),
+                'monte_carlo_price_rng': results.get('monte_carlo_price_rng', 0.0),
+                'monte_carlo_price_sobol': results.get('monte_carlo_price_sobol', 0.0),
+                'error': results.get('error', None)
+            }
+            results = complete_results
+    
+    context = {
+        'form': form,
+        'results': results,
+        'lab_title': 'Chapter 7: A note on random numbers and dimensionality',
+        'lab_icon': 'bi-dice-6',
+        'lab_description': 'Explore different random number generators and their impact on Monte Carlo simulations.'
+    }
     return render(request, 'chapter7_random/random_lab.html', context)
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def calculate_random_numbers_api(request):
+    """API endpoint for AJAX calculations"""
+    try:
+        # Handle both JSON and form data
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+        else:
+            # Handle form data
+            data = request.POST
+        
+        form = RandomNumbersForm(data)
+        
+        if form.is_valid():
+            rng_params = form.get_rng_parameters()
+            option_params = form.get_option_parameters()
+            
+            results = services.calculate_all_results(rng_params, option_params)
+            
+            return JsonResponse({
+                'success': True,
+                'data': results
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'errors': form.errors
+            })
+            
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })

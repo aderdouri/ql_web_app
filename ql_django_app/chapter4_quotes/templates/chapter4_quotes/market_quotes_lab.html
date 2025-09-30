@@ -1,0 +1,682 @@
+{% extends "basics/lab_base.html" %}
+
+{% block title %}{{ lab_title }} - {{ block.super }}{% endblock %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .lab-content-wrapper { display: flex; flex-wrap: wrap; gap: 2rem; margin-top: 2rem; }
+        .controls-panel { flex: 1; min-width: 350px; }
+        .results-panel { flex: 2; min-width: 400px; }
+        
+        .card { border: none; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); border-radius: 12px; }
+        .card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px 12px 0 0 !important; }
+        .card-header h5 { margin: 0; font-weight: 600; }
+        
+        .form-section { margin-bottom: 1.5rem; padding: 1.25rem; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #007bff; }
+        .section-title { color: #007bff; font-size: 1.1rem; margin-bottom: 1rem; font-weight: 600; }
+        
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #495057; font-size: 0.9rem; }
+        .form-control { border: 2px solid #e9ecef; border-radius: 6px; padding: 0.75rem; transition: all 0.3s ease; }
+        .form-control:focus { border-color: #007bff; box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25); }
+        
+        .bond-matrix { margin-top: 1rem; }
+        .bond-matrix .table { margin-bottom: 0; }
+        .bond-matrix th { background-color: #f8f9fa; font-weight: 600; font-size: 0.9rem; padding: 0.75rem; }
+        .bond-matrix td { padding: 0.5rem; }
+        .bond-matrix input { width: 100%; padding: 0.5rem; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem; }
+        
+        .btn-primary { background: linear-gradient(135deg, #007bff 0%, #0056b3 100%); border: none; border-radius: 6px; padding: 0.75rem 1.5rem; font-weight: 600; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3); }
+        
+        .results-section { margin-bottom: 2rem; }
+        .results-section h3 { color: #007bff; border-bottom: 2px solid #e9ecef; padding-bottom: 0.5rem; margin-bottom: 1.5rem; font-weight: 600; }
+        
+        .result-box-large { background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px solid #007bff; padding: 2rem; border-radius: 12px; text-align: center; margin-bottom: 1.5rem; }
+        .result-box-large h4 { margin: 0 0 1rem 0; color: #007bff; font-size: 1.2rem; font-weight: 600; }
+        .price-value { font-size: 2.5rem; font-weight: 700; margin: 0; color: #212529; }
+        
+        .chart-container { background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); margin-bottom: 1.5rem; }
+        .chart-description { font-size: 0.9rem; color: #6c757d; margin-bottom: 1rem; font-style: italic; }
+        .chart-container canvas { max-width: 100%; height: 300px !important; }
+        
+        .price-history-container { background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%); padding: 1.5rem; border-radius: 12px; border-left: 4px solid #28a745; }
+        .price-list { max-height: 200px; overflow-y: auto; }
+        .price-list p { margin: 0.25rem 0; font-family: 'Courier New', monospace; font-size: 0.9rem; background: white; padding: 0.25rem 0.5rem; border-radius: 4px; }
+        
+        .scenarios-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .scenario-box { background: white; border: 1px solid #e9ecef; padding: 1.5rem; border-radius: 12px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .scenario-box h4 { color: #007bff; margin-bottom: 1rem; font-size: 1.1rem; font-weight: 600; }
+        .scenario-results p { margin: 0.5rem 0; font-size: 0.9rem; }
+        .scenario-results strong { color: #495057; }
+        
+        .alert { border-radius: 8px; border: none; }
+        .alert-danger { background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%); color: #721c24; }
+    </style>
+{% endblock %}
+
+{% block lab_content %}
+<div class="lab-content-wrapper">
+    <div class="controls-panel">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">📊 Market Quotes Parameters</h5>
+            </div>
+            <div class="card-body">
+        <form id="marketQuotesForm" method="post">
+            {% csrf_token %}
+            
+            <!-- Section 1: Evaluation Date -->
+            <div class="form-section">
+                <h4 class="section-title">📅 Evaluation Date (today)</h4>
+                <div class="form-group">
+                    {{ form.evaluation_date.label_tag }}
+                    {{ form.evaluation_date }}
+                    <small class="form-text text-muted">{{ form.evaluation_date.help_text }}</small>
+                </div>
+            </div>
+            
+            <!-- Section 2: Calendar & Settlement -->
+            <div class="form-section">
+                <h4 class="section-title">🗓️ Calendar & Settlement</h4>
+                <div class="form-group">
+                    {{ form.calendar_choice.label_tag }}
+                    {{ form.calendar_choice }}
+                    <small class="form-text text-muted">{{ form.calendar_choice.help_text }}</small>
+                </div>
+                <div class="form-group">
+                    {{ form.settlement_days.label_tag }}
+                    {{ form.settlement_days }}
+                    <small class="form-text text-muted">{{ form.settlement_days.help_text }}</small>
+                </div>
+            </div>
+            
+            <!-- Section 3: Bond Matrix -->
+            <div class="form-section">
+                <h4 class="section-title">📊 Bond Matrix (Maturity & Coupon)</h4>
+                <div class="bond-matrix">
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Maturity (years)</th>
+                                    <th>Coupon (annual rate)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bondMatrixBody">
+                                <!-- Rows will be generated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Section 4: Initial Bond Prices -->
+            <div class="form-section">
+                <h4 class="section-title">💰 Initial Bond Prices (quotes)</h4>
+                <div class="form-group">
+                    {{ form.initial_quote_value.label_tag }}
+                    {{ form.initial_quote_value }}
+                    <small class="form-text text-muted">{{ form.initial_quote_value.help_text }}</small>
+                </div>
+            </div>
+            
+            <!-- Section 5: Test Bond -->
+            <div class="form-section">
+                <h4 class="section-title">🧪 Test Bond (15yr, 4% coupon, Actual360, Semiannual)</h4>
+                <div class="form-group">
+                    {{ form.test_bond_maturity.label_tag }}
+                    {{ form.test_bond_maturity }}
+                    <small class="form-text text-muted">{{ form.test_bond_maturity.help_text }}</small>
+                </div>
+                <div class="form-group">
+                    {{ form.test_bond_coupon.label_tag }}
+                    {{ form.test_bond_coupon }}
+                    <small class="form-text text-muted">{{ form.test_bond_coupon.help_text }}</small>
+                </div>
+                <div class="form-group">
+                    {{ form.test_bond_nominal.label_tag }}
+                    {{ form.test_bond_nominal }}
+                    <small class="form-text text-muted">{{ form.test_bond_nominal.help_text }}</small>
+                </div>
+            </div>
+            
+            <!-- Section 6: Technical Parameters (fixed) -->
+            <div class="form-section">
+                <h4 class="section-title">⚙️ Technical Parameters (fixed per book)</h4>
+                <div class="form-group">
+                    {{ form.day_count_convention.label_tag }}
+                    {{ form.day_count_convention }}
+                    <small class="form-text text-muted">{{ form.day_count_convention.help_text }}</small>
+                </div>
+                <div class="form-group">
+                    {{ form.frequency.label_tag }}
+                    {{ form.frequency }}
+                    <small class="form-text text-muted">{{ form.frequency.help_text }}</small>
+                </div>
+            </div>
+            </form>
+            <button type="button" id="updateChartsBtn" class="btn btn-primary w-100 mt-3">Update Calculations</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="results-panel">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">📈 Market Quotes Results</h5>
+            </div>
+            <div class="card-body">
+                <div id="error-message-container" class="alert alert-danger" style="display: none;"></div>
+        
+        <!-- Section 1: Test Bond Price -->
+        <div class="results-section">
+            <h3>🧪 Test Bond Price (15yr, 4% coupon)</h3>
+            <div class="result-box-large">
+                <h4>Initial Price</h4>
+                <p id="initial_price" class="price-value">-</p>
+                <small class="text-muted">Expected value: ≈ 105.77</small>
+            </div>
+        </div>
+        
+        <!-- Section 2: Nelson-Siegel Discount Curve -->
+        <div class="results-section">
+            <h3>📈 Nelson-Siegel Discount Curve (page 28)</h3>
+            <div class="chart-container">
+                <p class="chart-description">Discount factors vs time graph (0-30 years, 0-1)</p>
+                <canvas id="discountCurveChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+        
+        <!-- Section 3: Price History -->
+        <div class="results-section">
+            <h3>📊 Price History During Updates (pages 29-30)</h3>
+            <div class="price-history-container">
+                <p class="chart-description">List of prices before/after each quote update</p>
+                <div id="price_history" class="price-list">
+                    <p class="text-muted">No history available</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section 4: Price Evolution Chart -->
+        <div class="results-section">
+            <h3>📈 Price Evolution Chart (page 31)</h3>
+            <div class="chart-container">
+                <p class="chart-description">Price evolution with unique_prices = prices[::2] + prices[-1::]</p>
+                <canvas id="priceEvolutionChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+        
+        <!-- Section 5: Freeze/unfreeze and flag scenarios -->
+        <div class="results-section">
+            <h3>🔒 Test Scenarios</h3>
+            <div class="scenarios-grid">
+                <div class="scenario-box">
+                    <h4>Freeze/Unfreeze (page 32)</h4>
+                    <div class="scenario-results">
+                        <p><strong>Initial Price:</strong> <span id="freeze_initial_price">-</span></p>
+                        <p><strong>Price after freeze:</strong> <span id="freeze_frozen_price">-</span></p>
+                        <p><strong>Price after unfreeze:</strong> <span id="freeze_unfrozen_price">-</span></p>
+                        <p><strong>Freeze OK:</strong> <span id="freeze_result">❌</span></p>
+                        <p><strong>Unfreeze OK:</strong> <span id="unfreeze_result">❌</span></p>
+                        <small class="text-muted">Expected final price: ≈ 106.85</small>
+                    </div>
+                </div>
+                
+                <div class="scenario-box">
+                    <h4>Flag Scenario (page 33)</h4>
+                    <div class="scenario-results">
+                        <p><strong>Initial Flag:</strong> <span id="flag_initial">-</span></p>
+                        <p><strong>Final Flag:</strong> <span id="flag_final">-</span></p>
+                        <p><strong>Initial Price:</strong> <span id="flag_initial_price">-</span></p>
+                        <p><strong>Final Price:</strong> <span id="flag_final_price">-</span></p>
+                        <p><strong>Flag Changed:</strong> <span id="flag_result">❌</span></p>
+                        <small class="text-muted">Expected final price: ≈ 106.52</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock lab_content %}
+
+<!-- Données initiales pour les graphiques (comme Chapitre 2) -->
+{% if results %}
+    {{ results.discount_curve_plot|json_script:"discount-curve-initial-data" }}
+    {{ results.price_evolution_plot|json_script:"price-evolution-initial-data" }}
+{% endif %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('marketQuotesForm');
+    const updateBtn = document.getElementById('updateChartsBtn');
+    const errorContainer = document.getElementById('error-message-container');
+    const bondMatrixBody = document.getElementById('bondMatrixBody');
+    
+    // Chart variables
+    let discountCurveChart = null;
+    let priceEvolutionChart = null;
+    
+    // Function to create discount curve chart
+    function createDiscountCurveChart(data) {
+        const ctx = document.getElementById('discountCurveChart').getContext('2d');
+        
+        if (discountCurveChart) {
+            discountCurveChart.destroy();
+        }
+        
+        discountCurveChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.x,
+                datasets: [{
+                    label: 'Discount Factor',
+                    data: data.y,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    borderWidth: 1,
+                    fill: false,
+                    tension: 0,
+                    pointRadius: 0,
+                    pointHoverRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: data.xlabel
+                        },
+                        min: data.xlim[0],
+                        max: data.xlim[1],
+                        ticks: {
+                            stepSize: 5
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: data.ylabel
+                        },
+                        min: data.ylim[0],
+                        max: data.ylim[1],
+                        ticks: {
+                            stepSize: 0.2
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: data.title
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+    
+    // Function to create price evolution chart
+    function createPriceEvolutionChart(data) {
+        const ctx = document.getElementById('priceEvolutionChart').getContext('2d');
+        
+        if (priceEvolutionChart) {
+            priceEvolutionChart.destroy();
+        }
+        
+        priceEvolutionChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.x,
+                datasets: [{
+                    label: 'Prix',
+                    data: data.y,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
+                    borderWidth: 1,
+                    fill: false,
+                    tension: 0,
+                    pointRadius: 0,
+                    pointHoverRadius: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: data.xlabel
+                        },
+                        min: data.xlim[0],
+                        max: data.xlim[1]
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: data.ylabel
+                        },
+                        min: data.ylim[0],
+                        max: data.ylim[1],
+                        ticks: {
+                            stepSize: 0.2
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: data.title
+                    },
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    }
+    
+    // Default bond data according to the book (page 26)
+    const defaultBondData = [
+        [2, 0.02], [4, 0.0225], [6, 0.025], [8, 0.0275],
+        [10, 0.03], [12, 0.0325], [14, 0.035], [16, 0.0375],
+        [18, 0.04], [20, 0.0425], [22, 0.045], [24, 0.0475],
+        [26, 0.05], [28, 0.0525], [30, 0.055]
+    ];
+    
+    // Initialize bond matrix
+    function initializeBondMatrix() {
+        bondMatrixBody.innerHTML = '';
+        defaultBondData.forEach((bond, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><input type="number" class="form-control" value="${bond[0]}" min="1" max="50" data-field="maturity"></td>
+                <td><input type="number" class="form-control" value="${bond[1]}" min="0" max="1" step="0.0001" data-field="coupon"></td>
+            `;
+            bondMatrixBody.appendChild(row);
+            
+            // Add events for automatic updates
+            const maturityInput = row.querySelector('[data-field="maturity"]');
+            const couponInput = row.querySelector('[data-field="coupon"]');
+            
+            maturityInput.addEventListener('change', updateChartsAutomatically);
+            maturityInput.addEventListener('input', updateChartsAutomatically);
+            couponInput.addEventListener('change', updateChartsAutomatically);
+            couponInput.addEventListener('input', updateChartsAutomatically);
+        });
+    }
+    
+    // Get bond matrix data
+    function getBondMatrixData() {
+        const rows = bondMatrixBody.querySelectorAll('tr');
+        const bondData = [];
+        rows.forEach(row => {
+            const maturity = parseFloat(row.querySelector('[data-field="maturity"]').value);
+            const coupon = parseFloat(row.querySelector('[data-field="coupon"]').value);
+            if (maturity && coupon !== null) {
+                bondData.push({
+                    tenor_years: maturity,
+                    coupon_rate: coupon, // Keep as decimal (0.02 for 2%)
+                    face_amount: 100.0,
+                    frequency: 'Annual',
+                    business_convention: 'ModifiedFollowing',
+                    day_counter: 'Actual360'
+                });
+            }
+        });
+        return bondData;
+    }
+    
+    // Initialize matrix on load
+    initializeBondMatrix();
+    
+    // Initialize charts with default data (like Chapter 2)
+    try {
+        // Initialize discount curve chart
+        const discountElement = document.getElementById('discount-curve-initial-data');
+        if (discountElement) {
+            const discountInitialData = JSON.parse(discountElement.textContent);
+            if (discountInitialData && discountInitialData.x && discountInitialData.x.length > 0) {
+                console.log('Initializing discount curve chart with default data');
+                createDiscountCurveChart(discountInitialData);
+            }
+        } else {
+            console.log('Discount curve initial data element not found');
+        }
+        
+        // Initialize price evolution chart
+        const priceElement = document.getElementById('price-evolution-initial-data');
+        if (priceElement) {
+            const priceInitialData = JSON.parse(priceElement.textContent);
+            if (priceInitialData && priceInitialData.x && priceInitialData.x.length > 0) {
+                console.log('Initializing price evolution chart with default data');
+                createPriceEvolutionChart(priceInitialData);
+            }
+        } else {
+            console.log('Price evolution initial data element not found');
+        }
+        
+        // Display default results if they exist
+        {% if results %}
+        console.log('Default results available');
+        updateResults({
+            initial_price: {{ results.initial_price|default:"null" }},
+            discount_curve_data: {{ results.discount_curve_plot|default:"null"|safe }},
+            price_evolution_data: {{ results.price_evolution_plot|default:"null"|safe }},
+            price_evolution: {{ results.price_evolution|default:"[]"|safe }},
+            freeze_results: {{ results.freeze_results|default:"null"|safe }},
+            flag_results: {{ results.flag_results|default:"null"|safe }}
+        });
+        {% endif %}
+    } catch (e) {
+        console.error('Error initializing charts with default data:', e);
+        // Fallback: initial update
+        updateChartsAutomatically();
+    }
+    
+    // Add events for automatic chart updates
+    const formInputs = form.querySelectorAll('input, select, textarea');
+    formInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            console.log('Change detected in:', input.name);
+            // Automatically update charts
+            setTimeout(updateChartsAutomatically, 100);
+        });
+        
+        input.addEventListener('input', function() {
+            // For numeric fields, update in real time
+            if (input.type === 'number' || input.type === 'range') {
+                console.log('Input detected in:', input.name);
+                setTimeout(updateChartsAutomatically, 100);
+            }
+        });
+    });
+    
+    // Function to automatically update charts
+    function updateChartsAutomatically() {
+        console.log('Automatic chart update...');
+        
+        const formData = new FormData(form);
+        const bondDataList = getBondMatrixData();
+        
+        fetch('{% url "chapter4_quotes:update_charts_ajax" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                form_data: {
+                    evaluation_date: formData.get('evaluation_date'),
+                    calendar: formData.get('calendar'),
+                    settlement_days: parseInt(formData.get('settlement_days')),
+                    initial_quote_value: parseFloat(formData.get('initial_quote_value')),
+                    test_bond_maturity: parseInt(formData.get('test_bond_maturity')),
+                    test_bond_coupon: parseFloat(formData.get('test_bond_coupon')),
+                    test_bond_nominal: parseFloat(formData.get('test_bond_nominal')),
+                    day_count_convention: formData.get('day_count_convention'),
+                    frequency: formData.get('frequency')
+                },
+                bond_data_list: bondDataList
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Automatic update successful:', data);
+                updateResults(data);
+                errorContainer.style.display = 'none';
+            } else {
+                console.error('Error during automatic update:', data.error);
+                errorContainer.textContent = `Error: ${data.error}`;
+                errorContainer.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error updating charts automatically:', error);
+            errorContainer.textContent = `Connection error: ${error.message}`;
+            errorContainer.style.display = 'block';
+        });
+    }
+    
+    updateBtn.addEventListener('click', function() {
+        updateBtn.innerHTML = 'Calculating...';
+        updateBtn.disabled = true;
+        
+        const formData = new FormData(form);
+        const bondDataList = getBondMatrixData();
+        
+        fetch('{% url "chapter4_quotes:update_charts_ajax" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+                form_data: {
+                    evaluation_date: formData.get('evaluation_date'),
+                    calendar: formData.get('calendar'),
+                    settlement_days: parseInt(formData.get('settlement_days')),
+                    initial_quote_value: parseFloat(formData.get('initial_quote_value')),
+                    test_bond_maturity: parseInt(formData.get('test_bond_maturity')),
+                    test_bond_coupon: parseFloat(formData.get('test_bond_coupon')),
+                    test_bond_nominal: parseFloat(formData.get('test_bond_nominal')),
+                    day_count_convention: formData.get('day_count_convention'),
+                    frequency: formData.get('frequency')
+                },
+                bond_data_list: bondDataList
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                console.log('Data received:', data); // Debug
+                updateResults(data);
+                errorContainer.style.display = 'none';
+            } else {
+                console.error('Error:', data.error); // Debug
+                errorContainer.textContent = `Error: ${data.error}`;
+                errorContainer.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error updating charts:', error);
+            errorContainer.textContent = `Connection error: ${error.message}`;
+            errorContainer.style.display = 'block';
+        })
+        .finally(() => {
+            updateBtn.innerHTML = 'Update Calculations';
+            updateBtn.disabled = false;
+        });
+    });
+    
+    function updateResults(data) {
+        console.log('Updating results with:', data); // Debug
+        
+        // 1. Test bond price
+        const initialPriceElement = document.getElementById('initial_price');
+        if (initialPriceElement && data.initial_price) {
+            initialPriceElement.textContent = data.initial_price.toFixed(6);
+            console.log('Initial price updated:', data.initial_price);
+        }
+        
+        // 2. Nelson-Siegel discount curve
+        if (data.discount_curve_data) {
+            console.log('Updating discount chart');
+            createDiscountCurveChart(data.discount_curve_data);
+        } else {
+            console.log('No discount chart data available');
+        }
+        
+        // 3. Price history
+        const priceHistoryElement = document.getElementById('price_history');
+        if (priceHistoryElement && data.price_evolution && data.price_evolution.length > 0) {
+            console.log('Updating price history:', data.price_evolution);
+            priceHistoryElement.innerHTML = '';
+            data.price_evolution.forEach((price, index) => {
+                const priceItem = document.createElement('p');
+                priceItem.textContent = `Update ${index + 1}: ${price.toFixed(6)}`;
+                priceHistoryElement.appendChild(priceItem);
+            });
+        }
+        
+        // 4. Price evolution chart
+        if (data.price_evolution_data) {
+            console.log('Updating price evolution chart');
+            createPriceEvolutionChart(data.price_evolution_data);
+        } else {
+            console.log('No price evolution chart data available');
+        }
+        
+        // 5. Freeze/unfreeze scenario
+        if (data.freeze_results) {
+            console.log('Updating freeze/unfreeze results:', data.freeze_results);
+            const freezeInitialPrice = document.getElementById('freeze_initial_price');
+            const freezeFrozenPrice = document.getElementById('freeze_frozen_price');
+            const freezeUnfrozenPrice = document.getElementById('freeze_unfrozen_price');
+            const freezeResult = document.getElementById('freeze_result');
+            const unfreezeResult = document.getElementById('unfreeze_result');
+            
+            if (freezeInitialPrice) freezeInitialPrice.textContent = data.freeze_results.initial_price.toFixed(6);
+            if (freezeFrozenPrice) freezeFrozenPrice.textContent = data.freeze_results.frozen_price.toFixed(6);
+            if (freezeUnfrozenPrice) freezeUnfrozenPrice.textContent = data.freeze_results.unfrozen_price.toFixed(6);
+            if (freezeResult) freezeResult.innerHTML = data.freeze_results.freeze_worked ? '✅' : '❌';
+            if (unfreezeResult) unfreezeResult.innerHTML = data.freeze_results.unfreeze_worked ? '✅' : '❌';
+        }
+        
+        // 6. Flag scenario
+        if (data.flag_results) {
+            console.log('Updating flag results:', data.flag_results);
+            const flagInitial = document.getElementById('flag_initial');
+            const flagFinal = document.getElementById('flag_final');
+            const flagInitialPrice = document.getElementById('flag_initial_price');
+            const flagFinalPrice = document.getElementById('flag_final_price');
+            const flagResult = document.getElementById('flag_result');
+            
+            if (flagInitial) flagInitial.textContent = data.flag_results.initial_flag;
+            if (flagFinal) flagFinal.textContent = data.flag_results.final_flag;
+            if (flagInitialPrice) flagInitialPrice.textContent = data.flag_results.initial_price.toFixed(6);
+            if (flagFinalPrice) flagFinalPrice.textContent = data.flag_results.final_price.toFixed(6);
+            if (flagResult) flagResult.innerHTML = data.flag_results.flag_changed ? '✅' : '❌';
+        }
+        
+        console.log('Results update completed');
+    }
+});
+</script>
+{% endblock %}

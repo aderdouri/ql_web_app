@@ -20,14 +20,6 @@ def chapter2_instruments(request):
     }
     return render(request, 'basics/chapter2_instruments.html', context)
 
-def chapter3_greeks(request):
-    """Chapter 3: Numerical Greeks dedicated page"""
-    context = {
-        'chapter_title': 'Chapter 3: Numerical Greeks',
-        'chapter_icon': 'bi-graph-up',
-        'chapter_description': 'Calculate option sensitivities using numerical differentiation methods for barrier options.'
-    }
-    return render(request, 'basics/chapter3_numerical_greeks.html', context)
 
 def chapter4_quotes(request):
     """Chapter 4: Market Quotes dedicated page"""

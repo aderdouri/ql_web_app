@@ -13,8 +13,7 @@ def curve_lab_view(request):
     results = None
     
     if form.is_valid():
-        evaluation_date_str = form.cleaned_data['evaluation_date']
-        evaluation_date = date.fromisoformat(evaluation_date_str)
+        evaluation_date = form.cleaned_data['evaluation_date']
         market_data = form.get_market_data()
         curve_type = form.cleaned_data['curve_type']
         day_count = form.cleaned_data['day_count']
@@ -50,8 +49,7 @@ def calculate_term_structures_api(request):
         form = TermStructureForm(data)
         
         if form.is_valid():
-            evaluation_date_str = form.cleaned_data['evaluation_date']
-            evaluation_date = date.fromisoformat(evaluation_date_str)
+            evaluation_date = form.cleaned_data['evaluation_date']
             market_data = form.get_market_data()
             curve_type = form.cleaned_data['curve_type']
             day_count = form.cleaned_data['day_count']
