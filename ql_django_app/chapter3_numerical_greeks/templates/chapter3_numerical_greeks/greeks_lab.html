@@ -1,131 +1,144 @@
-{% extends "base.html" %}
+{% extends "basics/chapter_base.html" %}
 {% load static %}
 
-{% block title %}Chapter 3: Numerical Greeks Lab{% endblock %}
-
-{% block page_content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h1 class="mb-0"><i class="bi bi-calculator me-2"></i>Chapter 3: Numerical Greeks Lab</h1>
-                </div>
-                <div class="card-body">
-                    <p class="lead">Calculate option sensitivities (Greeks) using numerical differentiation methods for barrier options.</p>
+{% block chapter_content %}
                     
                     <!-- Form Section -->
-                    <div class="row">
-                        <div class="col-lg-6">
+                    <div class="row mb-4">
+                        <div class="col-12">
                             <div class="card">
                                 <div class="card-header bg-info text-white">
                                     <h3><i class="bi bi-gear me-2"></i>Input Parameters</h3>
                                 </div>
-                                <div class="card-body">
+                                <div class="card-body p-4">
                                     <form id="greeksForm" method="post">
                                         {% csrf_token %}
                                         
-                                        <!-- Barrier Option Parameters -->
-                                        <div class="mb-3">
-                                            <label for="barrier_type" class="form-label">Barrier Type</label>
-                                            <select id="barrier_type" name="barrier_type" class="form-select">
-                                                <option value="UpIn">Up-and-In (activated when price rises above barrier)</option>
-                                                <option value="UpOut">Up-and-Out (deactivated when price rises above barrier)</option>
-                                                <option value="DownIn">Down-and-In (activated when price falls below barrier)</option>
-                                                <option value="DownOut">Down-and-Out (deactivated when price falls below barrier)</option>
-                                            </select>
-                                            <div class="form-text">Choose the barrier option type. The system will automatically adjust the barrier level if needed.</div>
+                                        <!-- Barrier Option Parameters Section -->
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <h5 class="text-primary mb-3"><i class="bi bi-shield me-2"></i>Barrier Option Parameters</h5>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 mb-3">
+                                                <label for="barrier_type" class="form-label fw-semibold">Barrier Type</label>
+                                                <select id="barrier_type" name="barrier_type" class="form-select">
+                                                    <option value="UpIn">Up-and-In (activated when price rises above barrier)</option>
+                                                    <option value="UpOut">Up-and-Out (deactivated when price rises above barrier)</option>
+                                                    <option value="DownIn">Down-and-In (activated when price falls below barrier)</option>
+                                                    <option value="DownOut">Down-and-Out (deactivated when price falls below barrier)</option>
+                                                </select>
+                                                <div class="form-text small">Choose the barrier option type. The system will automatically adjust the barrier level if needed.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 mb-3">
+                                                <label for="barrier_level" class="form-label fw-semibold">Barrier Level</label>
+                                                <input type="number" id="barrier_level" name="barrier_level" value="120.0" step="0.1" class="form-control">
+                                                <div class="form-text small">Price level that triggers the barrier. For Up barriers, use values above current price. For Down barriers, use values below current price.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 mb-3">
+                                                <label for="rebate" class="form-label fw-semibold">Rebate</label>
+                                                <input type="number" id="rebate" name="rebate" value="0.0" step="0.1" class="form-control">
+                                                <div class="form-text small">Payment made to the holder if the barrier is touched (typically 0 for most options).</div>
+                                            </div>
                                         </div>
                                         
-                                        <div class="mb-3">
-                                            <label for="barrier_level" class="form-label">Barrier Level</label>
-                                            <input type="number" id="barrier_level" name="barrier_level" value="120.0" step="0.1" class="form-control">
-                                            <div class="form-text">Price level that triggers the barrier. For Up barriers, use values above current price. For Down barriers, use values below current price.</div>
+                                        <!-- Option Parameters Section -->
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <h5 class="text-primary mb-3"><i class="bi bi-currency-dollar me-2"></i>Option Parameters</h5>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 mb-3">
+                                                <label for="option_type" class="form-label fw-semibold">Option Type</label>
+                                                <select id="option_type" name="option_type" class="form-select">
+                                                    <option value="Call">Call (right to buy)</option>
+                                                    <option value="Put">Put (right to sell)</option>
+                                                </select>
+                                                <div class="form-text small">Type of underlying option contract.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 mb-3">
+                                                <label for="strike_price" class="form-label fw-semibold">Strike Price (K)</label>
+                                                <input type="number" id="strike_price" name="strike_price" value="100.0" step="0.1" class="form-control">
+                                                <div class="form-text small">Price at which the option can be exercised. Use values around the current underlying price for realistic scenarios.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 mb-3">
+                                                <label for="underlying_price" class="form-label fw-semibold">Underlying Price (S)</label>
+                                                <input type="number" id="underlying_price" name="underlying_price" value="100.0" step="0.1" class="form-control">
+                                                <div class="form-text small">Current market price of the underlying asset. This is the most important parameter affecting option value.</div>
+                                            </div>
                                         </div>
                                         
-                                        <div class="mb-3">
-                                            <label for="rebate" class="form-label">Rebate</label>
-                                            <input type="number" id="rebate" name="rebate" value="0.0" step="0.1" class="form-control">
-                                            <div class="form-text">Payment made to the holder if the barrier is touched (typically 0 for most options).</div>
+                                        <!-- Market Data Section -->
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <h5 class="text-primary mb-3"><i class="bi bi-graph-up me-2"></i>Market Data</h5>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 mb-3">
+                                                <label for="risk_free_rate" class="form-label fw-semibold">Risk-free Rate (r)</label>
+                                                <input type="number" id="risk_free_rate" name="risk_free_rate" value="0.01" step="0.001" class="form-control">
+                                                <div class="form-text small">Annual risk-free interest rate (e.g., 0.01 = 1%). Use current market rates for realistic scenarios.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 mb-3">
+                                                <label for="volatility" class="form-label fw-semibold">Volatility (σ)</label>
+                                                <input type="number" id="volatility" name="volatility" value="0.20" step="0.01" class="form-control">
+                                                <div class="form-text small">Annual volatility of the underlying asset (e.g., 0.20 = 20%). Higher volatility increases option value.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 mb-3">
+                                                <label for="evaluation_date" class="form-label fw-semibold">Evaluation Date</label>
+                                                <input type="date" id="evaluation_date" name="evaluation_date" value="2014-10-08" class="form-control">
+                                                <div class="form-text small">Date for which the option is being valued (today's date).</div>
+                                            </div>
                                         </div>
                                         
-                                        <!-- Option Parameters -->
-                                        <div class="mb-3">
-                                            <label for="option_type" class="form-label">Option Type</label>
-                                            <select id="option_type" name="option_type" class="form-select">
-                                                <option value="Call">Call (right to buy)</option>
-                                                <option value="Put">Put (right to sell)</option>
-                                            </select>
-                                            <div class="form-text">Type of underlying option contract.</div>
+                                        <!-- Time Parameters Section -->
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <h5 class="text-primary mb-3"><i class="bi bi-calendar me-2"></i>Time Parameters</h5>
+                                            </div>
+                                            <div class="col-lg-6 col-md-6 mb-3">
+                                                <label for="maturity_date" class="form-label fw-semibold">Maturity Date</label>
+                                                <input type="date" id="maturity_date" name="maturity_date" value="2015-01-08" class="form-control">
+                                                <div class="form-text small">Expiration date of the option. Must be after the evaluation date.</div>
+                                            </div>
                                         </div>
                                         
-                                        <div class="mb-3">
-                                            <label for="strike_price" class="form-label">Strike Price (K)</label>
-                                            <input type="number" id="strike_price" name="strike_price" value="100.0" step="0.1" class="form-control">
-                                            <div class="form-text">Price at which the option can be exercised. Use values around the current underlying price for realistic scenarios.</div>
+                                        <!-- Numerical Parameters Section -->
+                                        <div class="row mb-4">
+                                            <div class="col-12">
+                                                <h5 class="text-primary mb-3"><i class="bi bi-calculator me-2"></i>Numerical Parameters</h5>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 mb-3">
+                                                <label for="h_underlying" class="form-label fw-semibold">Perturbation h for Underlying</label>
+                                                <input type="number" id="h_underlying" name="h_underlying" value="0.01" step="0.001" class="form-control">
+                                                <div class="form-text small">Step size for Delta and Gamma calculations. Smaller values give more accurate results but may cause numerical issues.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 mb-3">
+                                                <label for="h_rate" class="form-label fw-semibold">Perturbation h for Rate</label>
+                                                <input type="number" id="h_rate" name="h_rate" value="0.0001" step="0.00001" class="form-control">
+                                                <div class="form-text small">Step size for Rho calculation. Use small values (0.0001) for interest rate sensitivity.</div>
+                                            </div>
+                                            <div class="col-lg-4 col-md-6 mb-3">
+                                                <label for="h_volatility" class="form-label fw-semibold">Perturbation h for Volatility</label>
+                                                <input type="number" id="h_volatility" name="h_volatility" value="0.0001" step="0.00001" class="form-control">
+                                                <div class="form-text small">Step size for Vega calculation. Use small values (0.0001) for volatility sensitivity.</div>
+                                            </div>
                                         </div>
                                         
-                                        <!-- Dates -->
-                                        <div class="mb-3">
-                                            <label for="evaluation_date" class="form-label">Evaluation Date</label>
-                                            <input type="date" id="evaluation_date" name="evaluation_date" value="2014-10-08" class="form-control">
-                                            <div class="form-text">Date for which the option is being valued (today's date).</div>
+                                        <!-- Submit Button -->
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                                    <i class="bi bi-calculator me-2"></i>Calculate Greeks
+                                                </button>
+                                            </div>
                                         </div>
-                                        
-                                        <div class="mb-3">
-                                            <label for="maturity_date" class="form-label">Maturity Date</label>
-                                            <input type="date" id="maturity_date" name="maturity_date" value="2015-01-08" class="form-control">
-                                            <div class="form-text">Expiration date of the option. Must be after the evaluation date.</div>
-                                        </div>
-                                        
-                                        <!-- Market Data -->
-                                        <div class="mb-3">
-                                            <label for="underlying_price" class="form-label">Underlying Price (Spot Price, S)</label>
-                                            <input type="number" id="underlying_price" name="underlying_price" value="100.0" step="0.1" class="form-control">
-                                            <div class="form-text">Current market price of the underlying asset. This is the most important parameter affecting option value.</div>
-                                        </div>
-                                        
-                                        <div class="mb-3">
-                                            <label for="risk_free_rate" class="form-label">Risk-free Rate (r)</label>
-                                            <input type="number" id="risk_free_rate" name="risk_free_rate" value="0.01" step="0.001" class="form-control">
-                                            <div class="form-text">Annual risk-free interest rate (e.g., 0.01 = 1%). Use current market rates for realistic scenarios.</div>
-                                        </div>
-                                        
-                                        <div class="mb-3">
-                                            <label for="volatility" class="form-label">Volatility (σ)</label>
-                                            <input type="number" id="volatility" name="volatility" value="0.20" step="0.01" class="form-control">
-                                            <div class="form-text">Annual volatility of the underlying asset (e.g., 0.20 = 20%). Higher volatility increases option value.</div>
-                                        </div>
-                                        
-                                        <!-- Perturbation Parameters -->
-                                        <div class="mb-3">
-                                            <label for="h_underlying" class="form-label">Perturbation h for Underlying</label>
-                                            <input type="number" id="h_underlying" name="h_underlying" value="0.01" step="0.001" class="form-control">
-                                            <div class="form-text">Step size for Delta and Gamma calculations. Smaller values give more accurate results but may cause numerical issues.</div>
-                                        </div>
-                                        
-                                        <div class="mb-3">
-                                            <label for="h_rate" class="form-label">Perturbation h for Rate</label>
-                                            <input type="number" id="h_rate" name="h_rate" value="0.0001" step="0.00001" class="form-control">
-                                            <div class="form-text">Step size for Rho calculation. Use small values (0.0001) for interest rate sensitivity.</div>
-                                        </div>
-                                        
-                                        <div class="mb-3">
-                                            <label for="h_volatility" class="form-label">Perturbation h for Volatility</label>
-                                            <input type="number" id="h_volatility" name="h_volatility" value="0.0001" step="0.00001" class="form-control">
-                                            <div class="form-text">Step size for Vega calculation. Use small values (0.0001) for volatility sensitivity.</div>
-                                        </div>
-                                        
-                                        <button type="submit" class="btn btn-primary btn-lg w-100">
-                                            <i class="bi bi-calculator me-2"></i>Calculate Greeks
-                                        </button>
                                     </form>
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Results Section -->
-                        <div class="col-lg-6">
+                    </div>
+                    
+                    <!-- Results Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
                             <div class="card">
                                 <div class="card-header bg-success text-white">
                                     <h3><i class="bi bi-graph-up me-2"></i>Results</h3>
@@ -139,31 +152,98 @@
                                         <p class="mt-2">Calculating Greeks...</p>
                                     </div>
                                     
-                                    <!-- Intermediate Calculations -->
+                                    <!-- Calculation Metrics -->
                                     <div id="intermediate-calculations" style="display: none;">
-                                        <h5><i class="bi bi-list-ol me-2"></i>Intermediate Calculations (Notebook Steps)</h5>
-                                        <div class="row mb-3">
-                                            <div class="col-4">
-                                                <div class="card text-center">
-                                                    <div class="card-body">
-                                                        <h6 class="card-title">Step 1: Base Price (Out[11])</h6>
-                                                        <p class="card-text h5 text-primary" id="p0-value">-</p>
+                                        <div class="card mb-4">
+                                            <div class="card-header bg-dark text-white">
+                                                <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Intermediate Calculations</h5>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="row">
+                                                    <div class="col-md-4 mb-3">
+                                                        <div class="card border-secondary h-100">
+                                                            <div class="card-header bg-secondary text-white text-center">
+                                                                <h6 class="mb-0">NPV Base</h6>
+                                                            </div>
+                                                            <div class="card-body text-center">
+                                                                <h4 class="text-dark fw-bold mb-2" id="p0-value">-</h4>
+                                                                <p class="text-muted small mb-0">Base price</p>
+                                                                <div class="mt-2">
+                                                                    <small class="text-muted" id="p0-explanation">-</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="col-md-4 mb-3">
+                                                        <div class="card border-secondary h-100">
+                                                            <div class="card-header bg-secondary text-white text-center">
+                                                                <h6 class="mb-0">Prix +h</h6>
+                                                            </div>
+                                                            <div class="card-body text-center">
+                                                                <h4 class="text-dark fw-bold mb-2" id="p-plus-value">-</h4>
+                                                                <p class="text-muted small mb-0">Price with increase</p>
+                                                                <div class="mt-2">
+                                                                    <small class="text-muted" id="p-plus-explanation">-</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="col-md-4 mb-3">
+                                                        <div class="card border-secondary h-100">
+                                                            <div class="card-header bg-secondary text-white text-center">
+                                                                <h6 class="mb-0">Prix -h</h6>
+                                                            </div>
+                                                            <div class="card-body text-center">
+                                                                <h4 class="text-dark fw-bold mb-2" id="p-minus-value">-</h4>
+                                                                <p class="text-muted small mb-0">Price with decrease</p>
+                                                                <div class="mt-2">
+                                                                    <small class="text-muted" id="p-minus-explanation">-</small>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-4">
-                                                <div class="card text-center">
-                                                    <div class="card-body">
-                                                        <h6 class="card-title">Step 2: Price with S+h (Out[12])</h6>
-                                                        <p class="card-text h5 text-success" id="p-plus-value">-</p>
-                                                    </div>
-                                                </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Understanding Results Section -->
+                                    <div id="understanding-results" style="display: none;">
+                                        <div class="card mb-4">
+                                            <div class="card-header bg-primary text-white">
+                                                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Understanding the Results</h5>
                                             </div>
-                                            <div class="col-4">
-                                                <div class="card text-center">
+                                            <div class="card-body">
+                                                <h6 class="text-primary mb-3">Understanding Your Results</h6>
+                                                <p class="text-muted mb-4">
+                                                    The results show the calculated option price and its sensitivities based on your input parameters.
+                                                </p>
+                                                
+                                                <div class="card bg-light" style="background-color: #cff4fc !important; background: #cff4fc !important;">
                                                     <div class="card-body">
-                                                        <h6 class="card-title">Step 3: Price with S-h (Out[13])</h6>
-                                                        <p class="card-text h5 text-warning" id="p-minus-value">-</p>
+                                                        <h6 class="fw-bold mb-3">How to Read the Results:</h6>
+                                                        <ul class="mb-0">
+                                                            <li class="mb-2">
+                                                                <strong>NPV:</strong> The fair price of the option today
+                                                            </li>
+                                                            <li class="mb-2">
+                                                                <strong>Delta:</strong> If the stock goes up $1, the option price changes roughly $X
+                                                            </li>
+                                                            <li class="mb-2">
+                                                                <strong>Gamma:</strong> Shows how Delta changes if the stock price changes a bit
+                                                            </li>
+                                                            <li class="mb-2">
+                                                                <strong>Rho:</strong> Shows how the option price reacts to interest rate changes
+                                                            </li>
+                                                            <li class="mb-2">
+                                                                <strong>Vega:</strong> Shows how the option price reacts if the market becomes a bit more volatile
+                                                            </li>
+                                                            <li class="mb-0">
+                                                                <strong>Theta:</strong> Shows how the option price changes as time passes
+                                                            </li>
+                                                        </ul>
                                                     </div>
                                                 </div>
                                             </div>
@@ -172,53 +252,59 @@
                                     
                                     <!-- Final Results -->
                                     <div id="results-grid" style="display: none;">
-                                        <h5><i class="bi bi-trophy me-2"></i>Final Results</h5>
+                                        <h5><i class="bi bi-calculator me-2"></i>Greeks Output</h5>
                                         <div class="row">
-                                            <div class="col-6 mb-3">
-                                                <div class="card text-center">
+                                            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                                <div class="card text-center h-100 results-card">
                                                     <div class="card-body">
-                                                        <h6 class="card-title">Option Price (NPV)</h6>
-                                                        <p class="card-text h4 text-primary" id="npv-value">-</p>
+                                                        <h6 class="card-title">NPV</h6>
+                                                        <p class="card-text h4 text-dark fw-bold" id="npv-value">-</p>
+                                                        <small class="text-muted d-block mt-2" id="npv-explanation">Option price</small>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-6 mb-3">
-                                                <div class="card text-center">
+                                            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                                <div class="card text-center h-100 results-card">
                                                     <div class="card-body">
                                                         <h6 class="card-title">Delta (Δ)</h6>
-                                                        <p class="card-text h4 text-success" id="delta-value">-</p>
+                                                        <p class="card-text h4 text-dark fw-bold" id="delta-value">-</p>
+                                                        <small class="text-muted d-block mt-2" id="delta-explanation">Price sensitivity</small>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-6 mb-3">
-                                                <div class="card text-center">
+                                            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                                <div class="card text-center h-100 results-card">
                                                     <div class="card-body">
                                                         <h6 class="card-title">Gamma (Γ)</h6>
-                                                        <p class="card-text h4 text-info" id="gamma-value">-</p>
+                                                        <p class="card-text h4 text-dark fw-bold" id="gamma-value">-</p>
+                                                        <small class="text-muted d-block mt-2" id="gamma-explanation">Delta speed</small>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-6 mb-3">
-                                                <div class="card text-center">
+                                            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                                <div class="card text-center h-100 results-card">
                                                     <div class="card-body">
                                                         <h6 class="card-title">Rho (ρ)</h6>
-                                                        <p class="card-text h4 text-warning" id="rho-value">-</p>
+                                                        <p class="card-text h4 text-dark fw-bold" id="rho-value">-</p>
+                                                        <small class="text-muted d-block mt-2" id="rho-explanation">Rate sensitivity</small>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-6 mb-3">
-                                                <div class="card text-center">
+                                            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                                <div class="card text-center h-100 results-card">
                                                     <div class="card-body">
                                                         <h6 class="card-title">Vega (ν)</h6>
-                                                        <p class="card-text h4 text-danger" id="vega-value">-</p>
+                                                        <p class="card-text h4 text-dark fw-bold" id="vega-value">-</p>
+                                                        <small class="text-muted d-block mt-2" id="vega-explanation">Volatility sensitivity</small>
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div class="col-6 mb-3">
-                                                <div class="card text-center">
+                                            <div class="col-lg-2 col-md-4 col-sm-6 mb-3">
+                                                <div class="card text-center h-100 results-card">
                                                     <div class="card-body">
                                                         <h6 class="card-title">Theta (Θ)</h6>
-                                                        <p class="card-text h4 text-secondary" id="theta-value">-</p>
+                                                        <p class="card-text h4 text-dark fw-bold" id="theta-value">-</p>
+                                                        <small class="text-muted d-block mt-2" id="theta-explanation">Time decay</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -229,27 +315,30 @@
                         </div>
                     </div>
                     
-                    <!-- Chart Section -->
-                    <div class="row mt-4">
+                    <!-- Visualization Section -->
+                    <div class="row mb-4">
                         <div class="col-12">
                             <div class="card">
                                 <div class="card-header bg-warning text-dark">
-                                    <h3><i class="bi bi-graph-up me-2"></i>Interactive Chart</h3>
+                                    <h3><i class="bi bi-graph-up me-2"></i>Visualization</h3>
                                 </div>
-                                <div class="card-body">
-                                    <p>Visualize the relationship between underlying price and option value, along with the Greeks.</p>
-                                    <div class="chart-container" style="position: relative; height: 400px;">
-                                        <canvas id="greeksChart"></canvas>
+                                <div class="card-body p-4">
+                                    <div id="chart-section" style="display: none;">
+                                        <div class="chart-container" style="position: relative; height: 400px;">
+                                            <canvas id="optionValueChart"></canvas>
+                                        </div>
+                                        <div class="mt-3">
+                                            <p class="text-muted small">
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                This chart shows how the option value changes with the underlying asset price. 
+                                                The blue line represents the option value curve for the current parameters.
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
@@ -262,6 +351,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const loading = document.getElementById('loading');
     const resultsGrid = document.getElementById('results-grid');
     const intermediateCalculations = document.getElementById('intermediate-calculations');
+    const chartSection = document.getElementById('chart-section');
     
     let chart = null;
     
@@ -274,6 +364,8 @@ document.addEventListener('DOMContentLoaded', function() {
         errorMessage.style.display = 'none';
         resultsGrid.style.display = 'none';
         intermediateCalculations.style.display = 'none';
+        document.getElementById('understanding-results').style.display = 'none';
+        chartSection.style.display = 'none';
         
         // Clear any existing info messages
         const existingMessages = document.querySelectorAll('.alert.alert-info');
@@ -307,11 +399,42 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
+    function generateCalculationExplanations(data) {
+        // Base NPV explanation - Simple
+        const p0 = data.npv;
+        let p0Explanation = `Price: ${p0.toFixed(6)}`;
+        document.getElementById('p0-explanation').textContent = p0Explanation;
+        
+        // Perturbation +h explanation - Simple
+        const pPlus = data.P_plus;
+        const p0Value = data.npv;
+        let pPlusExplanation = '';
+        if (pPlus && p0Value) {
+            const change = ((pPlus - p0Value) / p0Value * 100).toFixed(2);
+            const absoluteChange = (pPlus - p0Value).toFixed(6);
+            pPlusExplanation = `Change: ${absoluteChange} (${change}%)`;
+        }
+        document.getElementById('p-plus-explanation').textContent = pPlusExplanation;
+        
+        // Perturbation -h explanation - Simple
+        const pMinus = data.P_minus;
+        let pMinusExplanation = '';
+        if (pMinus && p0Value) {
+            const change = ((pMinus - p0Value) / p0Value * 100).toFixed(2);
+            const absoluteChange = (pMinus - p0Value).toFixed(6);
+            pMinusExplanation = `Change: ${absoluteChange} (${change}%)`;
+        }
+        document.getElementById('p-minus-explanation').textContent = pMinusExplanation;
+    }
+    
     function displayResults(data) {
         // Display intermediate calculations (Notebook steps)
         document.getElementById('p0-value').textContent = data.npv.toFixed(6);
         document.getElementById('p-plus-value').textContent = data.P_plus ? data.P_plus.toFixed(6) : '-';
         document.getElementById('p-minus-value').textContent = data.P_minus ? data.P_minus.toFixed(6) : '-';
+        
+        // Generate dynamic explanations for calculation metrics
+        generateCalculationExplanations(data);
         
         // Display final results
         document.getElementById('npv-value').textContent = data.npv.toFixed(6);
@@ -330,7 +453,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         intermediateCalculations.style.display = 'block';
+        document.getElementById('understanding-results').style.display = 'block';
         resultsGrid.style.display = 'block';
+        chartSection.style.display = 'block';
     }
     
     function showError(message) {
@@ -341,7 +466,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     function updateChart(chartData) {
-        const ctx = document.getElementById('greeksChart').getContext('2d');
+        const canvas = document.getElementById('optionValueChart');
+        if (!canvas) {
+            console.error('Canvas element not found');
+            return;
+        }
+        const ctx = canvas.getContext('2d');
         
         if (chart) {
             chart.destroy();
@@ -355,8 +485,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         label: 'NPV',
                         data: chartData.npv_values,
-                        borderColor: 'rgb(0, 123, 255)',
-                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        borderColor: '#1e3a8a',
+                        backgroundColor: 'rgba(30, 58, 138, 0.1)',
                         fill: true,
                         tension: 0.1,
                         borderWidth: 3
@@ -364,8 +494,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         label: 'Delta',
                         data: chartData.delta_values,
-                        borderColor: 'rgb(40, 167, 69)',
-                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        borderColor: '#059669',
+                        backgroundColor: 'rgba(5, 150, 105, 0.1)',
                         fill: false,
                         tension: 0.1,
                         borderDash: [5, 5]
@@ -373,8 +503,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         label: 'Gamma',
                         data: chartData.gamma_values,
-                        borderColor: 'rgb(255, 193, 7)',
-                        backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                        borderColor: '#d97706',
+                        backgroundColor: 'rgba(217, 119, 6, 0.1)',
                         fill: false,
                         tension: 0.1,
                         borderDash: [2, 2]
@@ -382,8 +512,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         label: 'Rho',
                         data: chartData.rho_values,
-                        borderColor: 'rgb(220, 53, 69)',
-                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        borderColor: '#dc2626',
+                        backgroundColor: 'rgba(220, 38, 38, 0.1)',
                         fill: false,
                         tension: 0.1,
                         borderDash: [5, 2, 2, 2]
@@ -391,8 +521,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         label: 'Vega',
                         data: chartData.vega_values,
-                        borderColor: 'rgb(108, 117, 125)',
-                        backgroundColor: 'rgba(108, 117, 125, 0.1)',
+                        borderColor: '#0891b2',
+                        backgroundColor: 'rgba(8, 145, 178, 0.1)',
                         fill: false,
                         tension: 0.1,
                         borderWidth: 1

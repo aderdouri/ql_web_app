@@ -28,10 +28,16 @@ def greeks_lab_view(request):
         'theta': 0.0
     }
     
-    return render(request, 'chapter3_numerical_greeks/greeks_lab.html', {
+    # Context variables for chapter_base.html template
+    context = {
+        'chapter_title': 'Chapter 3: Numerical Greeks Lab',
+        'chapter_icon': 'bi-calculator',
+        'chapter_description': 'Calculate option sensitivities (Greeks) using numerical differentiation methods for barrier options.',
         'form': form,
         'results': default_results
-    })
+    }
+    
+    return render(request, 'chapter3_numerical_greeks/greeks_lab.html', context)
 
 
 @csrf_exempt

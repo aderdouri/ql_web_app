@@ -1,16 +1,36 @@
 
 /* QuantLib Professional Suite - Custom Styles */
 :root {
-    --primary-blue: #0d6efd;
-    --secondary-blue: #6c757d;
-    --dark-blue: #0a58ca;
-    --light-blue: #e7f1ff;
-    --black: #212529;
+    /* Professional Color Palette - Single Blue Shade */
+    --primary-blue: #0d6efd;        /* Bootstrap primary blue - consistent throughout */
+    --secondary-blue: #0d6efd;      /* Same as primary */
+    --accent-blue: #0d6efd;         /* Same as primary */
+    --dark-blue: #0d6efd;           /* Same as primary */
+    --light-blue: #e7f3ff;          /* Very light blue background */
+    
+    /* Professional Grays */
+    --charcoal: #1f2937;            /* Professional dark gray */
+    --slate: #374151;               /* Medium dark gray */
+    --gray: #6b7280;                /* Standard gray */
+    --light-gray: #f3f4f6;          /* Light background */
+    --border-gray: #e5e7eb;          /* Border color */
+    
+    /* Professional Accent Colors */
+    --success-green: #059669;        /* Professional green */
+    --warning-amber: #d97706;       /* Professional amber */
+    --danger-red: #dc2626;          /* Professional red */
+    --info-cyan: #0891b2;           /* Professional cyan */
+    
+    /* Neutral Colors */
     --white: #ffffff;
-    --light-gray: #f8f9fa;
-    --border-color: #dee2e6;
-    --shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
-    --shadow-lg: 0 1rem 3rem rgba(0, 0, 0, 0.175);
+    --black: #111827;
+    
+    /* Professional Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 /* Global Styles */
@@ -20,6 +40,65 @@ body {
     color: var(--black);
     line-height: 1.6;
     min-height: 100vh;
+}
+
+/* Override Bootstrap's default primary color */
+:root {
+    --bs-primary: #0d6efd;
+    --bs-primary-rgb: 13, 110, 253;
+}
+
+.bg-primary {
+    background-color: var(--primary-blue) !important;
+}
+
+.text-primary {
+    color: var(--primary-blue) !important;
+}
+
+.border-primary {
+    border-color: var(--primary-blue) !important;
+}
+
+/* Override Bootstrap button classes */
+.btn-primary {
+    background-color: var(--primary-blue) !important;
+    border-color: var(--primary-blue) !important;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-blue) !important;
+    border-color: var(--primary-blue) !important;
+    opacity: 0.9;
+}
+
+.btn-outline-primary {
+    color: var(--primary-blue) !important;
+    border-color: var(--primary-blue) !important;
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-blue) !important;
+    border-color: var(--primary-blue) !important;
+}
+
+/* Force all Bootstrap icons to use consistent blue */
+[class*="bi-"] {
+    color: var(--primary-blue) !important;
+}
+
+/* Override any specific icon classes that might have different colors */
+.bi-calculator,
+.bi-graph-up,
+.bi-diagram-3,
+.bi-bar-chart,
+.bi-bank,
+.bi-gear,
+.bi-graph-up-arrow,
+.bi-play-circle,
+.bi-arrow-right,
+.bi-rocket-takeoff {
+    color: var(--primary-blue) !important;
 }
 
 /* Ensure all text is visible */
@@ -80,7 +159,7 @@ body {
 }
 
 .card-header {
-    background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+    background: var(--primary-blue);
     color: var(--white);
     border-radius: 0.75rem 0.75rem 0 0 !important;
     font-weight: 600;
@@ -89,7 +168,7 @@ body {
 
 /* Button Styles */
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+    background: var(--primary-blue);
     border: none;
     border-radius: 0.5rem;
     font-weight: 600;
@@ -98,7 +177,8 @@ body {
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, var(--dark-blue), var(--primary-blue));
+    background: var(--primary-blue);
+    opacity: 0.9;
     transform: translateY(-1px);
     box-shadow: var(--shadow-lg);
 }
@@ -251,7 +331,7 @@ body {
 
 /* Hero Section */
 .hero-section {
-    background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+    background: var(--primary-blue);
     color: var(--white) !important;
     padding: 4rem 0;
     margin-bottom: 3rem;
@@ -473,4 +553,621 @@ footer i {
     from { transform: translateX(-100%); }
     to { transform: translateX(0); }
 }
+
+/* Professional Form Styling for Chapter 3 */
+.professional-form {
+    background: #ffffff;
+    border-radius: 0.75rem;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+    border: 1px solid #e9ecef;
+}
+
+.form-section-header {
+    color: #0d6efd;
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.form-label.fw-semibold {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    outline: none;
+}
+
+.form-text.small {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 0.25rem;
+    line-height: 1.3;
+}
+
+/* Enhanced Card Styling */
+.card {
+    border: none;
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+    border-radius: 0.75rem;
+}
+
+.card-header {
+    border-radius: 0.75rem 0.75rem 0 0;
+    border: none;
+    padding: 1.25rem;
+}
+
+.card-body.p-4 {
+    padding: 2rem;
+}
+
+/* Results Cards Styling */
+.results-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.results-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.results-card .card-body {
+    padding: 1.5rem;
+}
+
+.results-card .card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.75rem;
+}
+
+.results-card .card-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Visualization Section */
+.visualization-card {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border: 1px solid #ffc107;
+}
+
+.visualization-card .card-header {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    color: #000;
+    font-weight: 600;
+}
+
+/* Responsive Form Design */
+@media (max-width: 992px) {
+    .card-body.p-4 {
+        padding: 1.5rem;
+    }
+    
+    .results-card .card-text {
+        font-size: 1.25rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .card-body.p-4 {
+        padding: 1rem;
+    }
+    
+    .form-section-header {
+        font-size: 1rem;
+    }
+    
+    .results-card .card-text {
+        font-size: 1.1rem;
+    }
+}
+
+/* ===== PROFESSIONAL CHAPTER 3 STYLING ===== */
+
+/* Professional Chapter Header */
+.chapter-header {
+    background: var(--primary-blue) !important;
+    color: var(--white) !important;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-gray);
+}
+
+.chapter-header .card-title {
+    color: var(--white) !important;
+    font-weight: 700;
+    font-size: 2rem;
+}
+
+.chapter-header .card-text {
+    color: var(--white) !important;
+    opacity: 0.95;
+}
+
+/* Professional Form Styling */
+.professional-form {
+    background: var(--white);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-gray);
+}
+
+.professional-form .card-header {
+    background: var(--primary-blue);
+    color: var(--white);
+    font-weight: 600;
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.form-section-header {
+    color: var(--primary-blue);
+    font-weight: 600;
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--border-gray);
+}
+
+/* Professional Results Cards */
+.results-card {
+    background: var(--white);
+    border: 1px solid var(--border-gray);
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.results-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--primary-blue);
+}
+
+.results-card .card-title {
+    color: var(--slate);
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+}
+
+.results-card .card-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* Professional Visualization */
+.visualization-card {
+    background: linear-gradient(135deg, var(--light-blue) 0%, var(--white) 100%);
+    border: 1px solid var(--primary-blue);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-md);
+}
+
+.visualization-card .card-header {
+    background: var(--primary-blue);
+    color: var(--white);
+    font-weight: 600;
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+
+/* Professional Buttons */
+.btn-primary.btn-lg {
+    background: var(--primary-blue) !important;
+    color: var(--white) !important;
+    border: none !important;
+    text-transform: lowercase !important;
+    letter-spacing: 0.5px !important;
+    font-weight: 600 !important;
+    box-shadow: var(--shadow-md) !important;
+    border-radius: 0.5rem !important;
+}
+
+.btn-primary.btn-lg:hover {
+    background: var(--primary-blue) !important;
+    opacity: 0.9 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-lg) !important;
+    color: var(--white) !important;
+}
+
+.btn-primary.btn-lg i {
+    color: var(--white) !important;
+}
+
+/* Professional Input Fields */
+.form-control {
+    border: 1px solid var(--border-gray);
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-label {
+    color: var(--slate);
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.form-text {
+    color: var(--gray);
+    font-size: 0.875rem;
+}
+
+/* Professional Alert Messages */
+.alert-info {
+    background-color: var(--light-blue);
+    border-color: var(--accent-blue);
+    color: var(--primary-blue);
+    border-radius: 0.5rem;
+}
+
+.alert-danger {
+    background-color: #fef2f2;
+    border-color: var(--danger-red);
+    color: var(--danger-red);
+    border-radius: 0.5rem;
+}
+
+/* Professional Loading Spinner */
+.spinner-border.text-primary {
+    color: var(--primary-blue) !important;
+}
+
+/* Explanatory Text Styling */
+.results-card small.text-muted {
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: var(--gray) !important;
+    font-weight: 400;
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
+.results-card .fw-bold {
+    font-weight: 700 !important;
+    color: inherit;
+}
+
+/* Enhanced Results Card Layout */
+.results-card .card-body {
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.results-card .card-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--slate);
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+}
+
+.results-card .card-text {
+    margin-bottom: 0.5rem;
+}
+
+.results-card small {
+    margin-top: 0.5rem;
+    padding: 0 0.5rem;
+}
+
+/* Professional Numerical Differentiation Section */
+.card.border-primary {
+    border-color: var(--primary-blue) !important;
+    border-width: 2px !important;
+}
+
+.card.border-success {
+    border-color: var(--success-green) !important;
+    border-width: 2px !important;
+}
+
+.card.border-warning {
+    border-color: var(--warning-amber) !important;
+    border-width: 2px !important;
+}
+
+/* Enhanced Card Headers */
+.card-header.bg-primary,
+.card-header.bg-success,
+.card-header.bg-warning {
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+    font-weight: 600;
+}
+
+/* Professional Badges */
+.badge {
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.375rem;
+}
+
+/* Mathematical Formulas */
+code {
+    background-color: var(--light-gray);
+    color: var(--primary-blue);
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* Educational Section Styling */
+.card.bg-light {
+    background-color: var(--light-blue) !important;
+    border: 1px solid var(--primary-blue);
+}
+
+.card.bg-light .text-primary {
+    color: var(--primary-blue) !important;
+    font-weight: 600;
+}
+
+/* Icon Enhancements */
+.bi-calculator,
+.bi-arrow-up,
+.bi-arrow-down {
+    opacity: 0.8;
+}
+
+/* Ensure all icons use consistent blue */
+.text-primary i,
+i.text-primary {
+    color: var(--primary-blue) !important;
+}
+
+/* Override any icon colors that might be using different blue shades */
+.bi-calculator,
+.bi-graph-up,
+.bi-diagram-3,
+.bi-bar-chart,
+.bi-bank,
+.bi-gear,
+.bi-graph-up-arrow {
+    color: var(--primary-blue) !important;
+}
+
+/* Step Number Icons */
+.bi-1-circle,
+.bi-2-circle,
+.bi-3-circle {
+    font-size: 1.1rem;
+}
+
+/* Dynamic Explanations Styling */
+#p0-explanation,
+#p-plus-explanation,
+#p-minus-explanation {
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.3rem;
+    background-color: rgba(0, 0, 0, 0.05);
+    display: block;
+    max-width: 100%;
+    word-wrap: break-word;
+    line-height: 1.3;
+    text-align: center;
+    margin-top: 0.5rem;
+    min-height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#p0-explanation,
+#p-plus-explanation,
+#p-minus-explanation {
+    color: var(--gray) !important;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Understanding Results Section Styling - Match Image Colors */
+#understanding-results .card {
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0.5rem !important;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+    background: white !important;
+}
+
+#understanding-results .card-header {
+    background: #0d6efd !important;
+    border: none !important;
+    border-radius: 0.5rem 0.5rem 0 0 !important;
+    padding: 1rem 1.5rem !important;
+}
+
+#understanding-results .card-header h5 {
+    color: white !important;
+    font-weight: 600 !important;
+    margin: 0 !important;
+    font-size: 1.1rem !important;
+}
+
+#understanding-results .card-body {
+    padding: 1.5rem !important;
+    background: white !important;
+}
+
+#understanding-results .text-primary {
+    color: #0d6efd !important;
+    font-weight: 600 !important;
+}
+
+#understanding-results .text-muted {
+    color: #6c757d !important;
+}
+
+#understanding-results .card.bg-light {
+    background-color: #cff4fc !important;
+    border: 1px solid #dee2e6 !important;
+    border-radius: 0.5rem !important;
+    margin-top: 0 !important;
+}
+
+/* Force the background color with higher specificity */
+#understanding-results .card.bg-light,
+#understanding-results .bg-light {
+    background-color: #cff4fc !important;
+    background: #cff4fc !important;
+}
+
+/* Additional specificity to override Bootstrap */
+.card.bg-light {
+    background-color: #cff4fc !important;
+    background: #cff4fc !important;
+}
+
+/* Target the specific element */
+div.card.bg-light {
+    background-color: #cff4fc !important;
+    background: #cff4fc !important;
+}
+
+#understanding-results .card.bg-light h6 {
+    color: #212529 !important;
+    font-weight: 700 !important;
+}
+
+#understanding-results .card.bg-light ul li {
+    color: #212529 !important;
+    font-size: 0.9rem !important;
+    line-height: 1.4 !important;
+}
+
+#understanding-results .card.bg-light ul li strong {
+    color: #212529 !important;
+    font-weight: 700 !important;
+}
+
+/* Professional Form Layout for Chapter 4 - Minimal Design */
+.professional-form {
+    background: #ffffff;
+    border-radius: 0.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    padding: 1.5rem;
+    border: 1px solid #dee2e6;
+}
+
+.professional-form .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.professional-form .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 0.5rem;
+    padding: 0.75rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.professional-form .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.professional-form .form-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+    line-height: 1.4;
+}
+
+.professional-form .table-responsive {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.professional-form .table {
+    margin-bottom: 0;
+}
+
+.professional-form .table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #495057;
+}
+
+.professional-form .form-check-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.professional-form .btn {
+    border-radius: 0.5rem;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.professional-form .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.15);
+}
+
+/* Minimal Color Palette for Chapter 4 */
+.minimal-card-header {
+    background-color: #f8f9fa !important;
+    border-bottom: 1px solid #dee2e6 !important;
+}
+
+.minimal-card-header h5 {
+    color: #495057 !important;
+    font-weight: 600 !important;
+}
+
+.minimal-button {
+    background-color: #6c757d !important;
+    border-color: #6c757d !important;
+    color: white !important;
+}
+
+.minimal-button:hover {
+    background-color: #5a6268 !important;
+    border-color: #545b62 !important;
+}
+
+.minimal-badge {
+    background-color: #6c757d !important;
+    color: white !important;
+}
+
+.minimal-text {
+    color: #6c757d !important;
+}
+
+.minimal-border {
+    border-color: #dee2e6 !important;
+}
+
 

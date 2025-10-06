@@ -1,0 +1,178 @@
+{% extends "basics/lab_base.html" %}
+
+{% block lab_content %}
+<!-- Lab Instructions -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Lab Instructions
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-3">{{ lab_instructions|default:"Follow the steps below to complete this interactive laboratory. Experiment with different parameters to understand how they affect the results." }}</p>
+                <div class="alert alert-light mb-0">
+                    <i class="bi bi-lightbulb me-2"></i>
+                    <strong>Tip:</strong> {{ lab_tip|default:"Try changing the input parameters and observe how the outputs and graphs update in real-time." }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Input Form -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-sliders me-2"></i>Input Parameters
+                </h3>
+            </div>
+            <div class="card-body">
+                {% block input_form %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-calculator me-2"></i>Calculation Results
+                </h3>
+            </div>
+            <div class="card-body">
+                <!-- Loading indicator -->
+                <div id="loading" class="text-center py-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Calculating results...</p>
+                </div>
+
+                <!-- Error message -->
+                <div id="error-message" class="alert alert-danger" style="display: none;">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span id="error-text"></span>
+                </div>
+
+                <!-- Results content -->
+                <div id="results-content">
+                    {% block results_content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Visualization Section -->
+{% if show_visualization %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Visualization
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="chart-container" style="position: relative; height: 400px; width: 100%;">
+                            <canvas id="mainChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Summary Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-clipboard-data me-2"></i>Summary
+                </h3>
+            </div>
+            <div class="card-body">
+                <div id="summary-content">
+                    {% block summary_content %}{% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Information -->
+{% if additional_info %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card border-secondary">
+            <div class="card-header bg-light">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-book me-2"></i>Additional Information
+                </h3>
+            </div>
+            <div class="card-body">
+                {% block additional_info %}{% endblock %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+<!-- Standard JavaScript for all labs -->
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Standard lab initialization
+    console.log('Lab initialized');
+    
+    // Standard error handling
+    function showError(message) {
+        const errorDiv = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        if (errorDiv && errorText) {
+            errorText.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+    }
+    
+    // Standard loading handling
+    function showLoading() {
+        const loading = document.getElementById('loading');
+        if (loading) {
+            loading.style.display = 'block';
+        }
+    }
+    
+    function hideLoading() {
+        const loading = document.getElementById('loading');
+        if (loading) {
+            loading.style.display = 'none';
+        }
+    }
+    
+    // Make functions globally available
+    window.showError = showError;
+    window.showLoading = showLoading;
+    window.hideLoading = hideLoading;
+});
+</script>
+{% endblock %}
+
+
+
+

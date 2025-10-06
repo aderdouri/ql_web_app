@@ -15,7 +15,8 @@ urlpatterns = [
     
     # Chapter pages
     path('chapter1/', chapter_views.chapter1_quantlib_basics, name='chapter1'),
-    path('chapter2/', chapter_views.chapter2_instruments, name='chapter2'),    
+    path('chapter2/', chapter_views.chapter2_instruments, name='chapter2'),
+    path('chapter3/', chapter_views.chapter3_numerical_greeks, name='chapter3'),
     path('chapter4/', chapter_views.chapter4_quotes, name='chapter4'),
     path('chapter5/', chapter_views.chapter5_curves, name='chapter5'),
     path('chapter6/', chapter_views.chapter6_pricing_range, name='chapter6'),

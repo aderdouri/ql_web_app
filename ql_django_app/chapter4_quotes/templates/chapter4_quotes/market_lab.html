@@ -8,7 +8,7 @@
     <style>
         /* Professional styling */
         .bg-gradient-primary {
-            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            background: var(--primary-blue);
         }
         
         .chart-container { 
@@ -93,105 +93,125 @@
 
     <!-- Chapter Content -->
     <div class="row g-4">
-        <!-- Left Column - Input Parameters -->
-        <div class="col-lg-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-sliders me-2 fs-5"></i>
-                        <h5 class="card-title mb-0 fw-bold">Input Parameters</h5>
-                    </div>
+        <!-- Input Parameters Card -->
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header minimal-card-header">
+                    <h5 class="card-title mb-0">Input Parameters</h5>
                 </div>
                 <div class="card-body">
-                    <form method="post" id="bondCurveForm">
+                    <form method="post" id="bondCurveForm" class="professional-form">
                         {% csrf_token %}
                         
-                        
-                        <!-- Evaluation Date -->
-                        <div class="mb-3">
-                            <label for="{{ form.evaluation_date.id_for_label }}" class="form-label">
-                                <i class="bi bi-calendar-date me-1"></i>{{ form.evaluation_date.label }}
-                            </label>
-                            {{ form.evaluation_date }}
-                            <div class="form-text small">
-                                <i class="bi bi-info-circle me-1"></i>
-                                <strong>Tip:</strong> This is the reference date for all bond calculations. Default is 2016-10-17 as in the book example.
-                            </div>
-                        </div>
-                        
-                        <!-- Coupon Matrix -->
-                        <div class="mb-3">
-                            <label class="form-label">
-                                <i class="bi bi-table me-1"></i>Coupon Matrix
-                            </label>
-                            <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
-                                <table class="table table-sm table-bordered mb-0" id="couponMatrix">
-                                    <thead class="table-light sticky-top">
-                                        <tr>
-                                            <th class="py-1">Maturity</th>
-                                            <th class="py-1">Rate (%)</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Will be populated by JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="form-text small">
-                                <i class="bi bi-info-circle me-1"></i>
-                                <strong>Tip:</strong> Edit the coupon rates for each maturity. Higher rates = higher bond prices. Values are in percentage (e.g., 2.5 for 2.5%).
-                            </div>
-                        </div>
-                        
-                        <!-- Bond Quotes -->
-                        <div class="mb-3">
-                            <label class="form-label">
-                                <i class="bi bi-currency-dollar me-1"></i>Market Prices
-                            </label>
-                            <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
-                                <table class="table table-sm table-bordered mb-0" id="bondQuotes">
-                                    <thead class="table-light sticky-top">
-                                        <tr>
-                                            <th class="py-1">Maturity</th>
-                                            <th class="py-1">Price</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Will be populated by JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="form-text small">
-                                <i class="bi bi-info-circle me-1"></i>
-                                <strong>Tip:</strong> Edit the market prices for each bond. Higher prices = lower yields = higher test bond price. Default is 100.0 for all bonds.
-                            </div>
-                        </div>
-                        
-                        <!-- Advanced Options -->
-                        <div class="mb-3">
-                            <div class="form-check mb-2">
-                                {{ form.enable_observer }}
-                                <label class="form-check-label" for="{{ form.enable_observer.id_for_label }}">
-                                    <i class="bi bi-arrow-clockwise me-1"></i>{{ form.enable_observer.label }}
-                                </label>
-                            </div>
-                            <div class="form-text small mb-2">
-                                <i class="bi bi-info-circle me-1"></i>
-                                <strong>Observer:</strong> When enabled, results update automatically when you change inputs. When disabled, you need to click "Calculate Results" manually.
+                        <!-- Clean Horizontal Layout -->
+                        <div class="row g-3">
+                            <!-- Evaluation Date -->
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label for="{{ form.evaluation_date.id_for_label }}" class="form-label">
+                                        {{ form.evaluation_date.label }}
+                                    </label>
+                                    {{ form.evaluation_date }}
+                                    <div class="form-text small text-muted">
+                                        Reference date for calculations
+                                    </div>
+                                </div>
                             </div>
                             
-                            <div class="d-flex gap-2 align-items-center">
-                                <button type="button" class="btn btn-warning btn-sm" id="freezeBtn">
-                                    <i class="bi bi-pause me-1"></i>Freeze
-                                </button>
-                                <button type="button" class="btn btn-info btn-sm" id="unfreezeBtn" disabled>
-                                    <i class="bi bi-play me-1"></i>Unfreeze
-                                </button>
-                                <span class="badge bg-success ms-2" id="freezeStatus">Active</span>
+                            <!-- Observer Checkbox -->
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        {{ form.enable_observer }}
+                                        <label class="form-check-label" for="{{ form.enable_observer.id_for_label }}">
+                                            {{ form.enable_observer.label }}
+                                        </label>
+                                    </div>
+                                    <div class="form-text small text-muted">
+                                        Auto-update results when enabled
+                                    </div>
+                                </div>
                             </div>
-                            <div class="form-text mt-1">
-                                <i class="bi bi-info-circle me-1"></i>
-                                <strong>Freeze:</strong> Stop automatic updates while you modify multiple inputs. <strong>Unfreeze:</strong> Resume updates and recalculate with all changes.
+                            
+                            <!-- Freeze/Unfreeze Controls -->
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <div class="d-flex gap-2 align-items-center">
+                                        <button type="button" class="btn minimal-button btn-sm" id="freezeBtn">
+                                            Freeze
+                                        </button>
+                                        <button type="button" class="btn minimal-button btn-sm" id="unfreezeBtn" disabled>
+                                            Unfreeze
+                                        </button>
+                                        <span class="badge minimal-badge ms-2" id="freezeStatus">Active</span>
+                                    </div>
+                                    <div class="form-text small text-muted">
+                                        Stop auto-updates while editing
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tables Row -->
+                        <div class="row g-3">
+                            <!-- Coupon Matrix -->
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Coupon Matrix</label>
+                                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                                        <table class="table table-sm table-bordered mb-0" id="couponMatrix">
+                                            <thead class="table-light sticky-top">
+                                                <tr>
+                                                    <th class="py-1">Maturity</th>
+                                                    <th class="py-1">Rate (%)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Will be populated by JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="form-text small text-muted">
+                                        Edit coupon rates for each maturity
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Market Prices -->
+                            <div class="col-lg-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Market Prices</label>
+                                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                                        <table class="table table-sm table-bordered mb-0" id="bondQuotes">
+                                            <thead class="table-light sticky-top">
+                                                <tr>
+                                                    <th class="py-1">Maturity</th>
+                                                    <th class="py-1">Price</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Will be populated by JavaScript -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="form-text small text-muted">
+                                        Edit market prices for each bond
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary" id="calculateBtn">
+                                        Calculate Results
+                                    </button>
+                                </div>
+                                <div class="form-text small mt-2 text-center text-muted">
+                                    If Observer is enabled, results update automatically. If disabled, click this button to calculate manually.
+                                </div>
                             </div>
                         </div>
                         
@@ -199,38 +219,22 @@
                         {{ form.coupon_matrix }}
                         {{ form.bond_quotes }}
                         {{ form.is_frozen }}
-                        
-                        <!-- Submit Button -->
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary" id="calculateBtn">
-                                <i class="bi bi-calculator me-2"></i>Calculate Results
-                            </button>
-                        </div>
-                        <div class="form-text small mt-2 text-center">
-                            <i class="bi bi-info-circle me-1"></i>
-                            <strong>Note:</strong> If Observer is enabled, results update automatically. If disabled, click this button to calculate manually.
-                        </div>
                     </form>
                 </div>
             </div>
         </div>
 
-        <!-- Right Column - Results & Analysis -->
-        <div class="col-lg-8">
+        <!-- Pricing Results Card - Directly under inputs -->
+        <div class="col-12">
             <!-- Pricing Results -->
             <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-success text-white">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-calculator me-2 fs-5"></i>
-                        <h5 class="card-title mb-0 fw-bold">Pricing Results</h5>
-                    </div>
+                <div class="card-header minimal-card-header">
+                    <h5 class="card-title mb-0">Pricing Results</h5>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-light mb-3">
-                        <h6 class="alert-heading mb-2">
-                            <i class="bi bi-info-circle me-2"></i>Test Bond Results
-                        </h6>
-                        <p class="mb-0 small">
+                        <h6 class="alert-heading mb-2">Test Bond Results</h6>
+                        <p class="mb-0 small text-muted">
                             15-year, 4% coupon bond priced using Nelson-Siegel yield curve
                         </p>
                     </div>
@@ -274,96 +278,127 @@
                         </div>
                     </div>
                     
-                    {% if not results %}
-                    <div class="text-center py-3">
-                        <i class="bi bi-calculator text-muted" style="font-size: 2rem;"></i>
-                        <p class="text-muted small mb-0 mt-2">Click "Build Curve & Calculate Prices" to see results</p>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
 
-            <!-- Simple Price Change Explanation -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-info text-white">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-lightbulb me-2 fs-5"></i>
-                        <h5 class="card-title mb-0 fw-bold">How Prices Change</h5>
+            <!-- Dynamic Results Explanation -->
+            <div id="results-explanation" style="display: none;">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header minimal-card-header">
+                        <h5 class="card-title mb-0">Understanding the Results</h5>
                     </div>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-light mb-3">
-                        <h6 class="alert-heading">
-                            <i class="bi bi-question-circle me-2"></i>What happens when you change a price?
-                        </h6>
-                        <p class="mb-0">
-                            When you modify a bond price in the table above, here's what happens step by step:
-                        </p>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-3 text-center mb-3">
-                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
-                                <span class="fw-bold fs-5">1</span>
-                            </div>
-                            <h6 class="text-primary mb-1">You Change Price</h6>
-                            <p class="small text-muted mb-0">
-                                You edit a bond price from 100.0 to 101.0 in the table
+                    <div class="card-body">
+                        <div class="alert alert-light mb-3">
+                            <h6 class="alert-heading">What Your Results Mean</h6>
+                            <p class="mb-0 text-muted">
+                                This section explains what the pricing results above tell you about your bond calculations.
                             </p>
                         </div>
-                        <div class="col-md-3 text-center mb-3">
-                            <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
-                                <span class="fw-bold fs-5">2</span>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body">
+                                        <h6 class="text-dark mb-3">Initial Price Analysis</h6>
+                                        <p class="small text-muted mb-2">
+                                            This represents the fair market value of your 15-year, 4% coupon bond 
+                                            based on the Nelson-Siegel yield curve constructed from your input parameters.
+                                        </p>
+                                        <div class="alert alert-info py-2">
+                                            <small class="mb-0">
+                                                <strong>Key Point:</strong> This is the theoretical price if all market conditions 
+                                                remain exactly as you've set them.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <h6 class="text-success mb-1">Curve Updates</h6>
-                            <p class="small text-muted mb-0">
-                                The yield curve automatically recalculates with the new price
-                            </p>
-                        </div>
-                        <div class="col-md-3 text-center mb-3">
-                            <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
-                                <span class="fw-bold fs-5">3</span>
+                            
+                            <div class="col-md-6 mb-4">
+                                <div class="card border-0 bg-light h-100">
+                                    <div class="card-body">
+                                        <h6 class="text-dark mb-3">Final Price Analysis</h6>
+                                        <p class="small text-muted mb-2">
+                                            This shows the bond's value after any changes you made to market prices 
+                                            in the input tables above.
+                                        </p>
+                                        <div class="alert alert-warning py-2">
+                                            <small class="mb-0">
+                                                <strong>Key Point:</strong> This reflects how market price changes 
+                                                affect the bond's valuation through the yield curve.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <h6 class="text-warning mb-1">Bond Reprices</h6>
-                            <p class="small text-muted mb-0">
-                                Our test bond (15 years, 4%) gets a new price using the updated curve
-                            </p>
-                        </div>
-                        <div class="col-md-3 text-center mb-3">
-                            <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 50px; height: 50px;">
-                                <span class="fw-bold fs-5">4</span>
+                            
+                            <div class="col-12 mb-4">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body">
+                                        <h6 class="text-dark mb-3">Price Change Interpretation</h6>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="text-center p-3">
+                                                    <div class="text-success mb-2">
+                                                        <i class="bi bi-arrow-up-circle" style="font-size: 2rem;"></i>
+                                                    </div>
+                                                    <h6 class="text-success">Positive Change</h6>
+                                                    <p class="small text-muted mb-0">
+                                                        Bond is worth more due to favorable market conditions
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="text-center p-3">
+                                                    <div class="text-danger mb-2">
+                                                        <i class="bi bi-arrow-down-circle" style="font-size: 2rem;"></i>
+                                                    </div>
+                                                    <h6 class="text-danger">Negative Change</h6>
+                                                    <p class="small text-muted mb-0">
+                                                        Bond is worth less due to unfavorable market conditions
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="text-center p-3">
+                                                    <div class="text-muted mb-2">
+                                                        <i class="bi bi-dash-circle" style="font-size: 2rem;"></i>
+                                                    </div>
+                                                    <h6 class="text-muted">No Change</h6>
+                                                    <p class="small text-muted mb-0">
+                                                        Market conditions had minimal impact on bond value
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <h6 class="text-info mb-1">Results Update</h6>
-                            <p class="small text-muted mb-0">
-                                You see the new price in the results and charts automatically
-                            </p>
                         </div>
-                    </div>
-
-                    <div class="alert alert-success">
-                        <h6 class="alert-heading">
-                            <i class="bi bi-check-circle me-2"></i>Simple Example
-                        </h6>
-                        <p class="mb-2">
-                            <strong>If you increase all bond prices from 100.0 to 101.0:</strong>
-                        </p>
-                        <ul class="mb-0 small">
-                            <li>✅ Bond yields go down (higher prices = lower yields)</li>
-                            <li>✅ Our test bond price goes up (from ~105.77 to ~106.52)</li>
-                            <li>✅ The discount curve becomes flatter</li>
-                            <li>✅ Charts update to show the new curve and price evolution</li>
-                        </ul>
-                    </div>
-
-                    <div class="alert alert-info">
-                        <h6 class="alert-heading">
-                            <i class="bi bi-info-circle me-2"></i>Why This Happens
-                        </h6>
-                        <p class="mb-0 small">
-                            <strong>Higher bond prices = Lower yields = Higher bond values</strong><br>
-                            This is the basic relationship in bond markets. When market prices go up, 
-                            the yield curve shifts down, making all bonds more valuable.
-                        </p>
+                        
+                        <div class="card border-0" style="background-color: #f8f9fa;">
+                            <div class="card-body">
+                                <h6 class="fw-bold mb-3">Practical Interpretation:</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-primary mb-2">For Investors:</h6>
+                                        <ul class="small mb-0">
+                                            <li>Positive change = Good investment opportunity</li>
+                                            <li>Negative change = Consider selling or hedging</li>
+                                            <li>Large changes = High sensitivity to market conditions</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-primary mb-2">For Risk Management:</h6>
+                                        <ul class="small mb-0">
+                                            <li>Monitor yield curve changes regularly</li>
+                                            <li>Large price swings indicate high risk</li>
+                                            <li>Use for portfolio rebalancing decisions</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -631,6 +666,21 @@ function updateResultsDisplay(data) {
     
     // Update price history table
     updatePriceHistoryTable(data.all_prices);
+    
+    // Update dynamic explanations
+    updateResultsExplanations(data);
+}
+
+// Update dynamic results explanations
+function updateResultsExplanations(data) {
+    // Show the explanation section
+    const explanationSection = document.getElementById('results-explanation');
+    if (explanationSection) {
+        explanationSection.style.display = 'block';
+    }
+    
+    // No need to update numerical values since we removed them from the explanation section
+    // The explanation section now focuses on interpretation rather than repeating values
 }
 
 // Update price history table
@@ -903,6 +953,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Calculate price changes
     calculatePriceChanges();
+    
+    // Hide results explanation initially
+    const explanationSection = document.getElementById('results-explanation');
+    if (explanationSection) {
+        explanationSection.style.display = 'none';
+    }
     
     // Initialize charts if data is available
     const curveDataElement = document.getElementById('curve-chart-data');

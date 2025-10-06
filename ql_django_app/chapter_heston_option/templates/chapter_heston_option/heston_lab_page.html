@@ -1,0 +1,280 @@
+{% extends "equity_models/chapter_base.html" %}
+{% load crispy_forms_tags %}
+
+{% block chapter_content %}
+<!-- Interactive Lab Section -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card border-primary h-100">
+                <div class="card-header bg-light">
+                    <h5 class="card-title fw-bold text-primary mb-0">
+                        <i class="bi bi-sliders me-2"></i>Option Parameters
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Option Parameters -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-primary mb-3">Basic Option Parameters</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    {{ form.spot_price|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.strike_price|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.option_type|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.exercise_type|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Market Data -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-primary mb-3">Market Data</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    {{ form.volatility_pct|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.dividend_rate_pct|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.risk_free_rate_pct|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    <!-- Empty div to maintain grid balance -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dates -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-primary mb-3">Dates</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    {{ form.evaluation_dt|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.maturity_dt|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Heston Model Parameters -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-primary mb-3">Heston Model Parameters</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    {{ form.v0|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.kappa|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.theta|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.sigma|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.rho|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    <!-- Empty div to maintain grid balance -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Settings -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-primary mb-3">Advanced Settings</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    {{ form.heston_engine_rate|as_crispy_field }}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.heston_engine_steps|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 btn-lg">
+                            <i class="bi bi-calculator me-2"></i>Calculate Option Prices
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card border-primary h-100">
+                <div class="card-header bg-primary">
+                    <h5 class="card-title fw-bold text-white mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Pricing Results
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if results %}
+                        <!-- Results Dashboard -->
+                        <div class="row g-3 mb-4">
+                            <!-- Heston Model Card -->
+                            <div class="col-12">
+                                <div class="card border-primary h-100">
+                                    <div class="card-body text-center p-4">
+                                        <div class="mb-3">
+                                            <i class="bi bi-graph-up-arrow text-primary" style="font-size: 3rem;"></i>
+                                        </div>
+                                        <h5 class="card-title text-primary fw-bold mb-2">Heston Model</h5>
+                                        <h2 class="fw-bold text-primary mb-3">{{ results.heston_price_formatted }}</h2>
+                                        <p class="text-muted small mb-0">Stochastic Volatility Model</p>
+                                        
+                                        <!-- Dynamic Explanation for Heston -->
+                                        <div class="mt-3 p-3 bg-light rounded">
+                                            <h6 class="fw-bold text-primary mb-2">What This Means:</h6>
+                                            <p class="small text-muted mb-0">
+                                                The Heston model accounts for <strong>time-varying volatility</strong> and <strong>mean reversion</strong>. 
+                                                This price reflects the option's value considering that volatility itself changes over time, 
+                                                making it more realistic than constant volatility assumptions.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- BSM Model Card -->
+                            <div class="col-12">
+                                <div class="card border-primary h-100">
+                                    <div class="card-body text-center p-4">
+                                        <div class="mb-3">
+                                            <i class="bi bi-calculator text-primary" style="font-size: 3rem;"></i>
+                                        </div>
+                                        <h5 class="card-title text-primary fw-bold mb-2">Black-Scholes-Merton</h5>
+                                        <h2 class="fw-bold text-primary mb-3">{{ results.bsm_price_formatted }}</h2>
+                                        <p class="text-muted small mb-0">Constant Volatility Model</p>
+                                        
+                                        <!-- Dynamic Explanation for BSM -->
+                                        <div class="mt-3 p-3 bg-light rounded">
+                                            <h6 class="fw-bold text-primary mb-2">What This Means:</h6>
+                                            <p class="small text-muted mb-0">
+                                                The BSM model assumes <strong>constant volatility</strong> throughout the option's life. 
+                                                This is the traditional approach used in most financial institutions and provides 
+                                                a baseline for comparison with more sophisticated models.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Difference Card -->
+                            <div class="col-12">
+                                <div class="card border-primary h-100">
+                                    <div class="card-body text-center p-4">
+                                        <div class="mb-3">
+                                            <i class="bi bi-arrow-left-right text-primary" style="font-size: 3rem;"></i>
+                                        </div>
+                                        <h5 class="card-title text-primary fw-bold mb-2">Price Difference</h5>
+                                        <h2 class="fw-bold text-primary mb-3">{{ results.difference_formatted }}</h2>
+                                        <p class="text-muted small mb-0">Volatility Impact</p>
+                                        
+                                        <!-- Dynamic Explanation for Difference -->
+                                        <div class="mt-3 p-3 bg-light rounded">
+                                            <h6 class="fw-bold text-primary mb-2">What This Means:</h6>
+                                            {% if results.difference > 0 %}
+                                            <p class="small text-muted mb-0">
+                                                <strong>BSM prices higher</strong> than Heston. This suggests that the constant volatility assumption 
+                                                leads to <strong>overpricing</strong> compared to the more realistic stochastic volatility model.
+                                            </p>
+                                            {% elif results.difference < 0 %}
+                                            <p class="small text-muted mb-0">
+                                                <strong>Heston prices higher</strong> than BSM. This indicates that stochastic volatility effects 
+                                                lead to <strong>higher option values</strong> due to volatility clustering and mean reversion.
+                                            </p>
+                                            {% else %}
+                                            <p class="small text-muted mb-0">
+                                                <strong>Both models agree</strong> on the option price. This suggests that for these parameters, 
+                                                the stochastic volatility effects are minimal.
+                                            </p>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Explanation Section -->
+                        <div class="mt-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body p-4">
+                                    <h5 class="fw-bold text-dark mb-3">
+                                        <i class="bi bi-info-circle text-primary me-2"></i>
+                                        Understanding the Results
+                                    </h5>
+                                    
+                                    <div class="row g-4">
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-white rounded border">
+                                                <h6 class="fw-bold text-primary mb-2">Why Different Prices?</h6>
+                                                <p class="small text-muted mb-2">
+                                                    The Heston and BSM models give different prices because they make different assumptions about volatility:
+                                                </p>
+                                                <ul class="small text-muted mb-0">
+                                                    <li><strong>BSM:</strong> Assumes constant volatility throughout the option's life</li>
+                                                    <li><strong>Heston:</strong> Models volatility as a stochastic process that changes over time</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-white rounded border">
+                                                <h6 class="fw-bold text-primary mb-2">What This Means</h6>
+                                                <p class="small text-muted mb-2">
+                                                    The difference of <strong>{{ results.difference_formatted }}</strong> shows the impact of stochastic volatility modeling:
+                                                </p>
+                                                <ul class="small text-muted mb-0">
+                                                    <li>Positive difference: BSM prices higher (constant vol assumption)</li>
+                                                    <li>Negative difference: Heston prices higher (stochastic effects)</li>
+                                                    <li>Zero difference: Both models agree (rare case)</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3 p-3 bg-primary text-white rounded">
+                                        <h6 class="fw-bold text-white mb-2">Practical Implications</h6>
+                                        <p class="small text-white mb-0">
+                                            <strong>For Risk Management:</strong> The Heston model provides more realistic pricing for options, especially in volatile markets. 
+                                            The difference you see represents the "volatility smile" effect - how market-observed option prices differ from constant volatility assumptions.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% else %}
+                        <div class="text-center py-5">
+                            <div class="mb-4">
+                                <i class="bi bi-calculator text-muted" style="font-size: 4rem;"></i>
+                            </div>
+                            <h5 class="fw-bold text-muted mb-3">Ready to Calculate</h5>
+                            <p class="text-muted mb-4">
+                                Enter the parameters above and click "Calculate Option Prices" to see the results.
+                            </p>
+                            <div class="alert alert-light border-0">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Tip:</strong> Start with the default values to see the book's example, then experiment with different parameters.
+                                </small>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

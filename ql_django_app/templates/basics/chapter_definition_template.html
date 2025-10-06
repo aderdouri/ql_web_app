@@ -1,0 +1,140 @@
+{% extends "basics/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card basics-card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    {{ chapter_overview|default:"This chapter covers essential concepts in quantitative finance using QuantLib. Learn through interactive examples and hands-on laboratories." }}
+                </p>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            {% for learning_point in learning_points %}
+                            <li><i class="bi bi-check-circle text-success me-2"></i>{{ learning_point }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+{% if lab_url %}
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card interactive-lab">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    {{ lab_description|default:"Use the interactive lab below to experiment with QuantLib's features. Try different parameters to see how they affect the results." }}
+                </p>
+                <div class="text-center">
+                    <a href="{{ lab_url }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2" style="color: white !important;"></i>Launch Interactive Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Learning Modules -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="fw-bold text-dark mb-4">
+            <i class="bi bi-list-ul me-2"></i>Learning Modules
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4 learning-modules">
+    {% for module in learning_modules %}
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi {{ module.icon }} basics-icon"></i>
+                    <h5 class="card-title fw-bold mb-0">{{ module.title }}</h5>
+                </div>
+                <p class="card-text text-muted">
+                    {{ module.description }}
+                </p>
+                <ul class="list-unstyled">
+                    {% for point in module.points %}
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>{{ point }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Key Concepts -->
+{% if key_concepts %}
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card key-concepts">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-lightbulb me-2"></i>Key Concepts
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for concept in key_concepts %}
+                    <div class="col-md-6 mb-3">
+                        <div class="d-flex">
+                            <i class="bi bi-star-fill text-warning me-3 mt-1"></i>
+                            <div>
+                                <h6 class="fw-bold mb-1">{{ concept.title }}</h6>
+                                <p class="text-muted mb-0 small">{{ concept.description }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Prerequisites -->
+{% if prerequisites %}
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card basics-alert basics-alert-warning">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Prerequisites
+                </h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled mb-0">
+                    {% for prereq in prerequisites %}
+                    <li><i class="bi bi-check-square text-success me-2"></i>{{ prereq }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+

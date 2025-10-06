@@ -56,8 +56,61 @@
                 </p>
                 <div class="text-center">
                     <a href="{% url 'chapter4_quotes:bond_curve_lab' %}" class="btn btn-primary btn-lg">
-                        <i class="bi bi-play-circle me-2"></i>Launch Bond Curve Lab
+                        <i class="bi bi-play-circle me-2" style="color: white !important;"></i>launch bond curve lab
                     </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Learning Modules Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card learning-modules">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-journal-bookmark me-2"></i>Learning Modules
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="accordion" id="learningModulesAccordion">
+                    <!-- Module 1: Bond Curve Construction -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                1. Bond Curve Construction
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#learningModulesAccordion">
+                            <div class="accordion-body">
+                                <p>Learn how to construct discount curves from bond market data using QuantLib's FittedBondDiscountCurve with Nelson-Siegel fitting methodology.</p>
+                                <ul>
+                                    <li><strong>FixedRateBondHelper:</strong> Create bond helpers for curve fitting</li>
+                                    <li><strong>Nelson-Siegel Model:</strong> Mathematical framework for yield curve modeling</li>
+                                    <li><strong>Discount Factors:</strong> Calculate present value factors from the curve</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Module 2: Market Quote Management -->
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button fw-semibold collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                2. Market Quote Management
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#learningModulesAccordion">
+                            <div class="accordion-body">
+                                <p>Understand how market quotes drive curve construction and how quote updates propagate through the pricing system using QuantLib's observer pattern.</p>
+                                <ul>
+                                    <li><strong>SimpleQuote:</strong> Basic quote management and updates</li>
+                                    <li><strong>Observer Pattern:</strong> Automatic notification system for price changes</li>
+                                    <li><strong>Real-time Updates:</strong> Dynamic curve recalculation</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -189,13 +242,9 @@
                         </ul>
                     </div>
                 </div>
-                <div class="alert alert-info mt-3">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <strong>Expected Results:</strong> You should see initial bond prices around 105.77, 
-                    evolving to approximately 106.52 as quotes are updated, matching the book's examples.
-                </div>
             </div>
         </div>
     </div>
 </div>
+
 {% endblock %}

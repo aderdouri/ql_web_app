@@ -151,3 +151,4 @@ class RandomNumbersForm(forms.Form):
             'risk_free_rate': 0.05,
         }
 
+

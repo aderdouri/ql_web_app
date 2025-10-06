@@ -1,0 +1,85 @@
+{% extends "equity_models/chapter_base.html" %}
+
+{% block chapter_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h4 class="card-title mb-4">
+                        <i class="bi bi-gear me-2"></i>Chapter 23: Heston Model Parameter Calibration
+                    </h4>
+                    
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">Advanced Parameter Calibration Techniques</h5>
+                        <p>This chapter demonstrates how to calibrate Heston model parameters using both QuantLib Python and SciPy optimization methods. We'll explore different solvers and their performance characteristics.</p>
+                    </div>
+                    
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0">Local Optimization Methods</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        <li><strong>QuantLib Levenberg-Marquardt:</strong> Built-in QuantLib solver</li>
+                                        <li><strong>SciPy Levenberg-Marquardt:</strong> Enhanced SciPy implementation</li>
+                                        <li><strong>SciPy Least Squares:</strong> Robust least squares optimization</li>
+                                    </ul>
+                                    <p class="small text-muted">These methods find local minima and are sensitive to initial conditions.</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0">Global Optimization Methods</h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        <li><strong>Differential Evolution:</strong> Global search algorithm</li>
+                                        <li><strong>Basin Hopping:</strong> Annealing-like method</li>
+                                    </ul>
+                                    <p class="small text-muted">These methods search for global minima and are less sensitive to initial conditions.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>Key Features:</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <span>Multiple Solver Comparison</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <span>Parameter Stability Analysis</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
+                                    <span>Calibration Quality Metrics</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{% url 'chapter_heston_calibration:calibration_lab' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-play-circle me-2"></i>Start Interactive Lab
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

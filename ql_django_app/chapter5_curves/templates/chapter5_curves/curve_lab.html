@@ -19,13 +19,13 @@
         .form-group .help-text { font-size: 0.8rem; color: #666; margin-top: 0.25rem; font-style: italic; }
         .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
         .result-box { background-color: white; border: 1px solid #e0e0e0; padding: 1rem; border-radius: 8px; text-align: center; }
-        .result-box h4 { margin: 0 0 0.5rem 0; color: #007bff; font-size: 1rem; }
+        .result-box h4 { margin: 0 0 0.5rem 0; color: var(--primary-blue); font-size: 1rem; }
         .result-box p { font-size: 1.2rem; font-weight: bold; margin: 0; color: #333; }
-        #calculateBtn { width: 100%; padding: 10px; margin-top: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; font-size: 1rem; }
+        #calculateBtn { width: 100%; padding: 10px; margin-top: 10px; background-color: var(--primary-blue); color: white; border: none; cursor: pointer; border-radius: 4px; font-size: 1rem; }
         .chart-container { background-color: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         #error-message-container { margin-bottom: 1rem; }
         .output-section { background-color: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1rem; }
-        .output-section h3 { color: #007bff; border-bottom: 2px solid #007bff; }
+        .output-section h3 { color: var(--primary-blue); border-bottom: 2px solid var(--primary-blue); }
         .table { margin-bottom: 0; }
         .table th { background-color: #f8f9fa; font-weight: 600; }
         .alert { border-radius: 8px; }
@@ -296,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         xAxisKey: 'x',
                         yAxisKey: 'y'
                     },
-                    borderColor: '#007BFF',
+                    borderColor: 'var(--primary-blue)',
                     fill: false,
                     tension: 0.1,
                     pointRadius: 0,

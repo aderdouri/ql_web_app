@@ -8,3 +8,4 @@ urlpatterns = [
     path('api/calculate/', views.calculate_random_numbers_api, name='calculate_api'),
 ]
 
+

@@ -38,7 +38,10 @@ def pricing_range_lab_view(request):
     
     return render(request, 'chapter6_pricing_range/pricing_range_lab.html', {
         'form': form,
-        'results': default_results
+        'results': default_results,
+        'chapter_title': 'Pricing over a Range of Days',
+        'chapter_icon': 'bi-graph-up',
+        'chapter_description': 'Visualize how the instrument value changes over time with discounting and time passing effects.'
     })
 
 @csrf_exempt

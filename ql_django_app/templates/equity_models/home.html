@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Equity Models - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+
+    <!-- Chapter Navigation -->
+    <div class="chapter-nav">
+        <div class="row">
+            <div class="col-12">
+                <h3 class="fw-bold text-center mb-4">
+                    <i class="bi bi-book me-2"></i>Available Chapters
+                </h3>
+            </div>
+        </div>
+        <div class="row g-3">
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-graph-up text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">21. Valuing European option using Heston</h5>
+                        <p class="card-text text-muted small">Advanced stochastic volatility model for European options</p>
+                        <a href="{% url 'equity_models:chapter_heston_option:heston_description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chapter 22: Volatility Smile and Heston Model Calibration - Coming Soon -->
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-graph-down text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">22. Volatility smile and Heston calibration</h5>
+                        <p class="card-text text-muted small">Volatility surfaces and Heston model calibration to market data</p>
+                        <button class="btn btn-secondary btn-sm" disabled>
+                            <i class="bi bi-clock me-1"></i>Coming Soon
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-gear text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">23. Heston parameter calibration</h5>
+                        <p class="card-text text-muted small">Advanced parameter estimation techniques</p>
+                        <a href="{% url 'equity_models:chapter_heston_calibration:calibration_description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-option text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">24. Valuing European and American options</h5>
+                        <p class="card-text text-muted small">Comprehensive option pricing models</p>
+                        <a href="{% url 'equity_models:chapter_european_american_options:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-bar-chart text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">25. Valuing options on commodity futures</h5>
+                        <p class="card-text text-muted small">Pricing options on commodity derivatives</p>
+                        <a href="{% url 'equity_models:chapter_commodity_futures_options:commodity_futures_lab' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-calculator text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">26. Defining rho for the Black process</h5>
+                        <p class="card-text text-muted small">Interest rate sensitivity in Black-Scholes model</p>
+                        <a href="{% url 'equity_models:chapter_black_process_rho:black_process_rho_lab' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-calendar-date text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">27. Using curves with different day-count conventions</h5>
+                        <p class="card-text text-muted small">Advanced day-count convention handling</p>
+                        <a href="{% url 'equity_models:chapter_day_count_conventions:day_count_lab' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

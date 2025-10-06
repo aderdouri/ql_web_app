@@ -1,0 +1,482 @@
+{% extends "equity_models/chapter_base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block chapter_content %}
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                
+                <!-- Harmonized Layout -->
+                <div class="row g-4">
+                    <!-- Parameters Section -->
+                    <div class="col-lg-4">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary">
+                                <h5 class="fw-bold text-white mb-0">
+                                    <i class="bi bi-sliders me-2"></i>Option Parameters
+                                </h5>
+                            </div>
+                            <div class="card-body">
+            <form id="optionForm" method="post">
+                {% csrf_token %}
+                                    {{ form|crispy }}
+                                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                                        <i class="bi bi-calculator me-2"></i>Calculate Option Prices
+                                    </button>
+            </form>
+                                
+                                <!-- Parameter Guide -->
+                                <div class="mt-4">
+                                    <h6 class="fw-bold text-primary mb-3">
+                                        <i class="bi bi-info-circle me-2"></i>Parameter Guide
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="alert alert-light border-primary">
+                                                <h6 class="fw-bold text-primary mb-2">Market Data</h6>
+                                                <p class="small mb-1"><strong>Spot Price:</strong> Current market price of the underlying asset</p>
+                                                <p class="small mb-1"><strong>Strike Price:</strong> Exercise price of the option contract</p>
+                                                <p class="small mb-1"><strong>Volatility:</strong> Annualized standard deviation (0.20 = 20%)</p>
+                                                <p class="small mb-0"><strong>Risk-Free Rate:</strong> Risk-free interest rate</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <div class="alert alert-light border-primary">
+                                                <h6 class="fw-bold text-primary mb-2">Model Parameters</h6>
+                                                <p class="small mb-1"><strong>Dividend Rate:</strong> Continuous dividend yield</p>
+                                                <p class="small mb-1"><strong>Max Steps:</strong> Number of time steps (higher = more accurate)</p>
+                                                <p class="small mb-1"><strong>Option Type:</strong> Call (right to buy) vs Put (right to sell)</p>
+                                                <p class="small mb-0"><strong>Dates:</strong> Calculation and expiration dates</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+        </div>
+
+                    <!-- Results Section -->
+                    <div class="col-lg-8">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary">
+                                <h5 class="fw-bold text-white mb-0">
+                                    <i class="bi bi-graph-up me-2"></i>Convergence Analysis Results
+                                </h5>
+                            </div>
+                            <div class="card-body">
+            {% if error %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endif %}
+            
+                                <!-- Large Charts Section - Full Width -->
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-light">
+                                                <h6 class="fw-bold text-primary mb-0">European Option Convergence</h6>
+                                            </div>
+                                            <div class="card-body p-2">
+                                                <div class="chart-container" style="height: 400px; width: 100%;">
+                            <canvas id="europeanChart"></canvas>
+                        </div>
+                    </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-light">
+                                                <h6 class="fw-bold text-primary mb-0">American Option Convergence</h6>
+                                            </div>
+                                            <div class="card-body p-2">
+                                                <div class="chart-container" style="height: 400px; width: 100%;">
+                            <canvas id="americanChart"></canvas>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {% if results_json %}
+                                    {{ results_json|json_script:"option-data" }}
+                                {% else %}
+                                    <script id="option-data" type="application/json">
+                                    {
+                                        "bs_price": 0,
+                                        "european_convergence": {
+                                            "steps": [2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                            "prices": [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                                        },
+                                        "american_convergence": {
+                                            "steps": [2, 3, 4, 5, 6, 7, 8, 9, 10],
+                                            "prices": [0, 0, 0, 0, 0, 0, 0, 0, 0]
+                                        }
+                                    }
+                                    </script>
+                                {% endif %}
+                                
+                                <!-- Compact Results Summary -->
+                                <div class="row">
+                                    <div class="col-12">
+                                        <div class="card border-primary">
+                                            <div class="card-header bg-primary">
+                                                <h6 class="fw-bold text-white mb-0">
+                                                    <i class="bi bi-lightbulb me-2"></i>Results Summary
+                                                </h6>
+                                            </div>
+                                            <div class="card-body">
+                                                {% if results_json %}
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <h6 class="fw-bold text-primary mb-2">European Option</h6>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <p class="mb-1"><strong>BS Price:</strong></p>
+                                                                    <p class="h6 text-primary" id="bs-price-display">Calculating...</p>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <p class="mb-1"><strong>Binomial Price:</strong></p>
+                                                                    <p class="h6 text-primary" id="european-final-price">Calculating...</p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <p class="mb-1"><strong>Quality:</strong></p>
+                                                                    <p class="small" id="european-convergence-quality">Analyzing...</p>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <p class="mb-1"><strong>Error:</strong></p>
+                                                                    <p class="small text-primary" id="european-error">Calculating...</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <h6 class="fw-bold text-primary mb-2">American Option</h6>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <p class="mb-1"><strong>Premium:</strong></p>
+                                                                    <p class="h6 text-primary" id="early-exercise-premium">Calculating...</p>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <p class="mb-1"><strong>Final Price:</strong></p>
+                                                                    <p class="h6 text-primary" id="american-final-price">Calculating...</p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-6">
+                                                                    <p class="mb-1"><strong>Quality:</strong></p>
+                                                                    <p class="small" id="american-convergence-quality">Analyzing...</p>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    <p class="mb-1"><strong>Error:</strong></p>
+                                                                    <p class="small text-primary" id="american-error">Calculating...</p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Compact Professional Insights -->
+                                                    <div class="row mt-3">
+                                                        <div class="col-md-6">
+                                                            <div class="alert alert-light border-primary p-2">
+                                                                <h6 class="fw-bold text-primary mb-1">Convergence Analysis</h6>
+                                                                <p class="small mb-0" id="convergence-insight">The binomial tree converges to Black-Scholes as steps increase, validating our numerical method.</p>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="alert alert-light border-primary p-2">
+                                                                <h6 class="fw-bold text-primary mb-1">Early Exercise Value</h6>
+                                                                <p class="small mb-0" id="premium-analysis">American options have higher values due to early exercise flexibility.</p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                {% else %}
+                                                    <div class="alert alert-warning text-center">
+                                                        <i class="bi bi-info-circle me-2"></i>
+                                                        <strong>No data available.</strong> Click "Calculate Option Prices" to generate the convergence analysis.
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM loaded, checking for Chart.js and data...");
+        
+        // On s'assure que Chart.js et les données sont bien là
+        if (typeof Chart === 'undefined') {
+            console.error("Chart.js is not loaded");
+            return;
+        }
+        
+        const dataElement = document.getElementById('option-data');
+        if (!dataElement) {
+            console.error("Data script tag is missing");
+            return;
+        }
+        
+        console.log("Chart.js loaded, data element found");
+
+        try {
+            const rawData = dataElement.textContent;
+            console.log("Raw data type:", typeof rawData);
+            console.log("Raw data length:", rawData.length);
+            console.log("Raw data preview:", rawData.substring(0, 100));
+            
+            const allData = JSON.parse(rawData);
+            console.log("Parsed data:", allData);
+            console.log("Data type:", typeof allData);
+            console.log("Is array:", Array.isArray(allData));
+            
+            // Force conversion to object if it's still a string
+            let dataObj;
+            if (typeof allData === 'string') {
+                console.log("Data is still a string, parsing again...");
+                dataObj = JSON.parse(allData);
+            } else {
+                dataObj = allData;
+            }
+            
+            console.log("Final dataObj type:", typeof dataObj);
+            console.log("Final dataObj keys:", Object.keys(dataObj));
+            
+            const bsPrice = dataObj.bs_price;
+            console.log("BS Price extracted:", bsPrice);
+            
+            // Force the creation of charts regardless of data access issues
+            console.log("FORCING CHART CREATION...");
+            if (dataObj.european_convergence && dataObj.european_convergence.steps && dataObj.european_convergence.prices) {
+                console.log("European data is valid, creating chart...");
+                createConvergenceChart('europeanChart', dataObj.european_convergence, bsPrice, 'Binomial Tree Price for European Option');
+            } else {
+                console.log("European data is invalid:", dataObj.european_convergence);
+            }
+            
+            if (dataObj.american_convergence && dataObj.american_convergence.steps && dataObj.american_convergence.prices) {
+                console.log("American data is valid, creating chart...");
+                createConvergenceChart('americanChart', dataObj.american_convergence, bsPrice, 'Binomial Tree Price for American Option');
+            } else {
+                console.log("American data is invalid:", dataObj.american_convergence);
+            }
+
+            function createConvergenceChart(canvasId, convergenceData, bsPrice, title) {
+                console.log(`Creating chart for ${canvasId} with data:`, convergenceData);
+                const canvas = document.getElementById(canvasId);
+                if (!canvas) {
+                    console.error(`Canvas element ${canvasId} not found`);
+                    return;
+                }
+                
+                // Destroy existing chart if it exists
+                if (window[canvasId + 'Chart']) {
+                    console.log(`Destroying existing chart for ${canvasId}`);
+                    window[canvasId + 'Chart'].destroy();
+                }
+                
+                const ctx = canvas.getContext('2d');
+                
+                const bsLine = {
+                    type: 'line', label: 'BSM Price',
+                    borderColor: 'rgb(255, 159, 64)', borderWidth: 2, borderDash: [5, 5],
+                    pointRadius: 0,
+                    data: [
+                        { x: 0, y: bsPrice },
+                        { x: convergenceData.steps[convergenceData.steps.length - 1], y: bsPrice }
+                    ]
+                };
+
+                const binomialLine = {
+                    type: 'line', label: 'Binomial Tree Price',
+                    borderColor: 'rgb(54, 162, 235)', borderWidth: 2,
+                    pointRadius: 0, tension: 0.1,
+                    data: convergenceData.steps.map((step, i) => ({ x: step, y: convergenceData.prices[i] }))
+                };
+                
+                const chart = new Chart(ctx, {
+                    type: 'scatter',
+                    data: { datasets: [binomialLine, bsLine] },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { 
+                                title: { display: true, text: 'Steps', font: { size: 14 } },
+                                ticks: { font: { size: 12 } }
+                            },
+                            y: { 
+                                title: { display: true, text: 'Price', font: { size: 14 } },
+                                ticks: { font: { size: 12 } }
+                            }
+                        },
+                        plugins: { 
+                            title: { 
+                                display: true, 
+                                text: title,
+                                font: { size: 16, weight: 'bold' }
+                            },
+                            legend: {
+                                display: true,
+                                position: 'top',
+                                labels: { font: { size: 12 } }
+                            }
+                        }
+                    }
+                });
+                
+                // Store chart reference for future destruction
+                window[canvasId + 'Chart'] = chart;
+                console.log(`Chart created and stored as ${canvasId}Chart`);
+            }
+
+            // Update dynamic analysis with calculated results
+            function updateDynamicAnalysis(dataObj) {
+                console.log("Updating dynamic analysis with data:", dataObj);
+                
+                // Helper function to safely update element text
+                function safeUpdateElement(id, value) {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = value;
+                    } else {
+                        console.warn(`Element with id '${id}' not found`);
+                    }
+                }
+                
+                // Check if we have valid data
+                if (!dataObj || !dataObj.bs_price || !dataObj.european_convergence || !dataObj.american_convergence) {
+                    console.log("Insufficient data for dynamic analysis update");
+                    return;
+                }
+                
+                // Update Black-Scholes price
+                const bsPrice = dataObj.bs_price;
+                safeUpdateElement('bs-price-display', bsPrice.toFixed(4));
+                
+                // Update European option analysis
+                const europeanData = dataObj.european_convergence;
+                if (europeanData.prices && europeanData.prices.length > 0) {
+                    const europeanFinalPrice = europeanData.prices[europeanData.prices.length - 1];
+                    const europeanError = Math.abs(europeanFinalPrice - bsPrice) / bsPrice * 100;
+                    
+                    safeUpdateElement('european-final-price', europeanFinalPrice.toFixed(4));
+                    safeUpdateElement('european-error', europeanError.toFixed(2) + '%');
+                    
+                    // Determine convergence quality
+                    let europeanQuality = 'Excellent';
+                    if (europeanError > 1) europeanQuality = 'Good';
+                    if (europeanError > 5) europeanQuality = 'Fair';
+                    if (europeanError > 10) europeanQuality = 'Poor';
+                    safeUpdateElement('european-convergence-quality', europeanQuality);
+                }
+                
+                // Update American option analysis
+                const americanData = dataObj.american_convergence;
+                if (americanData.prices && americanData.prices.length > 0) {
+                    const americanFinalPrice = americanData.prices[americanData.prices.length - 1];
+                    const americanError = Math.abs(americanFinalPrice - bsPrice) / bsPrice * 100;
+                    const earlyExercisePremium = americanFinalPrice - (europeanData.prices ? europeanData.prices[europeanData.prices.length - 1] : 0);
+                    
+                    safeUpdateElement('american-final-price', americanFinalPrice.toFixed(4));
+                    safeUpdateElement('american-error', americanError.toFixed(2) + '%');
+                    safeUpdateElement('early-exercise-premium', earlyExercisePremium.toFixed(4));
+                    
+                    // Determine American convergence quality
+                    let americanQuality = 'Excellent';
+                    if (americanError > 1) americanQuality = 'Good';
+                    if (americanError > 5) americanQuality = 'Fair';
+                    if (americanError > 10) americanQuality = 'Poor';
+                    safeUpdateElement('american-convergence-quality', americanQuality);
+                    
+                    // Update insights
+                    let convergenceInsight = 'The binomial tree shows excellent convergence to the Black-Scholes price.';
+                    if (europeanData.prices && europeanData.prices.length > 0) {
+                        const europeanError = Math.abs(europeanData.prices[europeanData.prices.length - 1] - bsPrice) / bsPrice * 100;
+                        if (europeanError > 5) {
+                            convergenceInsight = 'The binomial tree shows moderate convergence. Consider increasing the number of steps for better accuracy.';
+                        }
+                        if (europeanError > 10) {
+                            convergenceInsight = 'The binomial tree shows poor convergence. The model may need parameter adjustment or more steps.';
+                        }
+                    }
+                    safeUpdateElement('convergence-insight', convergenceInsight);
+                    
+                    // Update premium analysis
+                    let premiumAnalysis = 'The early exercise premium is ' + earlyExercisePremium.toFixed(4) + ', indicating ';
+                    if (earlyExercisePremium > 0.1) {
+                        premiumAnalysis += 'significant early exercise value.';
+                    } else if (earlyExercisePremium > 0.01) {
+                        premiumAnalysis += 'moderate early exercise value.';
+                    } else {
+                        premiumAnalysis += 'minimal early exercise value.';
+                    }
+                    safeUpdateElement('premium-analysis', premiumAnalysis);
+                }
+                
+                console.log("Dynamic analysis updated successfully");
+            }
+
+            // Créer les deux graphiques
+            console.log("Checking for European convergence data...");
+            console.log("All data keys:", Object.keys(dataObj));
+            console.log("European convergence exists:", !!dataObj.european_convergence);
+            console.log("European convergence data:", dataObj.european_convergence);
+            
+            const europeanData = dataObj.european_convergence || dataObj['european_convergence'];
+            const americanData = dataObj.american_convergence || dataObj['american_convergence'];
+            
+            console.log("European data direct access:", europeanData);
+            console.log("American data direct access:", americanData);
+            
+            if (europeanData && europeanData.steps && europeanData.prices) {
+                console.log("Creating European chart...");
+                createConvergenceChart(
+                    'europeanChart', 
+                    europeanData, 
+                    bsPrice, 
+                    'Binomial Tree Price for European Option'
+                );
+            } else {
+                console.log("No European convergence data found or incomplete");
+                console.log("Available data structure:", dataObj);
+            }
+            
+            if (americanData && americanData.steps && americanData.prices) {
+                console.log("Creating American chart...");
+                createConvergenceChart(
+                    'americanChart', 
+                    americanData, 
+                    bsPrice, 
+                    'Binomial Tree Price for American Option'
+                );
+            } else {
+                console.log("No American convergence data found or incomplete");
+                console.log("Available data structure:", dataObj);
+            }
+            
+            // Update dynamic analysis with calculated results
+            updateDynamicAnalysis(dataObj);
+        } catch (e) {
+            console.error("Failed to parse or render chart data:", e);
+        }
+    });
+</script>
+{% endblock %}

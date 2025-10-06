@@ -1,0 +1,122 @@
+{% extends "equity_models/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter demonstrates advanced option pricing techniques for both European and American options using QuantLib Python. 
+                    We'll explore different pricing methods, their convergence characteristics, and the mathematical foundations behind each approach.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-primary me-2"></i>European option pricing methods</li>
+                            <li><i class="bi bi-check-circle text-primary me-2"></i>American option pricing techniques</li>
+                            <li><i class="bi bi-check-circle text-primary me-2"></i>Convergence analysis and comparison</li>
+                            <li><i class="bi bi-check-circle text-primary me-2"></i>Early exercise optimization</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Option Types Section -->
+<div class="row mb-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title fw-bold mb-0">
+                    <i class="bi bi-option me-2"></i>European Options
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text">European options can only be exercised at expiration, making them easier to price analytically.</p>
+                <h6 class="fw-bold text-dark">Pricing Methods:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Black-Scholes-Merton:</strong> Analytical pricing formula</li>
+                    <li><strong>Binomial Tree:</strong> Discrete-time lattice model</li>
+                    <li><strong>Monte Carlo:</strong> Stochastic simulation method</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title fw-bold mb-0">
+                    <i class="bi bi-option me-2"></i>American Options
+                </h4>
+            </div>
+            <div class="card-body">
+                <p class="card-text">American options can be exercised at any time, requiring more sophisticated numerical methods.</p>
+                <h6 class="fw-bold text-dark">Pricing Methods:</h6>
+                <ul class="list-unstyled">
+                    <li><strong>Binomial Tree:</strong> Optimal exercise boundary</li>
+                    <li><strong>Finite Differences:</strong> PDE-based pricing</li>
+                    <li><strong>Least Squares Monte Carlo:</strong> Advanced simulation</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mathematical Foundations -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-calculator me-2"></i>Mathematical Foundations
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-dark">Black-Scholes PDE</h6>
+                        <p class="text-muted">$$\frac{\partial V}{\partial t} + \frac{1}{2}\sigma^2 S^2 \frac{\partial^2 V}{\partial S^2} + rS \frac{\partial V}{\partial S} - rV = 0$$</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-dark">American Option Constraint</h6>
+                        <p class="text-muted">$$V(S,t) \geq \max(S-K, 0) \text{ for calls}$$</p>
+                        <p class="text-muted">$$V(S,t) \geq \max(K-S, 0) \text{ for puts}$$</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Use the interactive lab below to experiment with different option pricing methods. 
+                    Compare European and American options, analyze convergence, and explore the impact of various parameters.
+                </p>
+                <div class="text-center">
+                    <a href="{% url 'equity_models:chapter_european_american_options:lab' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
