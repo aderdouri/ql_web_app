@@ -1,0 +1,362 @@
+{% extends "equity_models/chapter_base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ chapter_title }}{% endblock %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .page-wrapper { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 2rem; 
+        }
+        .controls { 
+            flex: 1; 
+            min-width: 350px; 
+            background-color: white; 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            align-self: flex-start; 
+        }
+        .results-area { 
+            flex: 2; 
+            min-width: 400px; 
+        }
+        h2, h3 { 
+            color: #333; 
+            border-bottom: 2px solid #eee; 
+            padding-bottom: 0.5rem; 
+            margin-bottom: 1rem; 
+        }
+        .form-group { 
+            margin-bottom: 1rem; 
+        }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 0.5rem; 
+            font-weight: bold; 
+            color: #555; 
+            font-size: 0.9rem; 
+        }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 8px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+        }
+        .form-text {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.25rem;
+            line-height: 1.3;
+        }
+        .results-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 1rem; 
+            margin-bottom: 2rem; 
+        }
+        .result-box { 
+            background-color: white; 
+            border: 1px solid #e0e0e0; 
+            padding: 1rem; 
+            border-radius: 8px; 
+            text-align: center; 
+        }
+        .result-box h4 { 
+            margin: 0 0 0.5rem 0; 
+            color: var(--primary-blue); 
+            font-size: 1rem; 
+        }
+        .result-box p { 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            margin: 0; 
+            color: #333; 
+        }
+        .result-box .explanation {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+        .analysis-container { 
+            background-color: white; 
+            padding: 1rem; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            margin-bottom: 1rem;
+        }
+        .alert-box {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+        .alert-warning {
+            background-color: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            border-left-color: #17a2b8;
+            color: #0c5460;
+        }
+        #runAnalysisBtn { 
+            width: 100%; 
+            padding: 10px; 
+            margin-top: 10px; 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 4px; 
+            font-size: 1rem; 
+        }
+        #error-message-container { 
+            margin-bottom: 1rem; 
+        }
+        .workaround-section {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+        .workaround-section h5 {
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .synthetic-vol {
+            background-color: white;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 0.5rem;
+            font-family: monospace;
+            margin: 0.5rem 0;
+        }
+    </style>
+{% endblock %}
+
+{% block chapter_content %}
+
+<div class="page-wrapper">
+    <div class="controls">
+        <h2>Parameters</h2>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Evaluation Date</label>
+                {{ form.evaluation_date }}
+                <small class="form-text text-muted">The date on which the option is being valued (default: July 27, 2018)</small>
+            </div>
+            <div class="form-group">
+                <label>Exercise Date</label>
+                {{ form.exercise_date }}
+                <small class="form-text text-muted">The date when the option can be exercised (default: October 27, 2018 - 3 months later)</small>
+            </div>
+            <div class="form-group">
+                <label>Strike Price</label>
+                {{ form.strike_price }}
+                <small class="form-text text-muted">The price at which the option holder can buy/sell the underlying asset (default: 100.0)</small>
+            </div>
+            <div class="form-group">
+                <label>Spot Price</label>
+                {{ form.spot_price }}
+                <small class="form-text text-muted">The current market price of the underlying asset (default: 100.0)</small>
+            </div>
+            <div class="form-group">
+                <label>Volatility</label>
+                {{ form.volatility }}
+                <small class="form-text text-muted">The annual volatility of the underlying asset (default: 0.20 = 20%)</small>
+            </div>
+            <div class="form-group">
+                <label>Risk-Free Rate</label>
+                {{ form.risk_free_rate }}
+                <small class="form-text text-muted">The risk-free interest rate (default: 0.0 = 0%)</small>
+            </div>
+            <div class="form-group">
+                <label>Risk-Free Rate Day Count</label>
+                {{ form.r_day_count }}
+                <small class="form-text text-muted">Day-count convention for the risk-free rate curve (default: Actual/365 Fixed)</small>
+            </div>
+            <div class="form-group">
+                <label>Volatility Day Count</label>
+                {{ form.sigma_day_count }}
+                <small class="form-text text-muted">Day-count convention for the volatility curve. Change to Business/252 to see the glitch!</small>
+            </div>
+            <button type="submit" id="runAnalysisBtn">Run Analysis</button>
+        </form>
+    </div>
+
+    <div class="results-area">
+        <h2>Analysis Results</h2>
+        <div id="error-message-container" class="alert alert-danger" style="display: none;"></div>
+        
+        {% if results %}
+            <!-- Status Alert -->
+            {% if results.error %}
+                <div class="alert-box alert-warning">
+                    <strong>Calculation Error:</strong> {{ results.error }}
+                </div>
+            {% else %}
+                {% if results.day_count_mismatch %}
+                    {% if results.is_mismatch %}
+                    <div class="alert-box alert-warning">
+                        <strong>⚠️ Glitch Detected!</strong><br>
+                        The engines produce significantly different results due to different day-count conventions. 
+                        This demonstrates the glitch described in this chapter.
+                    </div>
+                    {% else %}
+                    <div class="alert-box alert-info">
+                        <strong>ℹ️ Different Conventions</strong><br>
+                        Different day-count conventions are used, but the difference in results 
+                        is within numerical tolerance. The glitch may be present but not significant.
+                    </div>
+                    {% endif %}
+                {% else %}
+                <div class="alert-box alert-success">
+                    <strong>✅ Consistent Conventions</strong><br>
+                    Both curves use the same day-count convention, so both engines 
+                    should produce consistent results.
+                </div>
+                {% endif %}
+
+                <!-- Engine Results -->
+                <div class="results-grid">
+                    <div class="result-box">
+                        <h4>Analytic Price</h4>
+                        <p>{{ results.analytic_price|floatformat:6 }}</p>
+                        <div class="explanation">
+                            Price calculated with the Black-Scholes formula. This engine correctly accounts for 
+                            different day-count conventions.
+                        </div>
+                    </div>
+                    <div class="result-box">
+                        <h4>FD Price</h4>
+                        <p>{{ results.fd_price|floatformat:6 }}</p>
+                        <div class="explanation">
+                            Price calculated by finite differences. This engine uses a single time grid 
+                            based on the risk-free rate convention.
+                        </div>
+                    </div>
+                    <div class="result-box">
+                        <h4>Price Difference</h4>
+                        <p>{{ results.price_difference|floatformat:6 }}</p>
+                        <div class="explanation">
+                            Difference between the two engines. A significant difference indicates 
+                            a day-count convention problem.
+                        </div>
+                    </div>
+                    <div class="result-box">
+                        <h4>Corrected FD Price</h4>
+                        <p>{{ results.workaround.fd_price_corrected|floatformat:6 }}</p>
+                        <div class="explanation">
+                            FD price after applying synthetic volatility to correct 
+                            the day-count convention problem.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Details -->
+                <div class="analysis-container">
+                    <h3>Detailed Analysis</h3>
+                    <div class="results-grid">
+                        <div class="result-box">
+                            <h4>Volatility Time</h4>
+                            <p>{{ results.analysis.T_vol|floatformat:6 }}</p>
+                            <div class="explanation">
+                                Time calculated with the volatility curve convention. 
+                                Used by the analytic engine.
+                            </div>
+                        </div>
+                        <div class="result-box">
+                            <h4>Grid Time</h4>
+                            <p>{{ results.analysis.T_grid|floatformat:6 }}</p>
+                            <div class="explanation">
+                                Time calculated with the risk-free rate convention. 
+                                Used by the FD engine.
+                            </div>
+                        </div>
+                        <div class="result-box">
+                            <h4>Time Difference</h4>
+                            <p>{{ results.analysis.time_difference|floatformat:6 }}</p>
+                            <div class="explanation">
+                                Difference between the two time calculations. 
+                                A non-zero difference causes the glitch.
+                            </div>
+                        </div>
+                        <div class="result-box">
+                            <h4>Correct Variance</h4>
+                            <p>{{ results.analysis.correct_variance|floatformat:6 }}</p>
+                            <div class="explanation">
+                                Variance calculated correctly with the volatility convention. 
+                                Used by the analytic engine.
+                            </div>
+                        </div>
+                        <div class="result-box">
+                            <h4>FD Variance</h4>
+                            <p>{{ results.analysis.fd_variance|floatformat:6 }}</p>
+                            <div class="explanation">
+                                Variance calculated by the FD engine with the risk-free rate convention. 
+                                May be incorrect.
+                            </div>
+                        </div>
+                        <div class="result-box">
+                            <h4>Variance Difference</h4>
+                            <p>{{ results.analysis.variance_difference|floatformat:6 }}</p>
+                            <div class="explanation">
+                                Difference between the variances. A non-zero difference 
+                                explains the price difference.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Workaround Solution -->
+                <div class="workaround-section">
+                    <h3>Workaround Solution</h3>
+                    {% if results.day_count_mismatch %}
+                    <p>To fix the problem, we can use a synthetic volatility that accounts for the day-count convention difference:</p>
+                    <div class="synthetic-vol">
+                        Synthetic Volatility: {{ results.workaround.synthetic_vol|floatformat:6 }}
+                    </div>
+                    <p>Using this synthetic volatility with the same day-count convention as the risk-free rate:</p>
+                    <div class="result-box" style="display: inline-block; margin: 0.5rem 0;">
+                        <h4>Corrected FD Price</h4>
+                        <p style="color: #28a745;">{{ results.workaround.fd_price_corrected|floatformat:6 }}</p>
+                    </div>
+                    {% else %}
+                    <p>When the same day-count conventions are used for both curves, no workaround is needed as both engines should produce consistent results.</p>
+                    <div class="synthetic-vol">
+                        Synthetic Volatility: {{ results.workaround.synthetic_vol|floatformat:6 }}
+                    </div>
+                    <p>Even with the same conventions, here's what the corrected FD price would be:</p>
+                    <div class="result-box" style="display: inline-block; margin: 0.5rem 0;">
+                        <h4>Corrected FD Price</h4>
+                        <p style="color: #17a2b8;">{{ results.workaround.fd_price_corrected|floatformat:6 }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="alert-box alert-info">
+                <strong>Instructions:</strong><br>
+                Fill in the parameters on the left and click "Run Analysis" to see the results. 
+                Change the "Volatility Day Count" to "Business/252" to see the glitch in action!
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock chapter_content %}

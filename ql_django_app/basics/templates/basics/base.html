@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="mb-0"><i class="{{ chapter_icon }} me-2"></i>{{ chapter_title }}</h1>
+                </div>
+                <div class="card-body">
+                    <p class="lead">{{ chapter_description }}</p>
+                    
+                    {% block sub_page_content %}
+                    {% endblock %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+

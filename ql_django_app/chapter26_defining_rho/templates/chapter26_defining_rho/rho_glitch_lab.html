@@ -1,0 +1,503 @@
+{% extends "equity_models/chapter_base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}{{ chapter_title }}{% endblock %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        /* Banner Styling to match other chapters exactly */
+        .card.bg-primary {
+            max-width: 95%;
+            margin: 0 auto;
+            border-radius: 8px;
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+        
+        .card.bg-primary .card-body {
+            padding: 2rem 2.5rem;
+            background-color: #0d6efd !important;
+            color: white !important;
+        }
+        
+        .card.bg-primary .card-title {
+            font-size: 2.2rem;
+            line-height: 1.3;
+            margin-bottom: 1rem;
+            color: white !important;
+            font-weight: 700;
+        }
+        
+        .card.bg-primary .card-text {
+            font-size: 1.1rem;
+            margin-bottom: 0;
+            opacity: 0.95;
+            color: white !important;
+        }
+        
+        .card.bg-primary .btn {
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            background-color: white !important;
+            color: #0d6efd !important;
+            border: 1px solid white !important;
+        }
+        
+        .card.bg-primary .btn:hover {
+            background-color: #f8f9fa !important;
+            color: #0d6efd !important;
+        }
+        
+        /* Main Layout Container */
+        .main-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        
+        /* Vertical Content Layout */
+        .content-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        /* Card Styling */
+        .lab-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            border: 1px solid #e0e0e0;
+            height: fit-content;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .lab-card-header {
+            background-color: white;
+            border-bottom: 2px solid #eee;
+            margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+            padding: 1.25rem 1.5rem;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: #333;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Form Styling */
+        .form-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .form-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .form-section-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        /* Results Styling */
+        .result-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .result-section:last-child {
+            margin-bottom: 0;
+        }
+        
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+        
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .result-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.25rem;
+            text-align: center;
+        }
+        
+        .result-item-full {
+            grid-column: 1 / -1;
+        }
+        
+        .explanation-box {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary-blue);
+        }
+        
+        .explanation-title {
+            font-weight: bold;
+            color: var(--primary-blue);
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+        
+        /* Button Styling */
+        .action-button {
+            width: 100%;
+            padding: 0.875rem 1.5rem;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-top: 1.5rem;
+            font-size: 1rem;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .text-muted {
+            color: #555 !important;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .result-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .lab-card {
+                padding: 1rem;
+            }
+            
+            .lab-card-header {
+                margin: -1rem -1rem 1rem -1rem;
+                padding: 1rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block chapter_content %}
+
+<!-- Chapter Overview Section -->
+<div class="row mb-4">
+    <div class="col-12">
+        <h2><i class="bi bi-info-circle me-2"></i>Chapter Overview</h2>
+        <p>This chapter explores the calculation and interpretation of rho (interest rate sensitivity) in the Black-Scholes framework, 
+        with a particular focus on the Black process and the challenges that arise when calculating Greeks for different process types.</p>
+    </div>
+</div>
+
+<!-- Main Container -->
+<div class="main-container">
+    <!-- Main Content Container -->
+    <div class="content-container">
+        <!-- Parameters Section -->
+        <div class="lab-card">
+            <div class="lab-card-header">
+                <h2 class="card-title">
+                    <i class="bi bi-sliders" style="color: var(--primary-blue);"></i>
+                    Parameters
+                </h2>
+            </div>
+        
+                    <form id="rhoForm" method="post">
+                        {% csrf_token %}
+            
+            <!-- Market Data Section -->
+            <div class="form-section">
+                <h6 class="form-section-title">
+                    <i class="bi bi-graph-up me-2"></i>Market Data
+                </h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        {{ form.evaluation_date|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.underlying_price|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.risk_free_rate|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.volatility|as_crispy_field }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Option Parameters Section -->
+            <div class="form-section">
+                <h6 class="form-section-title">
+                    <i class="bi bi-currency-dollar me-2"></i>Option Parameters
+                </h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        {{ form.strike_price|as_crispy_field }}
+                    </div>
+                    <div class="col-md-6">
+                        {{ form.days_to_expiry|as_crispy_field }}
+                </div>
+            </div>
+        </div>
+
+            <button type="submit" class="action-button">
+                <i class="bi bi-calculator me-2"></i>Run Analysis
+            </button>
+        </form>
+        </div>
+
+        <!-- Results Section -->
+        <div class="lab-card">
+            <div class="lab-card-header">
+                <h2 class="card-title">
+                    <i class="bi bi-graph-up" style="color: var(--primary-blue);"></i>
+                    Results
+                </h2>
+            </div>
+        {% if results and not results.error %}
+            <!-- Process Comparison Section -->
+            <div class="result-section">
+                <h6 class="section-title">
+                    <i class="bi bi-diagram-3 me-2"></i>1. Process Comparison
+                </h6>
+                
+                <div class="explanation-box">
+                    <h6 class="explanation-title">Understanding the Two Processes</h6>
+                    <p class="small mb-1">
+                        <strong>BlackScholesProcess:</strong> Models stocks that don't pay dividends. The dividend yield is set to 
+                        {% if results and results.process_1_div_yield_display %}
+                            {{ results.process_1_div_yield_display|slice:":8" }}%, 
+                        {% else %}
+                            0.000000%, 
+                        {% endif %}
+                        making it perfect for non-dividend paying stocks.
+                    </p>
+                    <p class="small mb-1">
+                        <strong>BlackProcess:</strong> Models futures contracts where the cost of carry equals zero. 
+                        The dividend yield is constrained to equal the risk-free rate (q = r), resulting in 
+                        {% if results and results.process_2_div_yield_display %}
+                            {{ results.process_2_div_yield_display|slice:":8" }}%.
+            {% else %}
+                            1.000000%.
+                        {% endif %}
+                    </p>
+                    <p class="small mb-0">
+                        <strong>Key Difference:</strong> The dividend yield constraint (q = r) is what causes the rho calculation glitch in BlackProcess.
+                    </p>
+                </div>
+                
+                <div class="result-grid">
+                    <div class="result-item">
+                        <h6 class="text-primary mb-1">BlackScholesProcess</h6>
+                        <h5 class="text-primary mb-0">
+                            {% if results and results.process_1_div_yield_display %}{{ results.process_1_div_yield_display }}{% else %}0.000000 % Actual/365 (Fixed) continuous compounding{% endif %}
+                        </h5>
+                        <small class="text-muted">Correct for stocks with no dividends</small>
+                    </div>
+                    <div class="result-item">
+                        <h6 class="text-primary mb-1">BlackProcess</h6>
+                        <h5 class="text-primary mb-0">
+                            {% if results and results.process_2_div_yield_display %}{{ results.process_2_div_yield_display }}{% else %}1.000000 % Actual/360 continuous compounding{% endif %}
+                        </h5>
+                        <small class="text-muted">Key constraint: q = r (dividend yield = risk-free rate)</small>
+                    </div>
+                </div>
+                </div>
+
+            <!-- Option Prices Section -->
+            <div class="result-section">
+                <h6 class="section-title">
+                    <i class="bi bi-currency-dollar me-2"></i>2. Option Prices
+                </h6>
+                
+                <div class="explanation-box">
+                    <h6 class="explanation-title">Price Comparison Analysis</h6>
+                    <p class="small mb-1">
+                        Both processes price the same option (same strike, same expiry), but the different dividend yield assumptions 
+                        lead to different option values. 
+                        {% if results.option_1_npv > results.option_2_npv %}
+                            The BlackScholesProcess gives a higher price ({{ results.option_1_npv|floatformat:6 }}) 
+                            compared to BlackProcess ({{ results.option_2_npv|floatformat:6 }}), 
+                            with a difference of {{ results.price_difference|floatformat:6 }}.
+                        {% else %}
+                            The BlackProcess gives a higher price ({{ results.option_2_npv|floatformat:6 }}) 
+                            compared to BlackScholesProcess ({{ results.option_1_npv|floatformat:6 }}), 
+                            with a difference of {{ results.price_difference|floatformat:6 }}.
+                        {% endif %}
+                    </p>
+                    <p class="small mb-0">
+                        <strong>Key Insight:</strong> This {{ results.price_difference|floatformat:6 }} difference demonstrates how dividend yield assumptions affect option valuation.
+                    </p>
+                </div>
+                
+                <div class="result-grid">
+                    <div class="result-item">
+                        <h6 class="text-primary mb-1">NPV (BlackScholes)</h6>
+                        <h4 class="text-primary mb-0">{{ results.option_1_npv|floatformat:6 }}</h4>
+                        <small class="text-muted">Standard option pricing for stocks with no dividends</small>
+                    </div>
+                    <div class="result-item">
+                        <h6 class="text-primary mb-1">NPV (Black)</h6>
+                        <h4 class="text-primary mb-0">{{ results.option_2_npv|floatformat:6 }}</h4>
+                        <small class="text-muted">Futures option pricing where cost of carry equals zero</small>
+                    </div>
+                </div>
+            </div>
+                
+            <!-- The Rho Glitch Section -->
+            <div class="result-section">
+                <h6 class="section-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>3. The Rho Glitch
+                </h6>
+                
+                <div class="explanation-box">
+                    <h6 class="explanation-title">The Problem: Mismatch Between Analytical and Numerical Rho</h6>
+                    <p class="small mb-1">
+                        <strong>Rho</strong> measures how much an option's price changes when interest rates change by 1%. 
+                        For BlackScholesProcess, both analytical ({{ results.option_1_rho_analytic|floatformat:6 }}) and numerical ({{ results.option_1_rho_numeric|floatformat:6 }}) calculations 
+                        {% if results.bs_rho_difference < 0.001 %}
+                            match perfectly (difference: {{ results.bs_rho_difference|floatformat:6 }}).
+                        {% else %}
+                            show a small difference of {{ results.bs_rho_difference|floatformat:6 }}.
+                        {% endif %}
+                    </p>
+                    <p class="small mb-1">
+                        <strong>The Glitch:</strong> For BlackProcess, the analytical rho ({{ results.option_2_rho_analytic|floatformat:6 }}) and numerical rho ({{ results.option_2_rho_numeric|floatformat:6 }}) 
+                        show a significant mismatch of {{ results.black_rho_difference|floatformat:6 }}. This happens because the analytical calculation doesn't account for the constraint 
+                        that dividend yield equals risk-free rate (q = r).
+                    </p>
+                    <p class="small mb-0">
+                        <strong>Result:</strong> The analytical rho is wrong, but the numerical calculation (which bumps rates and reprices) 
+                        correctly captures the true sensitivity of {{ results.option_2_rho_numeric|floatformat:6 }}.
+                    </p>
+                </div>
+                
+                <div class="result-grid">
+                    <div class="result-item">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold">Analytic Rho (BlackScholes):</span>
+                            <span class="text-primary fw-bold">{{ results.option_1_rho_analytic|floatformat:6 }}</span>
+                        </div>
+                        <small class="text-muted">Closed-form calculation using Black-Scholes formula</small>
+                    </div>
+                    <div class="result-item">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold">Numerical Rho (BlackScholes):</span>
+                            <span class="text-primary fw-bold">{{ results.option_1_rho_numeric|floatformat:6 }}</span>
+                        </div>
+                        <small class="text-muted">Finite difference approximation by bumping rates</small>
+                    </div>
+                    <div class="result-item">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold">Analytic Rho (Black):</span>
+                            <span class="text-primary fw-bold">{{ results.option_2_rho_analytic|floatformat:6 }}</span>
+                        </div>
+                        <small class="text-muted">Incorrect due to q = r constraint not being handled</small>
+                    </div>
+                    <div class="result-item">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold">Numerical Rho (Black):</span>
+                            <span class="text-primary fw-bold">{{ results.option_2_rho_numeric|floatformat:6 }}</span>
+                        </div>
+                        <small class="text-muted">Correct sensitivity showing the true rho</small>
+                    </div>
+                </div>
+            </div>
+                
+            <!-- Correction Section -->
+            <div class="result-section">
+                <h6 class="section-title">
+                    <i class="bi bi-check-circle me-2"></i>4. Correction
+                </h6>
+                
+                <div class="explanation-box">
+                    <h6 class="explanation-title">The Solution: Manual Correction for BlackProcess</h6>
+                    <p class="small mb-1">
+                        <strong>The Fix:</strong> For BlackProcess, the correct rho sensitivity is the sum of the standard rho 
+                        and the dividend rho: <strong>Corrected Rho = rho + dividendRho</strong>
+                    </p>
+                    <p class="small mb-1">
+                        <strong>Calculation:</strong> Standard rho ({{ results.option_2_rho_analytic|floatformat:6 }}) + dividendRho ({{ results.dividend_rho|floatformat:6 }}) = 
+                        Corrected rho ({{ results.option_2_rho_corrected|floatformat:6 }})
+                    </p>
+                    <p class="small mb-1">
+                        <strong>Verification:</strong> The corrected analytical rho ({{ results.option_2_rho_corrected|floatformat:6 }}) 
+                        {% if results.correction_difference < 0.001 %}
+                            matches perfectly with the numerical calculation ({{ results.option_2_rho_numeric|floatformat:6 }}), 
+                            with a difference of only {{ results.correction_difference|floatformat:6 }}.
+                        {% else %}
+                            is close to the numerical calculation ({{ results.option_2_rho_numeric|floatformat:6 }}), 
+                            with a difference of {{ results.correction_difference|floatformat:6 }}.
+                        {% endif %}
+                    </p>
+                    <p class="small mb-0">
+                        <strong>Conclusion:</strong> This manual adjustment is necessary when using BlackProcess in QuantLib to get accurate rho sensitivity.
+                    </p>
+                </div>
+                
+                <div class="result-grid">
+                    <div class="result-item result-item-full">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold">Corrected Analytic Rho (rho + dividendRho):</span>
+                            <span class="text-primary fw-bold">{{ results.option_2_rho_corrected|floatformat:6 }}</span>
+                        </div>
+                        <small class="text-muted">Manual correction: rho + dividendRho accounts for q = r constraint</small>
+                    </div>
+                </div>
+            </div>
+            
+        {% elif results and results.error %}
+            <div class="alert alert-danger">{{ results.error }}</div>
+        {% else %}
+            <div class="alert alert-warning text-center">
+                <i class="bi bi-info-circle me-2"></i>
+                <strong>No data available.</strong> Submit the form to run the analysis.
+            </div>
+        {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock chapter_content %}

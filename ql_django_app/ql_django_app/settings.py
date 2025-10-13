@@ -44,18 +44,18 @@ INSTALLED_APPS = [
     'swap',
     'chapter_hull_white',
     'chapter_caps_floors',
-    'chapter_heston_calibration',
+    'chapter22_heston_calibration',
     'chapter_yield_curve',
     'chapter_calibration',
-    'chapter_heston_option',
+    'chapter21_heston_option',
     # 'chapter_volatility_smile',  # Temporarily disabled
     'chapter_mc_convergence',
     'chapter_par_vs_indexed',
-    'chapter_heston_parameter_calibration',
-    'chapter_european_american_options',
-    'chapter_commodity_futures_options',
-    'chapter_black_process_rho',
-    'chapter_day_count_conventions', ]
+    'chapter23_heston_parameter_calibration',
+    'chapter24_european_american_options',
+    'chapter25_black_formula_futures',
+    'chapter26_defining_rho',
+    'chapter27_day_count_conventions', ]
 
 
 MIDDLEWARE = [

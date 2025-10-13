@@ -1,0 +1,555 @@
+{% extends "equity_models/chapter_base.html" %}
+{% load static %}
+
+{% block title %}Heston Calibration with SciPy{% endblock %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .page-wrapper { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 2rem; 
+        }
+        .controls { 
+            flex: 1; 
+            min-width: 350px; 
+            background-color: white; 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+            align-self: flex-start; 
+        }
+        .results-area { 
+            flex: 2; 
+            min-width: 400px; 
+        }
+        h2, h3, h4, h5 { 
+            color: #333; 
+            border-bottom: 2px solid #eee; 
+            padding-bottom: 0.5rem; 
+            margin-bottom: 1rem; 
+        }
+        .form-group { 
+            margin-bottom: 1rem; 
+        }
+        .form-group label { 
+            display: block; 
+            margin-bottom: 0.5rem; 
+            font-weight: bold; 
+            color: #555; 
+            font-size: 0.9rem; 
+        }
+        .form-group input, .form-group select, .form-group textarea { 
+            width: 100%; 
+            padding: 8px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            box-sizing: border-box; 
+        }
+        .form-text {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.25rem;
+            line-height: 1.3;
+        }
+        
+        .solver-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #007BFF;
+        }
+        
+        .solver-info h4 {
+            color: #007BFF;
+            margin-bottom: 10px;
+        }
+        
+        .comparison-section {
+            margin-top: 20px;
+        }
+        
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .comparison-table th {
+            background-color: #007BFF;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+        
+        .comparison-table td {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .comparison-table tr:hover {
+            background-color: #e3f2fd;
+        }
+        .result-box { 
+            background-color: white; 
+            border: 1px solid #e0e0e0; 
+            padding: 1.5rem; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .results-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 1rem; 
+            margin-bottom: 2rem; 
+        }
+        .result-item {
+            background-color: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .result-item h4 { 
+            margin: 0 0 0.5rem 0; 
+            color: var(--primary-blue); 
+            font-size: 1rem; 
+        }
+        .result-item p { 
+            font-size: 1.2rem; 
+            font-weight: bold; 
+            margin: 0; 
+            color: #333; 
+        }
+        .result-item .explanation {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.5rem;
+            font-style: italic;
+        }
+        #runCalibrationBtn { 
+            width: 100%; 
+            padding: 10px; 
+            margin-top: 10px; 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 4px; 
+            font-size: 1rem; 
+        }
+        .spinner-container {
+            text-align: center;
+            padding: 2rem;
+        }
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+    </style>
+{% endblock %}
+
+{% block chapter_content %}
+
+<div class="page-wrapper">
+    <div class="controls">
+        <h2>Calibration Control</h2>
+        <form id="calibrationForm" method="post">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Solver Method</label>
+                {{ form.solver_method }}
+                <small class="form-text text-muted">Choose the optimization method for calibration</small>
+            </div>
+            
+            <h5>Initial Heston Parameters</h5>
+            <div class="form-group">
+                <label>Initial θ (Theta)</label>
+                {{ form.theta }}
+                <small class="form-text text-muted">Long-term variance level (default: 0.02)</small>
+            </div>
+            <div class="form-group">
+                <label>Initial κ (Kappa)</label>
+                {{ form.kappa }}
+                <small class="form-text text-muted">Mean reversion speed (default: 0.2)</small>
+            </div>
+            <div class="form-group">
+                <label>Initial σ (Sigma)</label>
+                {{ form.sigma }}
+                <small class="form-text text-muted">Volatility of volatility (default: 0.5)</small>
+            </div>
+            <div class="form-group">
+                <label>Initial ρ (Rho)</label>
+                {{ form.rho }}
+                <small class="form-text text-muted">Correlation between asset and volatility (default: 0.1)</small>
+            </div>
+            <div class="form-group">
+                <label>Initial v₀ (V0)</label>
+                {{ form.v0 }}
+                <small class="form-text text-muted">Initial variance level (default: 0.01)</small>
+            </div>
+            
+            <h5>Market Data</h5>
+            <div class="form-group">
+                <label>Evaluation Date</label>
+                {{ form.evaluation_date }}
+                <small class="form-text text-muted">Date for option valuation</small>
+            </div>
+            <div class="form-group">
+                <label>Spot Price</label>
+                {{ form.spot_price }}
+                <small class="form-text text-muted">Current asset price</small>
+            </div>
+            <div class="form-group">
+                <label>Risk-Free Rate (%)</label>
+                {{ form.risk_free_rate }}
+                <small class="form-text text-muted">Risk-free interest rate</small>
+            </div>
+            <div class="form-group">
+                <label>Dividend Rate (%)</label>
+                {{ form.dividend_rate }}
+                <small class="form-text text-muted">Dividend yield</small>
+            </div>
+            
+            <button type="submit" id="runCalibrationBtn">Run Calibration</button>
+        </form>
+    </div>
+
+    <div class="results-area">
+        <h2>Calibration Results</h2>
+        <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+        
+        {% if results and not results.error %}
+        <div id="results-container" class="result-box">
+            <h3>Calibrated Parameters</h3>
+            <div class="results-grid">
+                <div class="result-item">
+                    <h4>θ (Theta)</h4>
+                    <p id="theta_result">{{ results.calibrated_params.theta|floatformat:6 }}</p>
+                    <div class="explanation">Long-term variance level</div>
+                </div>
+                <div class="result-item">
+                    <h4>κ (Kappa)</h4>
+                    <p id="kappa_result">{{ results.calibrated_params.kappa|floatformat:6 }}</p>
+                    <div class="explanation">Mean reversion speed</div>
+                </div>
+                <div class="result-item">
+                    <h4>σ (Sigma)</h4>
+                    <p id="sigma_result">{{ results.calibrated_params.sigma|floatformat:6 }}</p>
+                    <div class="explanation">Volatility of volatility</div>
+                </div>
+                <div class="result-item">
+                    <h4>ρ (Rho)</h4>
+                    <p id="rho_result">{{ results.calibrated_params.rho|floatformat:6 }}</p>
+                    <div class="explanation">Asset-volatility correlation</div>
+                </div>
+                <div class="result-item">
+                    <h4>v₀ (V0)</h4>
+                    <p id="v0_result">{{ results.calibrated_params.v0|floatformat:6 }}</p>
+                    <div class="explanation">Initial variance level</div>
+                </div>
+                <div class="result-item">
+                    <h4>Average Error</h4>
+                    <p id="error_result">{{ results.avg_abs_error_pct|floatformat:4 }}%</p>
+                    <div class="explanation">Average absolute error percentage</div>
+                </div>
+            </div>
+        </div>
+        {% elif results and results.error %}
+        <div class="result-box">
+            <div class="alert alert-warning">
+                <strong>Calculation Error:</strong> {{ results.error }}
+            </div>
+        </div>
+        {% else %}
+        <div id="instructions" class="result-box">
+            <h3>Instructions</h3>
+            <p>This interactive lab demonstrates Heston model parameter calibration using different optimization methods:</p>
+            <ul>
+                <li><strong>QuantLib Levenberg-Marquardt:</strong> QuantLib's built-in solver</li>
+                <li><strong>SciPy Levenberg-Marquardt:</strong> SciPy's implementation</li>
+                <li><strong>SciPy Least Squares:</strong> Robust least squares method</li>
+                <li><strong>SciPy Differential Evolution:</strong> Global optimization (slower but more robust)</li>
+                <li><strong>SciPy Basin Hopping:</strong> Global optimization with local refinement</li>
+            </ul>
+            <p>Use the preset buttons to try different initial conditions from the book, or adjust parameters manually. You can also customize market data in the advanced section.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock chapter_content %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('calibrationForm');
+        const resultsContainer = document.getElementById('results-container');
+        const errorContainer = document.getElementById('error-container');
+        const spinner = document.getElementById('spinner');
+        const instructions = document.getElementById('instructions');
+
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Show loading state
+            if (instructions) instructions.style.display = 'none';
+            if (resultsContainer) resultsContainer.style.display = 'none';
+            if (errorContainer) errorContainer.style.display = 'none';
+
+            const formData = new FormData(form);
+            
+            // FORCER le solver method basé sur la sélection visible
+            const solverSelect = form.querySelector('select[name="solver_method"]');
+            if (solverSelect) {
+                const selectedText = solverSelect.options[solverSelect.selectedIndex].text;
+                console.log('Selected solver text:', selectedText);
+                
+                // Mapper le texte affiché vers la valeur
+                if (selectedText.includes('SciPy Levenberg-Marquardt')) {
+                    formData.set('solver_method', 'scipy_lm');
+                    console.log('FORCED solver_method to scipy_lm');
+                } else if (selectedText.includes('SciPy Differential Evolution')) {
+                    formData.set('solver_method', 'scipy_de');
+                    console.log('FORCED solver_method to scipy_de');
+                } else if (selectedText.includes('QuantLib Levenberg-Marquardt')) {
+                    formData.set('solver_method', 'ql_lm');
+                    console.log('FORCED solver_method to ql_lm');
+                }
+            }
+            
+            // Debug: afficher les données du formulaire
+            console.log('Form data being sent:');
+            for (let [key, value] of formData.entries()) {
+                console.log(key + ': ' + value);
+            }
+
+            fetch("{% url 'equity_models:heston_calibration_scipy:lab' %}", {
+                method: 'POST',
+                body: new URLSearchParams(formData),
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Response is not JSON');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.error) {
+                    if (errorContainer) {
+                        errorContainer.innerText = `Error: ${data.error}`;
+                        errorContainer.style.display = 'block';
+                    }
+                } else {
+                    // Update the results display without reloading
+                    updateResultsDisplay(data);
+                }
+            })
+            .catch(error => {
+                if (errorContainer) {
+                    errorContainer.innerText = `An unexpected error occurred: ${error.message}`;
+                    errorContainer.style.display = 'block';
+                }
+            });
+        });
+    });
+
+
+    // Update results display function
+    function updateResultsDisplay(data) {
+        const resultsContainer = document.getElementById('results-container');
+        const errorContainer = document.getElementById('error-container');
+        const instructions = document.getElementById('instructions');
+        
+        if (data.error) {
+            if (errorContainer) {
+                errorContainer.innerText = `Error: ${data.error}`;
+                errorContainer.style.display = 'block';
+            }
+            if (resultsContainer) resultsContainer.style.display = 'none';
+            if (instructions) instructions.style.display = 'none';
+        } else {
+            if (errorContainer) errorContainer.style.display = 'none';
+            if (instructions) instructions.style.display = 'none';
+            
+            // Create or update the results display
+            if (!resultsContainer) {
+                // Create the results container if it doesn't exist
+                createResultsContainer(data);
+            } else {
+                // Update existing results
+                const params = data.calibrated_params;
+                const thetaEl = resultsContainer.querySelector('#theta_result');
+                const kappaEl = resultsContainer.querySelector('#kappa_result');
+                const sigmaEl = resultsContainer.querySelector('#sigma_result');
+                const rhoEl = resultsContainer.querySelector('#rho_result');
+                const v0El = resultsContainer.querySelector('#v0_result');
+                const errorEl = resultsContainer.querySelector('#error_result');
+                
+                if (thetaEl) thetaEl.innerText = params.theta.toFixed(6);
+                if (kappaEl) kappaEl.innerText = params.kappa.toFixed(6);
+                if (sigmaEl) sigmaEl.innerText = params.sigma.toFixed(6);
+                if (rhoEl) rhoEl.innerText = params.rho.toFixed(6);
+                if (v0El) v0El.innerText = params.v0.toFixed(6);
+                if (errorEl) errorEl.innerText = data.avg_abs_error_pct.toFixed(4) + '%';
+                
+                resultsContainer.style.display = 'block';
+            }
+        }
+    }
+
+        // Create results container function
+        function createResultsContainer(data) {
+            const resultsArea = document.querySelector('.results-area');
+            
+            // Vérifier si c'est une réponse de test
+            if (data.test === 'success') {
+                const testHTML = `
+                    <div id="results-container" class="result-box">
+                        <h3>Test Successful!</h3>
+                        <div class="alert alert-success">
+                            <strong>Form data received successfully!</strong><br>
+                            <pre>${JSON.stringify(data.form_data, null, 2)}</pre>
+                        </div>
+                    </div>
+                `;
+                resultsArea.innerHTML = testHTML;
+                return;
+            }
+            
+            // Vérifier si c'est une erreur
+            if (data.error) {
+                const errorHTML = `
+                    <div id="results-container" class="result-box">
+                        <h3>Calibration Error</h3>
+                        <div class="alert alert-danger">
+                            <strong>Error:</strong> ${data.error}
+                        </div>
+                    </div>
+                `;
+                resultsArea.innerHTML = errorHTML;
+                return;
+            }
+            
+            const params = data.calibrated_params;
+            const initial = data.initial_condition;
+            
+            const resultsHTML = `
+                <div id="results-container" class="result-box">
+                    <h3>Calibration Results</h3>
+                    <div class="solver-info">
+                        <h4>Solver: ${data.solver_used ? data.solver_used.replace(/_/g, ' ').toUpperCase() : 'Unknown'}</h4>
+                        <p><strong>Initial Condition:</strong> θ=${initial[0].toFixed(4)}, κ=${initial[1].toFixed(4)}, σ=${initial[2].toFixed(4)}, ρ=${initial[3].toFixed(4)}, v₀=${initial[4].toFixed(4)}</p>
+                    </div>
+                    <div class="results-grid">
+                        <div class="result-item">
+                            <h4>θ (Theta)</h4>
+                            <p id="theta_result">${params.theta.toFixed(6)}</p>
+                            <div class="explanation">Long-term variance level</div>
+                        </div>
+                        <div class="result-item">
+                            <h4>κ (Kappa)</h4>
+                            <p id="kappa_result">${params.kappa.toFixed(6)}</p>
+                            <div class="explanation">Mean reversion speed</div>
+                        </div>
+                        <div class="result-item">
+                            <h4>σ (Sigma)</h4>
+                            <p id="sigma_result">${params.sigma.toFixed(6)}</p>
+                            <div class="explanation">Volatility of volatility</div>
+                        </div>
+                        <div class="result-item">
+                            <h4>ρ (Rho)</h4>
+                            <p id="rho_result">${params.rho.toFixed(6)}</p>
+                            <div class="explanation">Asset-volatility correlation</div>
+                        </div>
+                        <div class="result-item">
+                            <h4>v₀ (V0)</h4>
+                            <p id="v0_result">${params.v0.toFixed(6)}</p>
+                            <div class="explanation">Initial variance level</div>
+                        </div>
+                        <div class="result-item">
+                            <h4>Average Error</h4>
+                            <p id="error_result">${data.avg_abs_error_pct.toFixed(4)}%</p>
+                            <div class="explanation">Average absolute error percentage</div>
+                        </div>
+                    </div>
+                    <div class="comparison-section">
+                        <h4>Parameter Comparison</h4>
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Initial</th>
+                                    <th>Calibrated</th>
+                                    <th>Change</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>θ (Theta)</td>
+                                    <td>${initial[0].toFixed(4)}</td>
+                                    <td>${params.theta.toFixed(4)}</td>
+                                    <td>${((params.theta - initial[0]) / initial[0] * 100).toFixed(1)}%</td>
+                                </tr>
+                                <tr>
+                                    <td>κ (Kappa)</td>
+                                    <td>${initial[1].toFixed(4)}</td>
+                                    <td>${params.kappa.toFixed(4)}</td>
+                                    <td>${((params.kappa - initial[1]) / initial[1] * 100).toFixed(1)}%</td>
+                                </tr>
+                                <tr>
+                                    <td>σ (Sigma)</td>
+                                    <td>${initial[2].toFixed(4)}</td>
+                                    <td>${params.sigma.toFixed(4)}</td>
+                                    <td>${((params.sigma - initial[2]) / initial[2] * 100).toFixed(1)}%</td>
+                                </tr>
+                                <tr>
+                                    <td>ρ (Rho)</td>
+                                    <td>${initial[3].toFixed(4)}</td>
+                                    <td>${params.rho.toFixed(4)}</td>
+                                    <td>${((params.rho - initial[3]) / Math.abs(initial[3]) * 100).toFixed(1)}%</td>
+                                </tr>
+                                <tr>
+                                    <td>v₀ (V0)</td>
+                                    <td>${initial[4].toFixed(4)}</td>
+                                    <td>${params.v0.toFixed(4)}</td>
+                                    <td>${((params.v0 - initial[4]) / initial[4] * 100).toFixed(1)}%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+            
+            // Remove instructions if they exist
+            const instructions = document.getElementById('instructions');
+            if (instructions) {
+                instructions.remove();
+            }
+            
+            // Insert results before the end of results-area
+            resultsArea.insertAdjacentHTML('beforeend', resultsHTML);
+        }
+</script>
+{% endblock %}

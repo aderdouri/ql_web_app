@@ -23,7 +23,7 @@
                         </div>
                         <h5 class="card-title fw-bold">21. Valuing European option using Heston</h5>
                         <p class="card-text text-muted small">Advanced stochastic volatility model for European options</p>
-                        <a href="{% url 'equity_models:chapter_heston_option:heston_description' %}" class="btn btn-primary btn-sm">
+                        <a href="{% url 'equity_models:chapter21_heston_option:heston_description' %}" class="btn btn-primary btn-sm">
                             <i class="bi bi-play-circle me-1"></i>View Chapter
                         </a>
                     </div>
@@ -54,7 +54,7 @@
                         </div>
                         <h5 class="card-title fw-bold">23. Heston parameter calibration</h5>
                         <p class="card-text text-muted small">Advanced parameter estimation techniques</p>
-                        <a href="{% url 'equity_models:chapter_heston_calibration:calibration_description' %}" class="btn btn-primary btn-sm">
+                        <a href="{% url 'equity_models:heston_calibration_scipy:lab' %}" class="btn btn-primary btn-sm">
                             <i class="bi bi-play-circle me-1"></i>View Chapter
                         </a>
                     </div>
@@ -69,22 +69,7 @@
                         </div>
                         <h5 class="card-title fw-bold">24. Valuing European and American options</h5>
                         <p class="card-text text-muted small">Comprehensive option pricing models</p>
-                        <a href="{% url 'equity_models:chapter_european_american_options:description' %}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-play-circle me-1"></i>View Chapter
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-lg-4 col-md-6">
-                <div class="card h-100">
-                    <div class="card-body text-center">
-                        <div class="mb-3">
-                            <i class="bi bi-bar-chart text-primary" style="font-size: 2.5rem;"></i>
-                        </div>
-                        <h5 class="card-title fw-bold">25. Valuing options on commodity futures</h5>
-                        <p class="card-text text-muted small">Pricing options on commodity derivatives</p>
-                        <a href="{% url 'equity_models:chapter_commodity_futures_options:commodity_futures_lab' %}" class="btn btn-primary btn-sm">
+                        <a href="{% url 'equity_models:chapter24_european_american_options:description' %}" class="btn btn-primary btn-sm">
                             <i class="bi bi-play-circle me-1"></i>View Chapter
                         </a>
                     </div>
@@ -97,9 +82,24 @@
                         <div class="mb-3">
                             <i class="bi bi-calculator text-primary" style="font-size: 2.5rem;"></i>
                         </div>
+                        <h5 class="card-title fw-bold">25. Black Formula for Commodity Futures</h5>
+                        <p class="card-text text-muted small">Advanced option pricing for commodity futures using the Black formula</p>
+                        <a href="{% url 'equity_models:chapter25_black_formula_futures:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-journal-text text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
                         <h5 class="card-title fw-bold">26. Defining rho for the Black process</h5>
-                        <p class="card-text text-muted small">Interest rate sensitivity in Black-Scholes model</p>
-                        <a href="{% url 'equity_models:chapter_black_process_rho:black_process_rho_lab' %}" class="btn btn-primary btn-sm">
+                        <p class="card-text text-muted small">Understanding cost of carry (rho) parameter in QuantLib Black process</p>
+                        <a href="{% url 'equity_models:chapter26_defining_rho:description' %}" class="btn btn-primary btn-sm">
                             <i class="bi bi-play-circle me-1"></i>View Chapter
                         </a>
                     </div>
@@ -114,7 +114,7 @@
                         </div>
                         <h5 class="card-title fw-bold">27. Using curves with different day-count conventions</h5>
                         <p class="card-text text-muted small">Advanced day-count convention handling</p>
-                        <a href="{% url 'equity_models:chapter_day_count_conventions:day_count_lab' %}" class="btn btn-primary btn-sm">
+                        <a href="{% url 'equity_models:chapter27_day_count_conventions:description' %}" class="btn btn-primary btn-sm">
                             <i class="bi bi-play-circle me-1"></i>View Chapter
                         </a>
                     </div>

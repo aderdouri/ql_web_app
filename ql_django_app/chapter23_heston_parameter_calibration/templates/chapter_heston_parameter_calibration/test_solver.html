@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Solver</title>
+</head>
+<body>
+    <h1>Test Direct du Solver</h1>
+    
+    <form id="testForm">
+        <div>
+            <label>Solver Method:</label>
+            <select name="solver_method" id="solverSelect">
+                <option value="ql_lm">QuantLib Levenberg-Marquardt</option>
+                <option value="scipy_lm">SciPy Levenberg-Marquardt</option>
+                <option value="scipy_de">SciPy Differential Evolution</option>
+            </select>
+        </div>
+        
+        <div>
+            <label>Evaluation Date:</label>
+            <input type="date" name="evaluation_date" value="2015-11-06">
+        </div>
+        
+        <div>
+            <label>Spot Price:</label>
+            <input type="number" name="spot_price" value="659.37" step="0.01">
+        </div>
+        
+        <div>
+            <label>Risk Free Rate:</label>
+            <input type="number" name="risk_free_rate" value="1.0" step="0.1">
+        </div>
+        
+        <div>
+            <label>Dividend Rate:</label>
+            <input type="number" name="dividend_rate" value="0.0" step="0.1">
+        </div>
+        
+        <div>
+            <label>Theta:</label>
+            <input type="number" name="theta" value="0.02" step="0.01">
+        </div>
+        
+        <div>
+            <label>Kappa:</label>
+            <input type="number" name="kappa" value="0.2" step="0.1">
+        </div>
+        
+        <div>
+            <label>Sigma:</label>
+            <input type="number" name="sigma" value="0.5" step="0.01">
+        </div>
+        
+        <div>
+            <label>Rho:</label>
+            <input type="number" name="rho" value="0.1" step="0.1">
+        </div>
+        
+        <div>
+            <label>V0:</label>
+            <input type="number" name="v0" value="0.01" step="0.01">
+        </div>
+        
+        <button type="button" onclick="testSolver()">Test Solver</button>
+    </form>
+    
+    <div id="results"></div>
+    
+    <script>
+        function testSolver() {
+            const form = document.getElementById('testForm');
+            const formData = new FormData(form);
+            
+            console.log('=== FORM DATA ===');
+            for (let [key, value] of formData.entries()) {
+                console.log(key + ': ' + value);
+            }
+            
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Envoi en cours...</p>';
+            
+            fetch("{% url 'equity_models:heston_calibration_scipy:lab' %}", {
+                method: 'POST',
+                body: new URLSearchParams(formData),
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('=== RESPONSE ===');
+                console.log(data);
+                
+                if (data.error) {
+                    resultsDiv.innerHTML = '<p style="color: red;">Erreur: ' + data.error + '</p>';
+                } else {
+                    const params = data.calibrated_params;
+                    resultsDiv.innerHTML = `
+                        <h3>Résultats</h3>
+                        <p><strong>Solver utilisé:</strong> ${data.solver_used}</p>
+                        <p><strong>θ:</strong> ${params.theta.toFixed(6)}</p>
+                        <p><strong>κ:</strong> ${params.kappa.toFixed(6)}</p>
+                        <p><strong>σ:</strong> ${params.sigma.toFixed(6)}</p>
+                        <p><strong>ρ:</strong> ${params.rho.toFixed(6)}</p>
+                        <p><strong>v₀:</strong> ${params.v0.toFixed(6)}</p>
+                        <p><strong>Erreur:</strong> ${data.avg_abs_error_pct.toFixed(6)}%</p>
+                    `;
+                }
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                resultsDiv.innerHTML = '<p style="color: red;">Erreur: ' + error.message + '</p>';
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+{% extends "equity_models/chapter_base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+
+{% block title %}{{ chapter_title }}{% endblock %}
+
+{% block chapter_content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-12">
+                        <div class="alert alert-info border-primary">
+                            <h6 class="fw-bold text-primary mb-2">
+                                <i class="bi bi-info-circle me-2"></i>Quick Guide to Option Terms
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p class="small mb-1"><strong>Delta:</strong> Price sensitivity - how much option price changes when futures price moves $1</p>
+                                    <p class="small mb-1"><strong>Gamma:</strong> Delta sensitivity - how much Delta changes when futures price moves $1</p>
+                                    <p class="small mb-1"><strong>Theta:</strong> Time decay - how much option loses value each day</p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="small mb-1"><strong>Vega:</strong> Volatility risk - how much option price changes when volatility changes 1%</p>
+                                    <p class="small mb-1"><strong>Rho:</strong> Interest rate risk - how much option price changes when interest rate changes 1%</p>
+                                    <p class="small mb-0"><strong>ITM/OTM/ATM:</strong> In-the-Money / Out-of-the-Money / At-the-Money</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary">
+                                <h5 class="fw-bold text-white mb-0">
+                                    <i class="bi bi-sliders me-2"></i>Black Formula Parameters
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="blackFormulaForm" method="post">
+                {% csrf_token %}
+                                    {{ form|crispy }}
+                                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                                        <i class="bi bi-calculator me-2"></i>Calculate Option Price
+                                    </button>
+            </form>
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <div class="alert alert-warning border-warning" id="validationGuide" style="display: none;">
+                                            <h6 class="fw-bold text-warning mb-2">
+                                                <i class="bi bi-exclamation-triangle me-2"></i>Validation Guide
+                                            </h6>
+                                            <div id="validationMessages"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-6">
+                        <div class="card h-100">
+                            <div class="card-header bg-primary">
+                                <h5 class="fw-bold text-white mb-0">
+                                    <i class="bi bi-graph-up me-2"></i>Black Formula Results
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                {% if results %}
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <h6 class="fw-bold text-primary mb-3">
+                                            <i class="bi bi-calculator me-2"></i>Option Pricing Results
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <div class="text-center p-3 border rounded">
+                                                    <h6 class="text-primary mb-1">Call Price</h6>
+                                                    <h4 class="text-primary mb-0">{{ results.call_price|floatformat:4 }}</h4>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="text-center p-3 border rounded">
+                                                    <h6 class="text-primary mb-1">Put Price</h6>
+                                                    <h4 class="text-primary mb-0">{{ results.put_price|floatformat:4 }}</h4>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+        </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <h6 class="fw-bold text-primary mb-3">
+                                            <i class="bi bi-graph-up me-2"></i>Greeks Analysis
+                                        </h6>
+                                        <div class="row">
+                                            <div class="col-6 mb-2">
+                                                <div class="p-2 border rounded">
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <span class="fw-bold">Delta (Price Sensitivity):</span>
+                                                        <span class="text-primary fw-bold">{{ results.delta|floatformat:4 }}</span>
+                                                    </div>
+                                                    <small class="text-muted">How much option price changes when futures price moves $1</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-2">
+                                                <div class="p-2 border rounded">
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <span class="fw-bold">Gamma (Delta Change):</span>
+                                                        <span class="text-primary fw-bold">{{ results.gamma|floatformat:4 }}</span>
+                                                    </div>
+                                                    <small class="text-muted">How much Delta changes when futures price moves $1</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-2">
+                                                <div class="p-2 border rounded">
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <span class="fw-bold">Theta (Time Decay):</span>
+                                                        <span class="text-primary fw-bold">{{ results.theta|floatformat:4 }}</span>
+                                                    </div>
+                                                    <small class="text-muted">How much option loses value each day</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-2">
+                                                <div class="p-2 border rounded">
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <span class="fw-bold">Vega (Volatility Risk):</span>
+                                                        <span class="text-primary fw-bold">{{ results.vega|floatformat:4 }}</span>
+                                                    </div>
+                                                    <small class="text-muted">How much option price changes when volatility changes 1%</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-2">
+                                                <div class="p-2 border rounded">
+                                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                                        <span class="fw-bold">Rho (Interest Rate Risk):</span>
+                                                        <span class="text-primary fw-bold">{{ results.rho|floatformat:4 }}</span>
+                                                    </div>
+                                                    <small class="text-muted">How much option price changes when interest rate changes 1%</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <h6 class="fw-bold text-primary mb-3">
+                                            <i class="bi bi-lightbulb me-2"></i>Analysis Summary
+                                        </h6>
+                <div class="row">
+                                            <div class="col-6 mb-2">
+                                                <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+                                                    <span class="fw-bold">Moneyness:</span>
+                                                    {% if results.moneyness == "ITM" %}
+                                                        <span class="text-success fw-bold">In-the-Money</span>
+                                                    {% elif results.moneyness == "ATM" %}
+                                                        <span class="text-warning fw-bold">At-the-Money</span>
+                                                    {% else %}
+                                                        <span class="text-danger fw-bold">Out-of-the-Money</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-2">
+                                                <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+                                                    <span class="fw-bold">Intrinsic Value:</span>
+                                                    <span class="text-primary fw-bold">{{ results.intrinsic_value|floatformat:4 }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-2">
+                                                <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+                                                    <span class="fw-bold">Time Value:</span>
+                                                    <span class="text-primary fw-bold">{{ results.time_value|floatformat:4 }}</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 mb-2">
+                                                <div class="d-flex justify-content-between align-items-center p-2 border rounded">
+                                                    <span class="fw-bold">Volatility Impact:</span>
+                                                    <span class="text-primary fw-bold">{{ results.volatility_impact|floatformat:4 }}</span>
+                                                </div>
+                    </div>
+                    </div>
+                    </div>
+                    </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-12">
+                                        <h6 class="fw-bold text-primary mb-3">
+                                            <i class="bi bi-lightbulb me-2"></i>Dynamic Analysis
+                                        </h6>
+                                        <div class="alert alert-light border-primary p-3">
+                                            <h6 class="fw-bold text-primary mb-2">What This Means:</h6>
+                                            <p class="small mb-2">
+                                                <strong>Option Price:</strong> 
+                                                {% if results.call_price > 0 %}
+                                                    The option is worth ${{ results.call_price|floatformat:4 }}. 
+                                                    {% if results.moneyness == "ITM" %}
+                                                        Since it's In-the-Money, it has intrinsic value.
+                                                    {% elif results.moneyness == "OTM" %}
+                                                        Since it's Out-of-the-Money, it has only time value.
+                                                    {% else %}
+                                                        Since it's At-the-Money, it has both intrinsic and time value.
+                                                    {% endif %}
+                                                {% endif %}
+                                            </p>
+                                            <p class="small mb-2">
+                                                <strong>Risk Level:</strong> 
+                                                {% if results.delta|floatformat:2|add:0 > 0.7 %}
+                                                    High sensitivity to price changes (Delta = {{ results.delta|floatformat:4 }})
+                                                {% elif results.delta|floatformat:2|add:0 > 0.3 %}
+                                                    Moderate sensitivity to price changes (Delta = {{ results.delta|floatformat:4 }})
+                                                {% else %}
+                                                    Low sensitivity to price changes (Delta = {{ results.delta|floatformat:4 }})
+                                                {% endif %}
+                                            </p>
+                                            <p class="small mb-0">
+                                                <strong>Time Impact:</strong> 
+                                                {% if results.theta|floatformat:2|add:0 < -0.01 %}
+                                                    High time decay - loses ${{ results.theta|floatformat:4|slice:"1:" }} per day
+                                                {% elif results.theta|floatformat:2|add:0 < -0.001 %}
+                                                    Moderate time decay - loses ${{ results.theta|floatformat:4|slice:"1:" }} per day
+                                                {% else %}
+                                                    Low time decay - loses ${{ results.theta|floatformat:4|slice:"1:" }} per day
+                                                {% endif %}
+                                            </p>
+                    </div>
+                    </div>
+                </div>
+                                {% else %}
+                                <div class="alert alert-warning text-center">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>No data available.</strong> Click "Calculate Option Price" to generate the Black formula analysis.
+                                </div>
+            {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    console.log("Black Formula Lab page loaded successfully");
+    
+    const form = document.getElementById('blackFormulaForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            console.log("Form submitted for Black Formula calculation");
+        });
+    }
+    
+    const exampleTypeField = document.querySelector('select[name="example_type"]');
+    if (exampleTypeField) {
+        exampleTypeField.addEventListener('change', function() {
+            console.log("Example type changed to:", this.value);
+            
+            if (this.value === 'gas') {
+                const evalDateField = document.querySelector('input[name="evaluation_date"]');
+                const maturityDateField = document.querySelector('input[name="maturity_date"]');
+                const spotPriceField = document.querySelector('input[name="spot_price"]');
+                const strikePriceField = document.querySelector('input[name="strike_price"]');
+                const volatilityField = document.querySelector('input[name="volatility"]');
+                const interestRateField = document.querySelector('input[name="interest_rate"]');
+                const optionTypeField = document.querySelector('select[name="option_type"]');
+                
+                if (evalDateField) evalDateField.value = '2015-09-23';
+                if (maturityDateField) maturityDateField.value = '2015-12-28';
+                if (spotPriceField) spotPriceField.value = '2.919';
+                if (strikePriceField) strikePriceField.value = '3.5';
+                if (volatilityField) volatilityField.value = '0.4251';
+                if (interestRateField) interestRateField.value = '0.0015';
+                if (optionTypeField) optionTypeField.value = 'Call';
+                
+                console.log("Updated to Natural Gas values");
+            } else if (this.value === 'treasury') {
+                const evalDateField = document.querySelector('input[name="evaluation_date"]');
+                const maturityDateField = document.querySelector('input[name="maturity_date"]');
+                const spotPriceField = document.querySelector('input[name="spot_price"]');
+                const strikePriceField = document.querySelector('input[name="strike_price"]');
+                const volatilityField = document.querySelector('input[name="volatility"]');
+                const interestRateField = document.querySelector('input[name="interest_rate"]');
+                const optionTypeField = document.querySelector('select[name="option_type"]');
+                
+                if (evalDateField) evalDateField.value = '2015-12-01';
+                if (maturityDateField) maturityDateField.value = '2015-12-24';
+                if (spotPriceField) spotPriceField.value = '126.953';
+                if (strikePriceField) strikePriceField.value = '119.0';
+                if (volatilityField) volatilityField.value = '0.11567';
+                if (interestRateField) interestRateField.value = '0.00105';
+                if (optionTypeField) optionTypeField.value = 'Call';
+                
+                console.log("Updated to Treasury values");
+            }
+        });
+    }
+    
+    function updateAnalysis() {
+        console.log("Updating Black Formula analysis...");
+    }
+    
+    function validateForm() {
+        const spotPrice = parseFloat(document.querySelector('input[name="spot_price"]').value) || 0;
+        const strikePrice = parseFloat(document.querySelector('input[name="strike_price"]').value) || 0;
+        const volatility = parseFloat(document.querySelector('input[name="volatility"]').value) || 0;
+        const interestRate = parseFloat(document.querySelector('input[name="interest_rate"]').value) || 0;
+        const evalDate = new Date(document.querySelector('input[name="evaluation_date"]').value);
+        const maturityDate = new Date(document.querySelector('input[name="maturity_date"]').value);
+        const optionType = document.querySelector('select[name="option_type"]').value;
+        
+        const validationGuide = document.getElementById('validationGuide');
+        const validationMessages = document.getElementById('validationMessages');
+        let messages = [];
+        let hasErrors = false;
+        
+        if (evalDate >= maturityDate) {
+            messages.push('<div class="text-danger"><i class="bi bi-x-circle me-1"></i><strong>Date Error:</strong> Evaluation date must be before maturity date</div>');
+            hasErrors = true;
+        }
+        
+        if (spotPrice <= 0) {
+            messages.push('<div class="text-danger"><i class="bi bi-x-circle me-1"></i><strong>Spot Price:</strong> Must be positive</div>');
+            hasErrors = true;
+        }
+        
+        if (strikePrice <= 0) {
+            messages.push('<div class="text-danger"><i class="bi bi-x-circle me-1"></i><strong>Strike Price:</strong> Must be positive</div>');
+            hasErrors = true;
+        }
+        
+        if (volatility <= 0 || volatility > 5) {
+            messages.push('<div class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i><strong>Volatility:</strong> Should be between 0 and 5 (0.20 = 20%)</div>');
+            hasErrors = true;
+        }
+        
+        if (interestRate < 0 || interestRate > 1) {
+            messages.push('<div class="text-warning"><i class="bi bi-exclamation-triangle me-1"></i><strong>Interest Rate:</strong> Should be between 0 and 1 (0.0015 = 0.15%)</div>');
+            hasErrors = true;
+        }
+        
+        if (spotPrice > 0 && strikePrice > 0) {
+            // Simple guidance about Spot vs Strike relationship
+            if (spotPrice > strikePrice) {
+                messages.push('<div class="text-info"><i class="bi bi-info-circle me-1"></i><strong>Spot > Strike:</strong> Futures price is above strike price</div>');
+            } else if (spotPrice < strikePrice) {
+                messages.push('<div class="text-info"><i class="bi bi-info-circle me-1"></i><strong>Spot < Strike:</strong> Futures price is below strike price</div>');
+            } else {
+                messages.push('<div class="text-info"><i class="bi bi-info-circle me-1"></i><strong>Spot = Strike:</strong> Futures price equals strike price</div>');
+            }
+            
+            // Simple option guidance
+            if (optionType === 'Call' && spotPrice > strikePrice) {
+                messages.push('<div class="text-success"><i class="bi bi-check-circle me-1"></i><strong>Call:</strong> In-the-Money (profitable)</div>');
+            } else if (optionType === 'Call' && spotPrice < strikePrice) {
+                messages.push('<div class="text-info"><i class="bi bi-info-circle me-1"></i><strong>Call:</strong> Out-of-the-Money</div>');
+            } else if (optionType === 'Put' && spotPrice < strikePrice) {
+                messages.push('<div class="text-success"><i class="bi bi-check-circle me-1"></i><strong>Put:</strong> In-the-Money (profitable)</div>');
+            } else if (optionType === 'Put' && spotPrice > strikePrice) {
+                messages.push('<div class="text-info"><i class="bi bi-info-circle me-1"></i><strong>Put:</strong> Out-of-the-Money</div>');
+            }
+        }
+        
+        if (messages.length > 0) {
+            validationMessages.innerHTML = messages.join('');
+            validationGuide.style.display = 'block';
+        } else {
+            validationGuide.style.display = 'none';
+        }
+        
+        return !hasErrors;
+    }
+    
+    function addValidationListeners() {
+        const inputs = [
+            'input[name="spot_price"]',
+            'input[name="strike_price"]',
+            'input[name="volatility"]',
+            'input[name="interest_rate"]',
+            'input[name="evaluation_date"]',
+            'input[name="maturity_date"]',
+            'select[name="option_type"]'
+        ];
+        
+        inputs.forEach(selector => {
+            const element = document.querySelector(selector);
+            if (element) {
+                element.addEventListener('input', validateForm);
+                element.addEventListener('change', validateForm);
+            }
+        });
+    }
+    
+    updateAnalysis();
+    addValidationListeners();
+    
+    const currentExampleType = document.querySelector('select[name="example_type"]').value;
+    if (currentExampleType === 'gas') {
+        const evalDateField = document.querySelector('input[name="evaluation_date"]');
+        const maturityDateField = document.querySelector('input[name="maturity_date"]');
+        const spotPriceField = document.querySelector('input[name="spot_price"]');
+        const strikePriceField = document.querySelector('input[name="strike_price"]');
+        const volatilityField = document.querySelector('input[name="volatility"]');
+        const interestRateField = document.querySelector('input[name="interest_rate"]');
+        const optionTypeField = document.querySelector('select[name="option_type"]');
+        
+        if (evalDateField) evalDateField.value = '2015-09-23';
+        if (maturityDateField) maturityDateField.value = '2015-12-28';
+        if (spotPriceField) spotPriceField.value = '2.919';
+        if (strikePriceField) strikePriceField.value = '3.5';
+        if (volatilityField) volatilityField.value = '0.4251';
+        if (interestRateField) interestRateField.value = '0.0015';
+        if (optionTypeField) optionTypeField.value = 'Call';
+        
+        console.log("Forced Natural Gas values on page load");
+    }
+    });
+</script>
+{% endblock %}

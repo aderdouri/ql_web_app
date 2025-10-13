@@ -1,0 +1,145 @@
+{% extends "equity_models/chapter_base.html" %}
+{% load static %}
+
+{% block title %}{{ chapter_title }}{% endblock %}
+
+{% block chapter_content %}
+                    
+                    <!-- Chapter Overview -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h2><i class="bi bi-info-circle me-2"></i>Chapter Overview</h2>
+                            <p>This chapter demonstrates the valuation of options on commodity futures using the Black formula.
+                            We'll explore futures options pricing, volatility modeling, and risk management applications for commodity derivatives.</p>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <h5><strong>What You'll Learn:</strong></h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-primary me-2"></i>Black Formula for futures options</li>
+                                        <li><i class="bi bi-check-circle text-primary me-2"></i>Commodity futures pricing</li>
+                                        <li><i class="bi bi-check-circle text-primary me-2"></i>Volatility modeling</li>
+                                        <li><i class="bi bi-check-circle text-primary me-2"></i>Risk management applications</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5><strong>Applications:</strong></h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-currency-dollar text-primary me-2"></i>Caps & Floors</li>
+                                        <li><i class="bi bi-currency-dollar text-primary me-2"></i>Swaptions</li>
+                                        <li><i class="bi bi-currency-dollar text-primary me-2"></i>Commodity Options</li>
+                                        <li><i class="bi bi-currency-dollar text-primary me-2"></i>Interest Rate Derivatives</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Interactive Laboratory -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h3 class="mb-3">Interactive Laboratory</h3>
+                                    <p class="mb-4">Calculate futures option prices using the Black formula with real-time Greeks analysis.
+                                    Experiment with different parameters and observe how volatility affects option pricing.</p>
+                                    <a href="{% url 'equity_models:chapter25_black_formula_futures:lab' %}" class="btn btn-light btn-lg">
+                                        <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Key Concepts -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h3><i class="bi bi-lightbulb me-2"></i>Key Concepts</h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-info text-white">
+                                            <h5><i class="bi bi-calculator me-2"></i>Black Formula</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>The Black formula is used to price options on futures contracts, where the underlying is a futures price rather than a spot price.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Futures Options Pricing</li>
+                                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Volatility Modeling</li>
+                                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Risk Management</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5><i class="bi bi-graph-up me-2"></i>Applications</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>The Black formula is widely used in practice for pricing various types of derivatives on futures contracts.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Caps & Floors</li>
+                                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Swaptions</li>
+                                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Commodity Options</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Pricing Methodologies -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h3 class="mb-3">Pricing Methodologies</h3>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5><strong>Black Formula</strong></h5>
+                                            <p>Analytical solution for futures options</p>
+                                            <ul class="list-unstyled">
+                                                <li>• Fast and accurate</li>
+                                                <li>• Assumes log-normal futures</li>
+                                                <li>• Constant volatility</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5><strong>Greeks Analysis</strong></h5>
+                                            <p>Risk sensitivities for futures options</p>
+                                            <ul class="list-unstyled">
+                                                <li>• Delta hedging</li>
+                                                <li>• Gamma risk</li>
+                                                <li>• Vega exposure</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5><strong>Volatility Modeling</strong></h5>
+                                            <p>Stochastic volatility processes</p>
+                                            <ul class="list-unstyled">
+                                                <li>• Volatility surfaces</li>
+                                                <li>• Term structure</li>
+                                                <li>• Smile effects</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+{% endblock %}

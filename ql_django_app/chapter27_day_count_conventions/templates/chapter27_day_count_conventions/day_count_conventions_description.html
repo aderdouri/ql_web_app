@@ -1,0 +1,211 @@
+{% extends "equity_models/chapter_base.html" %}
+{% load static %}
+
+{% block title %}{{ chapter_title }}{% endblock %}
+
+{% block chapter_content %}
+                    
+                    <!-- Chapter Overview -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h2><i class="bi bi-info-circle me-2"></i>Chapter Overview</h2>
+                            <p>This chapter explores a glitch in QuantLib when using curves with different day-count conventions. 
+                            The problem occurs when pricing options with finite-difference engines that don't properly account for 
+                            different day-count conventions between risk-free rate and volatility curves.</p>
+                            
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <h5><strong>What You'll Learn:</strong></h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-primary me-2"></i>Day-count convention inconsistencies</li>
+                                        <li><i class="bi bi-check-circle text-primary me-2"></i>Engine behavior differences</li>
+                                        <li><i class="bi bi-check-circle text-primary me-2"></i>Variance calculation issues</li>
+                                        <li><i class="bi bi-check-circle text-primary me-2"></i>Workaround solutions</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5><strong>Key Issues:</strong></h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-exclamation-triangle text-warning me-2"></i>Analytic vs FD engine differences</li>
+                                        <li><i class="bi bi-exclamation-triangle text-warning me-2"></i>Time grid inconsistencies</li>
+                                        <li><i class="bi bi-exclamation-triangle text-warning me-2"></i>Variance calculation errors</li>
+                                        <li><i class="bi bi-exclamation-triangle text-warning me-2"></i>Implementation artifacts</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Interactive Laboratory -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h3 class="mb-3">Interactive Laboratory</h3>
+                                    <p class="mb-4">Explore the day-count convention glitch by comparing analytic and finite-difference engines 
+                                    with different day-count conventions for risk-free rates and volatility curves.</p>
+                                    <a href="{% url 'equity_models:chapter27_day_count_conventions:chapter' %}" class="btn btn-light btn-lg">
+                                        <i class="bi bi-tools me-2"></i>View Chapter
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- The Problem -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h3><i class="bi bi-exclamation-triangle me-2"></i>The Problem</h3>
+                            <div class="card">
+                                <div class="card-body">
+                                    <p>When pricing options with different day-count conventions for risk-free rates and volatility curves, 
+                                    the analytic and finite-difference engines produce significantly different results. This is due to an 
+                                    implementation artifact where the FD engine uses a single time grid based on the risk-free rate convention, 
+                                    while the analytic engine can properly account for different conventions.</p>
+                                    
+                                    <div class="alert alert-warning">
+                                        <h5><i class="bi bi-lightbulb me-2"></i>Key Insight</h5>
+                                        <p class="mb-0">The finite-difference engine asks the volatility curve for the volatility at the exercise date 
+                                        and uses it on a time grid that follows the day-count convention of the risk-free rate, resulting in 
+                                        inconsistent time-to-maturity calculations.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Engine Comparison -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h3><i class="bi bi-graph-up me-2"></i>Engine Behavior Comparison</h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-success text-white">
+                                            <h5><i class="bi bi-check-circle me-2"></i>Analytic Engine</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Behavior:</strong> Properly accounts for different day-count conventions</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="bi bi-arrow-right text-success me-2"></i>Uses correct variance calculation</li>
+                                                <li><i class="bi bi-arrow-right text-success me-2"></i>Accounts for volatility curve convention</li>
+                                                <li><i class="bi bi-arrow-right text-success me-2"></i>Consistent with market practice</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-danger text-white">
+                                            <h5><i class="bi bi-x-circle me-2"></i>Finite-Difference Engine</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p><strong>Behavior:</strong> Uses single time grid, ignores volatility convention</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="bi bi-arrow-right text-danger me-2"></i>Forced to use risk-free rate convention</li>
+                                                <li><i class="bi bi-arrow-right text-danger me-2"></i>Inconsistent variance calculation</li>
+                                                <li><i class="bi bi-arrow-right text-danger me-2"></i>Implementation artifact</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Day-Count Convention Impact -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h3 class="mb-3">Day-Count Convention Impact</h3>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5><strong>Actual/365 Fixed</strong></h5>
+                                            <p>Used for risk-free rate curve</p>
+                                            <ul class="list-unstyled">
+                                                <li>• T_grid = 0.25205479452054796</li>
+                                                <li>• Standard convention</li>
+                                                <li>• Used in time grid</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5><strong>Business/252</strong></h5>
+                                            <p>Used for volatility curve</p>
+                                            <ul class="list-unstyled">
+                                                <li>• T_vol = 0.25793650793650796</li>
+                                                <li>• Market practice</li>
+                                                <li>• Ignored by FD engine</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5><strong>Variance Impact</strong></h5>
+                                            <p>Different calculations</p>
+                                            <ul class="list-unstyled">
+                                                <li>• vol² × T_grid = 0.010082</li>
+                                                <li>• Correct variance = 0.010317</li>
+                                                <li>• Significant difference</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Solution -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h3><i class="bi bi-tools me-2"></i>Workaround Solution</h3>
+                            <div class="card">
+                                <div class="card-body">
+                                    <p>To work around this issue, you can calculate a synthetic volatility that, when used with the 
+                                    day-count convention of the time grid, gives the correct variance:</p>
+                                    
+                                    <div class="bg-light p-3 rounded mb-3">
+                                        <code>vol_synthetic = sqrt(correct_variance / T_grid)</code>
+                                    </div>
+                                    
+                                    <p>This synthetic volatility can then be used to build a volatility curve with the same day-count 
+                                    convention as the risk-free rate, allowing the FD engine to return more accurate results.</p>
+                                    
+                                    <div class="alert alert-info">
+                                        <h5><i class="bi bi-info-circle me-2"></i>Important Note</h5>
+                                        <p class="mb-0">This workaround becomes more complex with non-flat volatility curves, requiring 
+                                        conversion of multiple values or sampling and conversion for interpolated curves.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Best Practices -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h3><i class="bi bi-shield-check me-2"></i>Best Practices</h3>
+                            <div class="card">
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Sanity Checks:</strong> Always compare results between analytic and FD engines when possible</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Convention Consistency:</strong> Use the same day-count convention for all curves when possible</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Variance Verification:</strong> Verify that variance calculations are consistent across engines</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i><strong>Documentation:</strong> Document any workarounds and their implications for future reference</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+{% endblock %}

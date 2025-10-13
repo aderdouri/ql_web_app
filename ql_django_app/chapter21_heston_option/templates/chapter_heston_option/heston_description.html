@@ -1,0 +1,183 @@
+{% extends "equity_models/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter demonstrates how to value European options using the Heston stochastic volatility model 
+                    and compare it with the traditional Black-Scholes-Merton model. Learn about stochastic volatility 
+                    modeling and its impact on option pricing.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Heston stochastic volatility model</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>European option pricing</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Model comparison techniques</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Parameter sensitivity analysis</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Key Features:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-graph-up text-primary me-2"></i>Interactive parameter adjustment</li>
+                            <li><i class="bi bi-graph-up text-primary me-2"></i>Real-time price calculations</li>
+                            <li><i class="bi bi-graph-up text-primary me-2"></i>Model comparison results</li>
+                            <li><i class="bi bi-graph-up text-primary me-2"></i>Mathematical equation display</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Calculate European option prices using both Heston and Black-Scholes-Merton models. 
+                    Experiment with different parameters and observe how stochastic volatility affects option pricing.
+                </p>
+                <div class="text-center">
+                    <a href="{% url 'equity_models:chapter21_heston_option:heston_lab' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2" style="color: white !important;"></i>launch heston pricing lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mathematical Background -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-calculator me-2"></i>Mathematical Background
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-primary">Heston Model Equations</h5>
+                        <p><strong>Asset Price Process:</strong></p>
+                        <div class="bg-light p-3 rounded mb-3">
+                            <code>dS<sub>t</sub> = μS<sub>t</sub> dt + √V<sub>t</sub> S<sub>t</sub> dW¹</code>
+                        </div>
+                        <p><strong>Variance Process:</strong></p>
+                        <div class="bg-light p-3 rounded">
+                            <code>dV<sub>t</sub> = κ(θ - V<sub>t</sub>) + σ√V<sub>t</sub> dW²</code>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-primary">Model Parameters</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>S<sub>t</sub>:</strong> Asset's value at time t</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>μ:</strong> Expected growth rate</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>V<sub>t</sub>:</strong> Variance of the asset</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>θ:</strong> Mean reversion level</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>κ:</strong> Mean reversion speed</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>σ:</strong> Volatility of volatility</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>ρ:</strong> Correlation between W¹ and W²</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Concepts -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-lightbulb me-2"></i>Key Concepts
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="bi bi-graph-up fs-4"></i>
+                            </div>
+                            <h5 class="fw-bold">Stochastic Volatility</h5>
+                            <p class="text-muted small">The Heston model incorporates time-varying volatility, unlike the constant volatility assumption in Black-Scholes</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="bi bi-arrow-left-right fs-4"></i>
+                            </div>
+                            <h5 class="fw-bold">Mean Reversion</h5>
+                            <p class="text-muted small">Volatility tends to revert to a long-term mean level, captured by the κ and θ parameters</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <i class="bi bi-link-45deg fs-4"></i>
+                            </div>
+                            <h5 class="fw-bold">Correlation</h5>
+                            <p class="text-muted small">The ρ parameter captures the correlation between asset price and volatility movements</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Practical Example -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-book me-2"></i>Practical Example
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    In this lab, you'll work with a European call option on AAPL with the following characteristics:
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-1-circle text-primary me-2"></i>Spot Price: $127.62</li>
+                            <li><i class="bi bi-2-circle text-primary me-2"></i>Strike Price: $130</li>
+                            <li><i class="bi bi-3-circle text-primary me-2"></i>Maturity: January 15, 2016</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-4-circle text-primary me-2"></i>Volatility: 20%</li>
+                            <li><i class="bi bi-5-circle text-primary me-2"></i>Dividend Yield: 1.63%</li>
+                            <li><i class="bi bi-6-circle text-primary me-2"></i>Risk-Free Rate: 0.1%</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
