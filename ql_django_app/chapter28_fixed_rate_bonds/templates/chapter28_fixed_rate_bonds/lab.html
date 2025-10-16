@@ -1,0 +1,690 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+<!-- Updated: {{ "now"|date:"Y-m-d H:i:s" }} -->
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:chapter28_fixed_rate_bonds:description' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Description
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Form -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-sliders me-2"></i>Bond Parameters
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="bondForm">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Bond Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-bank me-2"></i>Basic Bond Parameters
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>What is a bond?</strong> A bond is a loan you make to a company or government. You receive regular interest payments (coupons) and get your money back at maturity.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ form.face_value|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.coupon_rate|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.issue_date|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.maturity_date|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Market Data -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-graph-up me-2"></i>Market Data
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Market Rates:</strong> These are current interest rates for risk-free investments (like government bonds) for different time periods. They're used to determine the bond's fair value.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ form.spot_rate_6m|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.spot_rate_1y|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Advanced Settings -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-gear me-2"></i>Advanced Settings
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-warning mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>What are these settings?</strong> These parameters control how QuantLib calculates dates, interest, and handles business days. For most users, the default values work perfectly.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        {{ form.settlement_days|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.day_count|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.calendar|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Yield Curve Settings -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-graph-up-arrow me-2"></i>Yield Curve Settings
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Yield Curve:</strong> This determines how interest rates are calculated between known points. Linear interpolation is the most common and intuitive method.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        {{ form.interpolation|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.compounding|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.compounding_frequency|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Schedule Settings -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-calendar-event me-2"></i>Schedule Settings
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Payment Schedule:</strong> These settings control when and how coupon payments are made. "Backward" generates dates from maturity to issue, which is standard for bonds.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        {{ form.business_convention|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.date_generation|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.month_end|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid mt-3">
+                            <button type="button" class="btn btn-primary btn-lg" onclick="calculateBondPrice()">
+                                <i class="bi bi-calculator me-2"></i>Calculate Bond Price
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row g-3 mt-2">
+        <div class="col-12">
+            <!-- Bond Analytics -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Bond Analytics
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="resultsContainer" class="text-center text-muted">
+                        <i class="bi bi-calculator" style="font-size: 3rem;"></i>
+                        <p class="mt-3">Enter bond parameters and click "Calculate Bond Price" to see results</p>
+                        <div class="alert alert-info mt-3">
+                            <h6 class="alert-heading">Understanding Your Results</h6>
+                            <p class="mb-2"><strong>Premium vs Discount:</strong> If the bond price is above face value, it's trading at a premium (coupon rate > market rate). If below, it's at a discount (coupon rate < market rate).</p>
+                            <p class="mb-0"><strong>Clean vs Dirty Price:</strong> Clean price is what you see quoted, dirty price is what you actually pay (includes accrued interest).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Yield Curve and Schedule Section -->
+    <div class="row g-3 mt-2">
+        <!-- Yield Curve Details -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Yield Curve Details
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="yieldCurveContainer" class="text-center text-muted">
+                        <i class="bi bi-graph-up" style="font-size: 3rem;"></i>
+                        <p class="mt-3">Yield curve details will appear here after calculation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Schedule -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-calendar-event me-2"></i>Payment Schedule
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="scheduleContainer" class="text-center text-muted">
+                        <i class="bi bi-calendar-event" style="font-size: 3rem;"></i>
+                        <p class="mt-3">Payment schedule will appear here after calculation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Terms Glossary -->
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title fw-bold mb-0">
+                        <i class="bi bi-book me-2"></i>Financial Terms Glossary
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Face Value (Par Value)</h6>
+                                <p class="small text-muted mb-0">The principal amount of the bond that will be repaid at maturity. This is the amount the bondholder receives when the bond expires.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Coupon Rate</h6>
+                                <p class="small text-muted mb-0">The annual interest rate paid by the bond, expressed as a percentage of the face value. This is the regular income you receive from the bond.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Net Present Value (NPV)</h6>
+                                <p class="small text-muted mb-0">The current worth of all future cash flows from the bond, discounted at current market rates. This tells you what the bond is worth today.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Clean Price</h6>
+                                <p class="small text-muted mb-0">The bond price excluding accrued interest. This is the price you typically see quoted in financial markets.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Dirty Price</h6>
+                                <p class="small text-muted mb-0">The bond price including accrued interest. This is the actual amount you pay when buying the bond between coupon payments.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Bond Yield</h6>
+                                <p class="small text-muted mb-0">The annual return you earn on the bond, taking into account its current price, coupon payments, and time to maturity.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Accrued Interest</h6>
+                                <p class="small text-muted mb-0">Interest that has accumulated since the last coupon payment but hasn't been paid yet. This is added to the clean price.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Spot Rate</h6>
+                                <p class="small text-muted mb-0">The current interest rate for a specific maturity period. Used to discount future cash flows to their present value.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Yield Curve</h6>
+                                <p class="small text-muted mb-0">A graph showing interest rates for different maturity periods. Helps determine the appropriate discount rate for each cash flow.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+function calculateBondPrice() {
+    // Get form values
+    const formData = new FormData(document.getElementById('bondForm'));
+    const jsonData = {};
+    formData.forEach((value, key) => {
+        jsonData[key] = value;
+    });
+
+    // Show loading
+    document.getElementById('resultsContainer').innerHTML = `
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3">Calculating bond price...</p>
+    `;
+
+    // Call API
+    fetch('{% url "bonds:chapter28_fixed_rate_bonds:calculate_price_api" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': jsonData['csrfmiddlewaretoken']
+        },
+        body: JSON.stringify(jsonData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('API Response:', data); // Debug log
+        if (data.success && data.results) {
+            displayResults(data.results);
+            displayYieldCurve(data.results);
+            displaySchedule(data.results);
+        } else {
+            displayError(data.error || 'Unknown error occurred');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error); // Debug log
+        displayError('Network error: ' + error.message);
+    });
+}
+
+function displayResults(results) {
+    const container = document.getElementById('resultsContainer');
+
+    // Helper function to safely format numbers
+    function safeFormat(value, decimals = 6, prefix = '') {
+        if (value === undefined || value === null || isNaN(value)) {
+            return 'N/A';
+        }
+        return parseFloat(value).toFixed(decimals);
+    }
+    
+    function safeFormatPercent(value, decimals = 6) {
+        if (value === undefined || value === null || isNaN(value)) {
+            return 'N/A%';
+        }
+        return (parseFloat(value) * 100).toFixed(decimals) + '%';
+    }
+
+    container.innerHTML = `
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <i class="bi bi-calculator text-primary me-3" style="font-size: 2rem;"></i>
+                            <h5 class="card-title fw-bold text-primary mb-0">Net Present Value</h5>
+                        </div>
+                        <h3 class="text-success fw-bold">${safeFormat(results.npv)}</h3>
+                        <small class="text-muted">${getNPVExplanation(results)}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <i class="bi bi-currency-dollar text-primary me-3" style="font-size: 2rem;"></i>
+                            <h5 class="card-title fw-bold text-primary mb-0">Clean Price</h5>
+                        </div>
+                        <h3 class="text-success fw-bold">${safeFormat(results.clean_price)}</h3>
+                        <small class="text-muted">${getCleanPriceExplanation(results)}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <i class="bi bi-graph-up text-primary me-3" style="font-size: 2rem;"></i>
+                            <h5 class="card-title fw-bold text-primary mb-0">Dirty Price</h5>
+                        </div>
+                        <h3 class="text-success fw-bold">${safeFormat(results.dirty_price)}</h3>
+                        <small class="text-muted">${getDirtyPriceExplanation(results)}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <i class="bi bi-percent text-primary me-3" style="font-size: 2rem;"></i>
+                            <h5 class="card-title fw-bold text-primary mb-0">Bond Yield</h5>
+                        </div>
+                        <h3 class="text-success fw-bold">${safeFormatPercent(results.bond_yield)}</h3>
+                        <small class="text-muted">${getBondYieldExplanation(results)}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <i class="bi bi-clock text-primary me-3" style="font-size: 2rem;"></i>
+                            <h5 class="card-title fw-bold text-primary mb-0">Accrued Amount</h5>
+                        </div>
+                        <h3 class="text-primary fw-bold">${safeFormat(results.accrued_amount)}</h3>
+                        <small class="text-muted">${getAccruedAmountExplanation(results)}</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <i class="bi bi-gear text-primary me-3" style="font-size: 2rem;"></i>
+                            <h5 class="card-title fw-bold text-primary mb-0">Manual NPV</h5>
+                        </div>
+                        <h3 class="text-primary fw-bold">${safeFormat(results.manual_npv)}</h3>
+                        <small class="text-muted">${getManualNPVExplanation(results)}</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="card-title fw-bold mb-0">
+                            <i class="bi bi-info-circle text-primary me-2"></i>Additional Information
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <p class="mb-2"><strong class="text-dark">Calculation Method:</strong></p>
+                                <p class="text-muted">${results.calculation_method || 'N/A'}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-2"><strong class="text-dark">Coupon Payment:</strong></p>
+                                <p class="text-primary fw-bold">${safeFormat(results.coupon_payment, 2)}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-2"><strong class="text-dark">Face Value:</strong></p>
+                                <p class="text-primary fw-bold">${safeFormat(results.face_value, 2)}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function displayYieldCurve(results) {
+    const container = document.getElementById('yieldCurveContainer');
+
+    if (!results.spot_curve_dates || !results.spot_curve_rates) {
+        container.innerHTML = '<p class="text-muted">Yield curve data not available</p>';
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up text-primary me-2"></i>Yield Curve Details
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-dark">Spot Curve Dates</h6>
+                        <ul class="list-unstyled">
+                            ${results.spot_curve_dates.map(date => `<li><i class="bi bi-calendar-date text-primary me-2"></i>${date || 'N/A'}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold text-dark">Spot Curve Rates (%)</h6>
+                        <ul class="list-unstyled">
+                            ${results.spot_curve_rates.map(rate => `<li><i class="bi bi-percent text-success me-2"></i>${rate !== undefined && rate !== null ? parseFloat(rate).toFixed(3) : 'N/A'}%</li>`).join('')}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function displaySchedule(results) {
+    const container = document.getElementById('scheduleContainer');
+
+    if (!results.schedule_dates || !results.coupon_payment || !results.face_value) {
+        container.innerHTML = '<p class="text-muted">Schedule data not available</p>';
+        return;
+    }
+
+    container.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title fw-bold mb-0">
+                    <i class="bi bi-calendar-event text-primary me-2"></i>Payment Schedule
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-primary">
+                            <tr>
+                                <th class="fw-bold">Payment Date</th>
+                                <th class="fw-bold">Coupon Payment</th>
+                                <th class="fw-bold">Principal Payment</th>
+                                <th class="fw-bold">Total Payment</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${results.schedule_dates.map((date, index) => {
+                                const isLast = index === results.schedule_dates.length - 1;
+                                const couponPayment = parseFloat(results.coupon_payment) || 0;
+                                const faceValue = parseFloat(results.face_value) || 0;
+                                const principalPayment = isLast ? faceValue : 0;
+                                const totalPayment = couponPayment + principalPayment;
+                                return `
+                                    <tr>
+                                        <td><i class="bi bi-calendar-date text-primary me-2"></i>${date || 'N/A'}</td>
+                                        <td class="text-success fw-bold">${couponPayment.toFixed(2)}</td>
+                                        <td class="text-primary fw-bold">${principalPayment.toFixed(2)}</td>
+                                        <td class="text-dark fw-bold">${totalPayment.toFixed(2)}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+
+// Individual explanation functions
+function getNPVExplanation(results) {
+    const npv = parseFloat(results.npv) || 0;
+    const faceValue = parseFloat(results.face_value) || 100;
+
+    if (npv > faceValue) {
+        return "Price is above par because coupon rate is higher than market rates";
+    } else if (npv < faceValue) {
+        return "Price is below par because coupon rate is lower than market rates";
+    } else {
+        return "Price equals par because coupon rate matches market yield";
+    }
+}
+
+function getCleanPriceExplanation(results) {
+    const cleanPrice = parseFloat(results.clean_price) || 0;
+    const dirtyPrice = parseFloat(results.dirty_price) || 0;
+
+    if (Math.abs(dirtyPrice - cleanPrice) > 0.01) {
+        return "Price excluding accrued interest since last coupon payment";
+    } else {
+        return "Clean price equals dirty price because no interest has accrued";
+    }
+}
+
+function getDirtyPriceExplanation(results) {
+    const cleanPrice = parseFloat(results.clean_price) || 0;
+    const dirtyPrice = parseFloat(results.dirty_price) || 0;
+
+    if (Math.abs(dirtyPrice - cleanPrice) > 0.01) {
+        return "Price including accrued interest since last coupon payment";
+    } else {
+        return "Dirty price equals clean price because no interest has accrued";
+    }
+}
+
+function getBondYieldExplanation(results) {
+    const bondYield = parseFloat(results.bond_yield) || 0;
+
+    if (bondYield > 0.05) {
+        return "High yield indicating higher risk or longer maturity";
+    } else if (bondYield < 0.01) {
+        return "Low yield typical of short-term, high-quality bonds";
+    } else {
+        return "Moderate yield reflecting current market conditions";
+    }
+}
+
+function getAccruedAmountExplanation(results) {
+    const accruedAmount = parseFloat(results.accrued_amount) || 0;
+
+    if (accruedAmount > 0) {
+        return "Interest accumulated since the last coupon payment";
+    } else {
+        return "No accrued interest because we are at the coupon payment date";
+    }
+}
+
+function getManualNPVExplanation(results) {
+    return "Manual calculation using simple cash flow discounting formula";
+}
+
+function displayError(error) {
+    const container = document.getElementById('resultsContainer');
+    container.innerHTML = `
+        <div class="alert alert-danger">
+            <i class="bi bi-exclamation-triangle me-2"></i>
+            <strong>Error:</strong> ${error}
+        </div>
+    `;
+}
+
+// Calculate on page load with default values
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-calculate with default values
+    setTimeout(calculateBondPrice, 1000);
+});
+</script>
+{% endblock %}

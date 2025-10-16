@@ -1,0 +1,545 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:chapter29_irregular_bonds:description' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Description
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Form -->
+    <div class="row g-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-sliders me-2"></i>Irregular Bond Parameters
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="irregularBondForm">
+                        {% csrf_token %}
+                        
+                        <!-- Bond Type Selection -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-primary text-white">
+                                        <h5 class="fw-bold mb-0">
+                                            <i class="bi bi-puzzle me-2"></i>Step 1: Select Bond Type
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-info mb-3">
+                                            <small>
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                <strong>Choose your bond type:</strong> Each type demonstrates different irregular bond modeling techniques from the chapter.
+                                            </small>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                {{ form.bond_type|as_crispy_field }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-lg-4">
+                                <!-- Basic Bond Parameters -->
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h5 class="fw-bold text-primary mb-0">
+                                            <i class="bi bi-bank me-2"></i>Step 2: Basic Parameters
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-info mb-3">
+                                            <small>
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                <strong>Core bond information:</strong> Face value, coupon rate, and key dates.
+                                            </small>
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                {{ form.face_value|as_crispy_field }}
+                                            </div>
+                                            <div class="col-12">
+                                                {{ form.coupon_rate|as_crispy_field }}
+                                            </div>
+                                            <div class="col-12">
+                                                {{ form.issue_date|as_crispy_field }}
+                                            </div>
+                                            <div class="col-12">
+                                                {{ form.maturity_date|as_crispy_field }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-4">
+                                <!-- Market Data & Type-Specific Parameters -->
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h5 class="fw-bold text-primary mb-0">
+                                            <i class="bi bi-graph-up me-2"></i>Step 3: Market Data
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-info mb-3">
+                                            <small>
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                <strong>Market rates:</strong> Current interest rates for calculations.
+                                            </small>
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                {{ form.euribor_rate|as_crispy_field }}
+                                            </div>
+                                        </div>
+
+                                        <!-- Fixed-to-Floating Parameters -->
+                                        <div id="fixedToFloatingParams" style="display: none;">
+                                            <hr>
+                                            <h6 class="fw-bold text-success mb-3">
+                                                <i class="bi bi-arrow-repeat me-2"></i>Fixed-to-Floating Settings
+                                            </h6>
+                                            <div class="alert alert-success mb-3">
+                                                <small>
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    <strong>Hybrid bonds:</strong> Fixed rate initially, then floating rate.
+                                                </small>
+                                            </div>
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    {{ form.fixed_period_years|as_crispy_field }}
+                                                </div>
+                                                <div class="col-12">
+                                                    {{ form.floating_spread|as_crispy_field }}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Custom Coupon Parameters -->
+                                        <div id="customCouponParams" style="display: none;">
+                                            <hr>
+                                            <h6 class="fw-bold text-warning mb-3">
+                                                <i class="bi bi-gear-fill me-2"></i>Custom Coupon Settings
+                                            </h6>
+                                            <div class="alert alert-warning mb-3">
+                                                <small>
+                                                    <i class="bi bi-info-circle me-1"></i>
+                                                    <strong>Different indices:</strong> First coupon uses different index than remaining coupons.
+                                                </small>
+                                            </div>
+                                            <div class="row g-3">
+                                                <div class="col-12">
+                                                    {{ form.first_coupon_index|as_crispy_field }}
+                                                </div>
+                                                <div class="col-12">
+                                                    {{ form.remaining_coupons_index|as_crispy_field }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-4">
+                                <!-- Advanced Settings -->
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h5 class="fw-bold text-primary mb-0">
+                                            <i class="bi bi-gear me-2"></i>Step 4: Advanced Settings
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-warning mb-3">
+                                            <small>
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                <strong>QuantLib parameters:</strong> Advanced settings for date handling and conventions.
+                                            </small>
+                                        </div>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                {{ form.settlement_days|as_crispy_field }}
+                                            </div>
+                                            <div class="col-12">
+                                                {{ form.day_count|as_crispy_field }}
+                                            </div>
+                                            <div class="col-12">
+                                                {{ form.calendar|as_crispy_field }}
+                                            </div>
+                                            <div class="col-12">
+                                                {{ form.business_convention|as_crispy_field }}
+                                            </div>
+                                            <div class="col-12">
+                                                {{ form.date_generation|as_crispy_field }}
+                                            </div>
+                                            <div class="col-12">
+                                                {{ form.month_end|as_crispy_field }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid mt-3">
+                            <button type="button" class="btn btn-primary btn-lg" onclick="calculateIrregularBond()">
+                                <i class="bi bi-calculator me-2"></i>Build Irregular Bond
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row g-3 mt-2">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Bond Structure Results
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="resultsContainer" class="text-center text-muted">
+                        <i class="bi bi-calculator" style="font-size: 3rem;"></i>
+                        <p class="mt-3">Select bond parameters and click "Build Irregular Bond" to see results</p>
+                        <div class="alert alert-info mt-3">
+                            <h6 class="alert-heading">Understanding Irregular Bonds</h6>
+                            <p class="mb-2"><strong>Irregular Fixed:</strong> Bonds with missing or null last coupons, requiring special handling.</p>
+                            <p class="mb-2"><strong>Fixed-to-Floating:</strong> Hybrid bonds that transition from fixed to floating rate payments.</p>
+                            <p class="mb-0"><strong>Custom Coupons:</strong> Bonds with different indices for different coupon periods.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Schedule Section -->
+    <div class="row g-3 mt-2">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-calendar-event me-2"></i>Payment Schedule
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="scheduleContainer" class="text-center text-muted">
+                        <i class="bi bi-calendar-event" style="font-size: 3rem;"></i>
+                        <p class="mt-3">Payment schedule will appear here after calculation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Terms Glossary -->
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title fw-bold mb-0">
+                        <i class="bi bi-book me-2"></i>Financial Terms Glossary
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Irregular Bond</h6>
+                                <p class="small text-muted mb-0">A bond with non-standard payment schedules, missing coupons, or mixed rate structures that requires special modeling techniques.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Null Coupon/Gearing</h6>
+                                <p class="small text-muted mb-0">A technique to cancel or eliminate specific coupon payments by setting their rate or gearing to zero.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Fixed-to-Floating Bond</h6>
+                                <p class="small text-muted mb-0">A hybrid bond that pays fixed rate coupons initially, then switches to floating rate coupons for the remainder of the term.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Custom Coupon</h6>
+                                <p class="small text-muted mb-0">A coupon that uses a different interest rate index or calculation method than the standard bond coupons.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Cash Flow Manipulation</h6>
+                                <p class="small text-muted mb-0">The process of modifying, combining, or restructuring bond cash flows to achieve specific payment structures.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Leg Combination</h6>
+                                <p class="small text-muted mb-0">Combining different types of cash flow legs (fixed, floating, custom) to create complex bond structures.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Show/hide conditional parameters based on bond type
+    const bondTypeSelect = document.getElementById('id_bond_type');
+    const fixedToFloatingParams = document.getElementById('fixedToFloatingParams');
+    const customCouponParams = document.getElementById('customCouponParams');
+    
+    function toggleParameterSections() {
+        const bondType = bondTypeSelect.value;
+        
+        // Hide all conditional sections
+        fixedToFloatingParams.style.display = 'none';
+        customCouponParams.style.display = 'none';
+        
+        // Show relevant sections
+        if (bondType === 'fixed_to_floating') {
+            fixedToFloatingParams.style.display = 'block';
+        } else if (bondType === 'custom_coupon') {
+            customCouponParams.style.display = 'block';
+        }
+    }
+    
+    bondTypeSelect.addEventListener('change', toggleParameterSections);
+    toggleParameterSections(); // Initial call
+});
+
+function calculateIrregularBond() {
+    const form = document.getElementById('irregularBondForm');
+    const formData = new FormData(form);
+    const jsonData = {};
+    formData.forEach((value, key) => {
+        jsonData[key] = value;
+    });
+
+    const resultsContainer = document.getElementById('resultsContainer');
+    const scheduleContainer = document.getElementById('scheduleContainer');
+
+    // Clear previous results and show loading spinner
+    resultsContainer.innerHTML = `
+        <div id="loadingSpinner" class="text-center my-5">
+            <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 text-muted">Building irregular bond structure...</p>
+        </div>
+    `;
+    scheduleContainer.innerHTML = `
+        <div class="text-center my-5">
+            <i class="bi bi-calendar-event display-1 text-muted"></i>
+            <p class="mt-3">Payment schedule will appear here after calculation</p>
+        </div>
+    `;
+
+    fetch('{% url "bonds:chapter29_irregular_bonds:calculate_bond_api" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': jsonData['csrfmiddlewaretoken']
+        },
+        body: JSON.stringify(jsonData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Hide loading spinner
+        document.getElementById('loadingSpinner')?.remove();
+
+        console.log('API Response:', data);
+        if (data.success && data.results) {
+            displayResults(data.results);
+            displaySchedule(data.results);
+        } else {
+            displayError(data.error || 'Unknown error occurred', data.details);
+        }
+    })
+    .catch(error => {
+        // Hide loading spinner
+        document.getElementById('loadingSpinner')?.remove();
+        console.error('Error:', error);
+        displayError('Network error: ' + error.message);
+    });
+}
+
+function displayResults(results) {
+    const container = document.getElementById('resultsContainer');
+
+    container.innerHTML = `
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title fw-bold text-primary mb-0">
+                            <i class="bi bi-info-circle me-2"></i>Bond Structure Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong class="text-dark">Bond Type:</strong></p>
+                                <p class="text-primary fw-bold">${results.bond_type || 'N/A'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong class="text-dark">Description:</strong></p>
+                                <p class="text-muted">${results.description || 'N/A'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong class="text-dark">Face Value:</strong></p>
+                                <p class="text-success fw-bold">${results.face_value || 'N/A'}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2"><strong class="text-dark">Calculation Method:</strong></p>
+                                <p class="text-muted">${results.calculation_method || 'N/A'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function displaySchedule(results) {
+    const container = document.getElementById('scheduleContainer');
+
+    if (!results.schedule_dates) {
+        container.innerHTML = '<p class="text-muted">Schedule data not available</p>';
+        return;
+    }
+
+    let scheduleRows = '';
+    results.schedule_dates.forEach((date, index) => {
+        let rateInfo = '';
+        if (results.coupon_rates && results.coupon_rates[index] !== undefined && results.coupon_rates[index] !== null) {
+            rateInfo = `<td class="text-success fw-bold">${results.coupon_rates[index]}%</td>`;
+        } else if (results.gearings && results.gearings[index] !== undefined && results.gearings[index] !== null) {
+            rateInfo = `<td class="text-primary fw-bold">${results.gearings[index]}%</td>`;
+        } else {
+            rateInfo = '<td class="text-muted"></td>';
+        }
+        
+        // Get amount if available
+        let amountInfo = '';
+        if (results.amounts && results.amounts[index] !== undefined) {
+            amountInfo = `<td class="text-dark fw-bold">${results.amounts[index]}</td>`;
+        } else {
+            amountInfo = '<td class="text-muted">-</td>';
+        }
+        
+        scheduleRows += `
+            <tr>
+                <td><i class="bi bi-calendar-date text-primary me-2"></i>${date || 'N/A'}</td>
+                ${rateInfo}
+                ${amountInfo}
+            </tr>
+        `;
+    });
+
+    container.innerHTML = `
+        <div class="card">
+            <div class="card-header">
+                <h6 class="card-title fw-bold mb-0">
+                    <i class="bi bi-calendar-event text-primary me-2"></i>Payment Schedule
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-primary">
+                            <tr>
+                                <th class="fw-bold">Payment Date</th>
+                                <th class="fw-bold">Rate/Gearing</th>
+                                <th class="fw-bold">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${scheduleRows}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function displayError(error, details = '') {
+    const resultsContainer = document.getElementById('resultsContainer');
+    resultsContainer.innerHTML = `
+        <div class="alert alert-danger">
+            <h6 class="alert-heading">Error</h6>
+            <p class="mb-0">${error}</p>
+            ${details ? `<hr><small class="text-muted">${details}</small>` : ''}
+        </div>
+    `;
+}
+</script>
+{% endblock %}

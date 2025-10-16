@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:chapter31_callable_bonds:description' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Description
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Form -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">Callable Bond Parameters</h3>
+                </div>
+                <div class="card-body">
+                    <form id="callableForm" method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Bond Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">Basic Bond Parameters</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        {{ form.evaluation_date|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.yield_curve_rate|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.coupon_rate|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hull-White Model Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">Hull-White Model Parameters</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        {{ form.mean_reversion|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.volatility|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.grid_points|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chart Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">Volatility Sensitivity Chart Parameters</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        {{ form.sigma_min|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.sigma_max|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.sigma_step|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calculate Button -->
+                        <div class="d-flex justify-content-center mt-4">
+                            <button type="button" id="calculateBtn" class="btn btn-primary btn-lg px-5">
+                                Calculate Bond Price
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+
+            <div id="results-wrapper">
+                <!-- Bond Price Result -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title fw-bold mb-0">Bond Price Result</h3>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="d-flex align-items-center justify-content-center mb-3">
+                            <h4 class="text-primary fw-bold mb-0">Current Bond Price</h4>
+                        </div>
+                        <h3 class="text-success fw-bold mb-0" id="current_price">0.000000</h3>
+                        <p class="text-muted">Clean price calculated using Hull-White model</p>
+                        
+                        <!-- Dynamic Price Analysis -->
+                        <div class="mt-3">
+                            <div class="alert alert-info alert-sm" id="price_analysis" style="display: none;">
+                                <span id="price_analysis_text"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Volatility Sensitivity Chart -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title fw-bold mb-0">Price Sensitivity to Volatility</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">This chart shows how the bond price changes as volatility (sigma) increases. Higher volatility increases the probability of the bond being called, thus decreasing its value.</p>
+                        
+                        <!-- Dynamic Volatility Analysis -->
+                        <div class="mb-3">
+                            <div class="alert alert-warning alert-sm" id="volatility_impact" style="display: none;">
+                                <span id="volatility_impact_text"></span>
+                            </div>
+                        </div>
+                        
+                        <div style="height: 450px;">
+                            <canvas id="sensitivityChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cashflows Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title fw-bold mb-0">Bond Cashflows</h3>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted mb-3">Complete schedule of coupon payments and principal repayment for the callable bond.</p>
+                        
+                        <!-- Dynamic Model Information -->
+                        <div class="mb-3">
+                            <div class="alert alert-light border alert-sm" id="model_parameters" style="display: none;">
+                                <span id="model_parameters_text"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="alert alert-light border alert-sm" id="callability" style="display: none;">
+                                <span id="callability_text"></span>
+                            </div>
+                        </div>
+                        
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover table-sm">
+                                    <thead class="table-dark sticky-top">
+                                        <tr>
+                                            <th class="fw-bold">Payment Date</th>
+                                            <th class="text-end fw-bold">Amount ($)</th>
+                                            <th class="text-center fw-bold">Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cashflow_table_body">
+                                        <!-- Cashflows will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if results_json %}
+                {{ results_json|json_script:"bond-data" }}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Chart === 'undefined') { 
+            console.error("Chart.js is not loaded.");
+            return; 
+        }
+
+        const form = document.getElementById('callableForm');
+        const errorContainer = document.getElementById('error-container');
+        const resultsWrapper = document.getElementById('results-wrapper');
+        
+        let sensitivityChart;
+        const sensitivityCtx = document.getElementById('sensitivityChart').getContext('2d');
+        
+        function renderChart(chartData) {
+            if (sensitivityChart) { sensitivityChart.destroy(); }
+            sensitivityChart = new Chart(sensitivityCtx, {
+                type: 'line',
+                data: {
+                    labels: chartData.sigmas.map(s => s.toFixed(3)),
+                    datasets: [{
+                        label: 'Bond Price',
+                        data: chartData.prices,
+                        borderColor: 'rgb(54, 162, 235)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                        borderWidth: 2, 
+                        pointRadius: 0,
+                        fill: true
+                    }]
+                },
+                options: { 
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { 
+                        x: { 
+                            title: { display: true, text: 'Sigma (Volatility)' },
+                            grid: { color: 'rgba(0,0,0,0.1)' }
+                        }, 
+                        y: { 
+                            title: { display: true, text: 'Bond Price' },
+                            grid: { color: 'rgba(0,0,0,0.1)' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function updateUI(data) {
+            errorContainer.style.display = 'none';
+            resultsWrapper.style.display = 'block';
+
+            // Update bond price
+            document.getElementById('current_price').innerText = data.current_price.toFixed(6);
+            
+            // Update dynamic explanations
+            updateDynamicExplanations(data.explanations);
+            
+            // Update cashflows table with professional formatting
+            updateCashflowsTable(data.cashflows);
+            
+            // Update chart
+            renderChart(data.sensitivity_chart_data);
+        }
+        
+        function updateDynamicExplanations(explanations) {
+            // Price analysis
+            const priceAnalysis = document.getElementById('price_analysis');
+            const priceAnalysisText = document.getElementById('price_analysis_text');
+            if (explanations.price_analysis) {
+                priceAnalysisText.textContent = explanations.price_analysis;
+                priceAnalysis.style.display = 'block';
+            }
+            
+            // Volatility impact
+            const volatilityImpact = document.getElementById('volatility_impact');
+            const volatilityImpactText = document.getElementById('volatility_impact_text');
+            if (explanations.volatility_impact) {
+                volatilityImpactText.textContent = explanations.volatility_impact;
+                volatilityImpact.style.display = 'block';
+            }
+            
+            // Model parameters
+            const modelParameters = document.getElementById('model_parameters');
+            const modelParametersText = document.getElementById('model_parameters_text');
+            if (explanations.model_parameters) {
+                modelParametersText.textContent = explanations.model_parameters;
+                modelParameters.style.display = 'block';
+            }
+            
+            // Callability
+            const callability = document.getElementById('callability');
+            const callabilityText = document.getElementById('callability_text');
+            if (explanations.callability) {
+                callabilityText.textContent = explanations.callability;
+                callability.style.display = 'block';
+            }
+        }
+        
+        function updateCashflowsTable(cashflows) {
+            const tableBody = document.getElementById('cashflow_table_body');
+            tableBody.innerHTML = '';
+            
+            cashflows.forEach((cf, index) => {
+                const row = tableBody.insertRow();
+                
+                // Date cell
+                const dateCell = row.insertCell();
+                dateCell.className = 'fw-medium';
+                dateCell.innerText = cf.date;
+                
+                // Amount cell
+                const amountCell = row.insertCell();
+                amountCell.className = 'text-end fw-bold';
+                amountCell.innerText = `$${cf.amount.toFixed(6)}`;
+                
+                // Type cell
+                const typeCell = row.insertCell();
+                typeCell.className = 'text-center';
+                
+                if (index === cashflows.length - 1) {
+                    // Last payment is principal
+                    typeCell.innerHTML = '<span class="badge bg-primary">Principal</span>';
+                    row.classList.add('table-success');
+                } else {
+                    // Other payments are coupons
+                    typeCell.innerHTML = '<span class="badge bg-secondary">Coupon</span>';
+                }
+            });
+        }
+        
+        function handleError(errorMsg) {
+            resultsWrapper.style.display = 'none';
+            errorContainer.innerText = `Error: ${errorMsg}`;
+            errorContainer.style.display = 'block';
+        }
+
+        function triggerUpdate() {
+            const formData = new FormData(form);
+            fetch("{% url 'bonds:chapter31_callable_bonds:lab' %}", {
+                method: 'POST', 
+                body: new URLSearchParams(formData),
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest', 
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value 
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    handleError(data.error);
+                } else {
+                    updateUI(data);
+                }
+            })
+            .catch(err => {
+                handleError("An unexpected network error occurred.");
+            });
+        }
+
+        // Add event listener to the calculate button
+        const calculateBtn = document.getElementById('calculateBtn');
+        calculateBtn.addEventListener('click', triggerUpdate);
+
+        // Initial UI update on page load
+        const initialDataEl = document.getElementById('bond-data');
+        if (initialDataEl) {
+            try {
+                const initialData = JSON.parse(initialDataEl.textContent);
+                if (initialData.error) {
+                    handleError(initialData.error);
+                } else {
+                    updateUI(initialData);
+                }
+            } catch (e) {
+                handleError("Failed to load initial data.");
+            }
+        }
+    });
+</script>
+{% endblock %}

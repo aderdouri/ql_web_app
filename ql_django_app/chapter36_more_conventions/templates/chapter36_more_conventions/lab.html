@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}36. More Mischievous Conventions Lab - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi bi-exclamation-triangle-fill me-3"></i>36. More Mischievous Conventions Lab
+                            </h1>
+                            <p class="card-text lead mb-0">Interactive analysis of short coupon effects in fixed-rate bonds using QuantLib.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'short_coupon_glitch:description' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Chapter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parameters Form -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">Bond Parameters</h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-3">
+                        <small>
+                            <strong>Instructions:</strong> Adjust the bond parameters below to see how short coupons affect pricing. 
+                            The key is the relationship between evaluation date and issue date - when they're close, you get a short first coupon.
+                        </small>
+                    </div>
+                    
+                    <form method="post" id="shortCouponForm">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.evaluation_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.issue_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.maturity_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.coupon_rate|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.bond_yield|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.face_amount|as_crispy_field }}
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <div class="alert alert-warning">
+                                <small>
+                                    <strong>Key Insight:</strong> When the evaluation date is close to the issue date, 
+                                    the first coupon period becomes "short" and requires special handling in Actual/Actual convention.
+                                </small>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Analyze Short Coupon Effects
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    {% if results %}
+        {% if results.error %}
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title fw-bold mb-0">Calculation Error</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h6 class="fw-bold">Error Details:</h6>
+                        <p class="mb-0">{{ results.error }}</p>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Bond Price Comparison -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">Price Comparison</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info mb-3">
+                                <small>
+                                    <strong>Analysis:</strong> Two different pricing methods give different results due to how they handle short coupons.
+                                </small>
+                            </div>
+                            
+                            <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <div class="border rounded p-3 text-center">
+                                                <div class="text-muted small">Yield-Based Price</div>
+                                                <div class="fw-bold h4" id="price_yield">{{ results.price_with_yield|floatformat:6 }}</div>
+                                                <div class="text-muted small">Correct calculation</div>
+                                                <div class="text-muted small mt-1">
+                                                    Uses proper day-count convention
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="border rounded p-3 text-center">
+                                                <div class="text-muted small">Curve-Based Price</div>
+                                                <div class="fw-bold h4" id="price_curve">{{ results.price_with_curve|floatformat:6 }}</div>
+                                                <div class="text-muted small">Incorrect calculation</div>
+                                                <div class="text-muted small mt-1">
+                                                    Uses simplified day-count convention
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="border rounded p-3 text-center">
+                                                <div class="text-muted small">Price Difference</div>
+                                                <div class="fw-bold h4 {% if results.price_difference != 0 %}text-danger{% else %}text-success{% endif %}" id="price_difference">
+                                                    {{ results.price_difference|floatformat:6 }}
+                                                </div>
+                                                <div class="text-muted small">Impact of short coupon</div>
+                                                <div class="text-muted small mt-1">
+                                                    {% if results.price_difference != 0 %}
+                                                        Significant difference detected
+                                                    {% else %}
+                                                        No difference found
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Short Coupon Analysis -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">Short Coupon Analysis</h3>
+                        </div>
+                        <div class="card-body">
+                                    <div class="alert alert-info mb-3">
+                                        <small>
+                                            <strong>Analysis:</strong> The bond has a short first coupon from <span id="coupon_start">{{ results.analysis.first_coupon_start }}</span> to <span id="coupon_end">{{ results.analysis.first_coupon_end }}</span>. 
+                                            This requires special handling in day-count calculations.
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <div class="border rounded p-3">
+                                                <div class="text-muted small">Correct Calculation</div>
+                                                <div class="fw-bold h6" id="t_correct">{{ results.analysis.T_correct|floatformat:6 }}</div>
+                                                <div class="text-muted small">With reference dates</div>
+                                                <div class="text-muted small mt-1">
+                                                    Uses proper day-count convention
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="border rounded p-3">
+                                                <div class="text-muted small">Incorrect Calculation</div>
+                                                <div class="fw-bold h6" id="t_incorrect">{{ results.analysis.T_incorrect|floatformat:6 }}</div>
+                                                <div class="text-muted small">Without reference dates</div>
+                                                <div class="text-muted small mt-1">
+                                                    Uses simplified calculation
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            
+                            <div class="mt-3">
+                                <div class="alert alert-warning">
+                                    <h6 class="fw-bold">⚠ Short Coupon Effect Detected</h6>
+                                    <p class="mb-0">
+                                        The difference between correct ({{ results.analysis.T_correct|floatformat:6 }}) 
+                                        and incorrect ({{ results.analysis.T_incorrect|floatformat:6 }}) calculations 
+                                        causes a price difference. This shows why proper day-count handling is important for accurate bond pricing.
+                                    </p>
+                                    <div class="mt-2">
+                                        <small class="text-muted">
+                                            <strong>Dynamic Adjustment:</strong> 
+                                            Days difference: {{ results.analysis.days_diff }} days | 
+                                            Adjustment factor: {{ results.analysis.adjustment_factor|floatformat:4 }}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Price Reconciliation -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">Price Reconciliation</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info mb-3">
+                                <small>
+                                    <strong>Analysis:</strong> We can prove the cause by adjusting the curve-based price using the ratio of correct and incorrect discount factors.
+                                </small>
+                            </div>
+                            
+                                    <div class="row g-3">
+                                        <div class="col-md-3">
+                                            <div class="border rounded p-3 text-center">
+                                                <div class="text-muted small">Correct Discount Factor</div>
+                                                <div class="fw-bold h6" id="d_y">{{ results.reconciliation.D_y|floatformat:6 }}</div>
+                                                <div class="text-muted small">Based on correct calculation</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="border rounded p-3 text-center">
+                                                <div class="text-muted small">Incorrect Discount Factor</div>
+                                                <div class="fw-bold h6" id="d_c">{{ results.reconciliation.D_c|floatformat:6 }}</div>
+                                                <div class="text-muted small">Based on incorrect calculation</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="border rounded p-3 text-center">
+                                                <div class="text-muted small">Yield-Based Price</div>
+                                                <div class="fw-bold h6" id="price_yield_2">{{ results.price_with_yield|floatformat:6 }}</div>
+                                                <div class="text-muted small">Correct pricing method</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="border rounded p-3 text-center">
+                                                <div class="text-muted small">Reconciled Price</div>
+                                                <div class="fw-bold h6" id="reconciled_price">{{ results.reconciliation.reconciled_price|floatformat:6 }}</div>
+                                                <div class="text-muted small">Adjusted calculation</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                            
+                            <div class="mt-3">
+                                <div class="alert alert-success">
+                                    <h6 class="fw-bold">✓ Price Reconciliation Successful</h6>
+                                    <p class="mb-0">
+                                        The reconciled price ({{ results.reconciliation.reconciled_price|floatformat:6 }}) matches the yield-based price 
+                                        ({{ results.price_with_yield|floatformat:6 }}), confirming that the price difference is entirely 
+                                        due to the incorrect handling of the short coupon.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Cashflow Analysis -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">Detailed Cashflow Analysis</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info mb-3">
+                                <small>
+                                    <strong>Analysis:</strong> Complete breakdown of bond cashflows showing amounts, discount factors, and discounted amounts.
+                                </small>
+                            </div>
+                            
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-striped table-sm" id="detailed-cashflows-table">
+                                    <thead class="table-dark sticky-top">
+                                        <tr>
+                                            <th>Period</th>
+                                            <th>Date</th>
+                                            <th>Amount</th>
+                                            <th>Discount</th>
+                                            <th>Discounted</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for cf in results.detailed_cashflows %}
+                                        <tr {% if forloop.first %}class="table-warning"{% elif forloop.last %}class="table-info"{% endif %}>
+                                            <td>{{ cf.period }}</td>
+                                            <td>{{ cf.date }}</td>
+                                            <td>{{ cf.amount|floatformat:4 }}</td>
+                                            <td>{{ cf.discount|floatformat:4 }}</td>
+                                            <td>{{ cf.discounted_amount|floatformat:4 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                    <tfoot class="table-dark">
+                                        <tr>
+                                            <td colspan="4" class="fw-bold">Total Bond Price</td>
+                                            <td class="fw-bold">{{ results.price_with_curve|floatformat:4 }}</td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simple Coupon Schedule -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">Coupon Schedule</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info mb-3">
+                                <small>
+                                    <strong>Analysis:</strong> Coupon schedule showing accrual periods. 
+                                    The first coupon is highlighted as it's the "short" coupon causing the pricing difference.
+                                </small>
+                            </div>
+                            
+                            <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+                                <table class="table table-striped table-sm" id="simple-cashflows-table">
+                                    <thead class="table-dark sticky-top">
+                                        <tr>
+                                            <th>Period</th>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                            <th>Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for coupon in results.cashflows %}
+                                        <tr {% if forloop.first %}class="table-warning"{% endif %}>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ coupon.start_date }}</td>
+                                            <td>{{ coupon.end_date }}</td>
+                                            <td>
+                                                {% if forloop.first %}
+                                                    <span class="badge bg-warning text-dark">Short</span>
+                                                {% else %}
+                                                    <span class="badge bg-success">Regular</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title fw-bold mb-0">Ready to Analyze</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="py-5">
+                    <i class="bi bi-calculator text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="text-muted mt-3">Enter Parameters and Click Analyze</h5>
+                    <p class="text-muted">Modify the bond parameters and click "Analyze Short Coupon Effects" to see how short coupons affect pricing accuracy.</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Continue Learning -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Bond Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('shortCouponForm');
+    
+    function updateResults() {
+        const formData = new FormData(form);
+        
+        fetch(window.location.pathname, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                console.error('Error:', data.error);
+                return;
+            }
+            
+            // Update price comparison
+            document.getElementById('price_yield').textContent = data.price_with_yield.toFixed(6);
+            document.getElementById('price_curve').textContent = data.price_with_curve.toFixed(6);
+            document.getElementById('price_difference').textContent = data.price_difference.toFixed(6);
+            
+            // Update short coupon analysis
+            document.getElementById('coupon_start').textContent = data.analysis.first_coupon_start;
+            document.getElementById('coupon_end').textContent = data.analysis.first_coupon_end;
+            document.getElementById('t_correct').textContent = data.analysis.T_correct.toFixed(6);
+            document.getElementById('t_incorrect').textContent = data.analysis.T_incorrect.toFixed(6);
+            
+            // Update dynamic adjustment info
+            const adjustmentInfo = document.querySelector('.alert-warning small');
+            if (adjustmentInfo && data.analysis.days_diff !== undefined) {
+                adjustmentInfo.innerHTML = `
+                    <strong>Dynamic Adjustment:</strong> 
+                    Days difference: ${data.analysis.days_diff} days | 
+                    Adjustment factor: ${data.analysis.adjustment_factor.toFixed(4)}
+                `;
+            }
+            
+            // Update reconciliation
+            document.getElementById('d_y').textContent = data.reconciliation.D_y.toFixed(6);
+            document.getElementById('d_c').textContent = data.reconciliation.D_c.toFixed(6);
+            document.getElementById('price_yield_2').textContent = data.price_with_yield.toFixed(6);
+            document.getElementById('reconciled_price').textContent = data.reconciliation.reconciled_price.toFixed(6);
+            
+            // Update detailed cashflows table
+            const tableBody = document.querySelector('#detailed-cashflows-table tbody');
+            if (tableBody && data.detailed_cashflows) {
+                tableBody.innerHTML = '';
+                data.detailed_cashflows.forEach((cf, index) => {
+                    const row = tableBody.insertRow();
+                    row.className = index === 0 ? 'table-warning' : (index === data.detailed_cashflows.length - 1 ? 'table-info' : '');
+                    row.innerHTML = `
+                        <td>${cf.period}</td>
+                        <td>${cf.date}</td>
+                        <td>${cf.amount.toFixed(4)}</td>
+                        <td>${cf.discount.toFixed(4)}</td>
+                        <td>${cf.discounted_amount.toFixed(4)}</td>
+                    `;
+                });
+            }
+            
+            // Update simple cashflows table
+            const simpleTableBody = document.querySelector('#simple-cashflows-table tbody');
+            if (simpleTableBody && data.cashflows) {
+                simpleTableBody.innerHTML = '';
+                data.cashflows.forEach((cf, index) => {
+                    const row = simpleTableBody.insertRow();
+                    row.className = index === 0 ? 'table-warning' : '';
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${cf.start_date}</td>
+                        <td>${cf.end_date}</td>
+                        <td>${index === 0 ? '<span class="badge bg-warning text-dark">Short</span>' : '<span class="badge bg-success">Regular</span>'}</td>
+                    `;
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+    
+    // Add event listeners
+    form.addEventListener('change', updateResults);
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        updateResults();
+    });
+    
+    // Initial update
+    updateResults();
+});
+</script>
+{% endblock %}

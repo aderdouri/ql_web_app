@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'interest_rate_curves',
     'interest_rate_models',
     'equity_models',
+    'bonds',
     'interactive_basics',
       
     # --- Applications de Chapitres Actives ---
@@ -55,7 +56,17 @@ INSTALLED_APPS = [
     'chapter24_european_american_options',
     'chapter25_black_formula_futures',
     'chapter26_defining_rho',
-    'chapter27_day_count_conventions', ]
+    'chapter27_day_count_conventions',
+    'chapter28_fixed_rate_bonds',
+    'chapter29_irregular_bonds',
+    'chapter30_credit_spreads',
+    'chapter31_callable_bonds',
+    'chapter32_discount_margin',
+    'chapter33_floating_duration',
+    'chapter34_treasury_futures',
+    'chapter35_pricing_conventions',
+    'chapter36_more_conventions',
+]
 
 
 MIDDLEWARE = [

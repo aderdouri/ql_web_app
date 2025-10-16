@@ -1,0 +1,170 @@
+{% extends "base.html" %}
+
+{% block title %}Bonds - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+
+    <!-- Chapter Navigation -->
+    <div class="chapter-nav">
+        <div class="row">
+            <div class="col-12">
+                <h3 class="fw-bold text-center mb-4">
+                    <i class="bi bi-book me-2"></i>Available Chapters
+                </h3>
+            </div>
+        </div>
+        <div class="row g-3">
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-bank text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">28. Modeling fixed rate bonds</h5>
+                        <p class="card-text text-muted small">Comprehensive modeling and pricing of fixed rate bonds</p>
+                        <a href="{% url 'bonds:chapter28_fixed_rate_bonds:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-puzzle text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">29. Building irregular bonds</h5>
+                        <p class="card-text text-muted small">Advanced techniques for modeling bonds with irregular payment schedules</p>
+                        <a href="{% url 'bonds:chapter29_irregular_bonds:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-shield-check text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">30. Valuation of bonds with credit spreads</h5>
+                        <p class="card-text text-muted small">Learn how to value bonds with credit spreads using parallel and non-parallel shifts</p>
+                        <a href="{% url 'bonds:chapter30_credit_spreads:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-telephone text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">31. Modeling callable bonds</h5>
+                        <p class="card-text text-muted small">Advanced modeling of callable bonds and embedded options</p>
+                        <a href="{% url 'bonds:chapter31_callable_bonds:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>Start Learning
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-calculator text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">32. Discount margin calculation</h5>
+                        <p class="card-text text-muted small">Calculate discount margins for floating-rate bonds using numerical solvers</p>
+                        <a href="{% url 'bonds:chapter32_discount_margin:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>Start Learning
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-clock-history text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">33. Duration of floating-rate bonds</h5>
+                        <p class="card-text text-muted small">Learn how to correctly calculate the modified duration of floating-rate bonds using proper curve linking techniques</p>
+                        <a href="{% url 'bonds:chapter33_floating_duration:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>Start Learning
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-graph-up text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">34. Treasury futures contracts</h5>
+                        <p class="card-text text-muted small">Modeling and pricing of treasury futures contracts</p>
+                        <a href="{% url 'treasury_futures:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>Start Learning
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-exclamation-triangle text-primary" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">35. Mischievous pricing conventions</h5>
+                    <p class="card-text text-muted small">Day-count convention effects on floating rate bond pricing</p>
+                    <a href="{% url 'pricing_conventions:description' %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-play-circle me-1"></i>View Chapter
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100">
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <i class="bi bi-exclamation-triangle-fill text-primary" style="font-size: 2.5rem;"></i>
+                    </div>
+                    <h5 class="card-title fw-bold">36. More mischievous conventions</h5>
+                    <p class="card-text text-muted small">Short coupon effects in fixed-rate bonds with Actual/Actual convention</p>
+                    <a href="{% url 'short_coupon_glitch:description' %}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-play-circle me-1"></i>View Chapter
+                    </a>
+                </div>
+            </div>
+        </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-gear text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">36. More mischievous conventions</h5>
+                        <p class="card-text text-muted small">Advanced pricing conventions and edge cases</p>
+                        <button class="btn btn-secondary btn-sm" disabled>
+                            <i class="bi bi-clock me-1"></i>Coming Soon
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

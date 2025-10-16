@@ -1,0 +1,542 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}30. Valuation of Bonds with Credit Spreads - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi bi-shield-check me-3"></i>30. Valuation of Bonds with Credit Spreads
+                            </h1>
+                            <p class="card-text lead mb-0">An interactive lab to analyze different methods of applying credit spreads to bond valuation.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:chapter30_credit_spreads:description' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Description
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Form -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-sliders me-2"></i>Credit Spread Parameters
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="spreadForm" method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Credit Spread Configuration -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-graph-up me-2"></i>Spread Configuration
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Credit Spread Methods:</strong> Direct shock modifies the base rate directly, 
+                                        parallel shift applies uniform spreads, and non-parallel allows different spreads across maturities.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        {{ form.spread_method|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.spread1|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6" id="spread2-wrapper">
+                                        {{ form.spread2|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bond Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-bank me-2"></i>Bond Details
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Bond Characteristics:</strong> Define the bond's key parameters including issue date, 
+                                        maturity, and coupon rate that will be used for credit spread calculations.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ form.issue_date|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.maturity_date|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.coupon_rate|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Market Data -->
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-graph-up me-2"></i>Market Data & Settings
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Market Conditions:</strong> Set the base treasury rate and evaluation date 
+                                        for the credit spread calculations.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ form.base_rate|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.evaluation_date|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Calculate Button -->
+                        <div class="text-center mt-4">
+                            <button type="button" id="calculateBtn" class="btn btn-primary btn-lg">
+                                <i class="bi bi-calculator me-2"></i>Calculate Bond Prices
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Results -->
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-calculator me-2"></i>Calculation Results
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="spinner" class="text-center" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Calculating...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Calculating bond prices...</p>
+                    </div>
+                    
+                    <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+                    
+                    <div id="success-container">
+                        <div class="row g-4">
+                            <!-- Initial Price -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <div class="d-flex align-items-center justify-content-center mb-3">
+                                            <i class="bi bi-currency-dollar text-primary me-3" style="font-size: 2rem;"></i>
+                                            <h5 class="card-title fw-bold text-primary mb-0">Initial Price (No Spread)</h5>
+                                        </div>
+                                        <h3 class="text-success fw-bold mb-0" id="initial_npv">0.000000</h3>
+                                        <small class="text-muted">Treasury yield curve price</small>
+                                        
+                                        <!-- Dynamic Explanation for Initial Price -->
+                                        <div class="mt-3">
+                                            <div class="alert alert-info alert-sm">
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                <span id="initial_price_explanation">
+                                                    This is the bond's fair value using the risk-free treasury rate of <span id="base_rate_display">0.15%</span>.
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Price with Spread -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <div class="d-flex align-items-center justify-content-center mb-3">
+                                            <i class="bi bi-graph-up text-primary me-3" style="font-size: 2rem;"></i>
+                                            <h5 class="card-title fw-bold text-primary mb-0">Price with Credit Spread</h5>
+                                        </div>
+                                        <h3 class="text-success fw-bold mb-0" id="npv_with_spread">0.000000</h3>
+                                        <small class="text-muted">Price after applying credit spread</small>
+                                        
+                                        <!-- Dynamic Explanation for Spread Price -->
+                                        <div class="mt-3">
+                                            <div class="alert alert-warning alert-sm">
+                                                <i class="bi bi-graph-up me-1"></i>
+                                                <span id="spread_price_explanation">
+                                                    This price reflects the additional risk premium of <span id="spread_display">50 bps</span> using <span id="method_display">Direct Shock</span> method.
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Impact Analysis -->
+                        <div class="row g-4 mt-3">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h3 class="card-title fw-bold mb-0">
+                                            <i class="bi bi-bar-chart me-2"></i>Impact Analysis
+                                        </h3>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <div class="text-center">
+                                                    <div class="d-flex align-items-center justify-content-center mb-2">
+                                                        <i class="bi bi-arrow-up-down text-primary me-2"></i>
+                                                        <h6 class="fw-bold text-primary mb-0">Price Impact</h6>
+                                                    </div>
+                                                    <h4 class="text-success fw-bold mb-0" id="price_impact">0.000000</h4>
+                                                    <small class="text-muted">Absolute change</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="text-center">
+                                                    <div class="d-flex align-items-center justify-content-center mb-2">
+                                                        <i class="bi bi-percent text-primary me-2"></i>
+                                                        <h6 class="fw-bold text-primary mb-0">Percentage Impact</h6>
+                                                    </div>
+                                                    <h4 class="text-success fw-bold mb-0" id="percentage_impact">0.00%</h4>
+                                                    <small class="text-muted">Relative change</small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="text-center">
+                                                    <div class="d-flex align-items-center justify-content-center mb-2">
+                                                        <i class="bi bi-shield-check text-primary me-2"></i>
+                                                        <h6 class="fw-bold text-primary mb-0">Risk Level</h6>
+                                                    </div>
+                                                    <h4 class="text-success fw-bold mb-0" id="risk_level">Low</h4>
+                                                    <small class="text-muted">Based on spread</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Dynamic Risk Explanation -->
+                                        <div class="mt-3">
+                                            <div class="alert alert-light">
+                                                <i class="bi bi-lightbulb me-2"></i>
+                                                <span id="risk_explanation">
+                                                    The credit spread of <span id="spread_risk_display">50 bps</span> indicates <span id="risk_assessment">low credit risk</span>. 
+                                                    This results in a <span id="price_direction">decrease</span> in bond price of <span id="impact_amount">0.000000</span> 
+                                                    (<span id="impact_percent">0.00%</span>) compared to the risk-free price.
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue Learning -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('spreadForm');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const spread2Wrapper = document.getElementById('spread2-wrapper');
+
+        const resultsContainer = document.getElementById('results-container');
+        const spinner = document.getElementById('spinner');
+        const errorContainer = document.getElementById('error-container');
+        const successContainer = document.getElementById('success-container');
+        const npvDisplay = document.getElementById('npv_with_spread');
+
+        function toggleSpread2Field() {
+            const method = form.elements['spread_method'].value;
+            spread2Wrapper.style.display = (method === 'non_parallel_shift') ? 'block' : 'none';
+        }
+        
+        function updateDynamicExplanations(data) {
+            // Récupérer les valeurs du formulaire
+            const formData = new FormData(form);
+            const baseRate = parseFloat(formData.get('base_rate'));
+            const spread1 = parseFloat(formData.get('spread1'));
+            const spread2 = parseFloat(formData.get('spread2'));
+            const spreadMethod = formData.get('spread_method');
+            const couponRate = parseFloat(formData.get('coupon_rate'));
+            
+            // Calculer les impacts
+            const priceImpact = data.npv_with_spread - data.initial_npv;
+            const percentageImpact = (priceImpact / data.initial_npv) * 100;
+            
+            // Déterminer le niveau de risque basé sur le spread
+            let riskLevel, riskAssessment, riskColor;
+            if (spread1 <= 25) {
+                riskLevel = 'Low';
+                riskAssessment = 'low credit risk';
+                riskColor = 'text-success';
+            } else if (spread1 <= 100) {
+                riskLevel = 'Medium';
+                riskAssessment = 'moderate credit risk';
+                riskColor = 'text-warning';
+            } else {
+                riskLevel = 'High';
+                riskAssessment = 'high credit risk';
+                riskColor = 'text-danger';
+            }
+            
+        // Mettre à jour les explications avec vérifications de sécurité
+        const baseRateDisplay = document.getElementById('base_rate_display');
+        if (baseRateDisplay) baseRateDisplay.textContent = baseRate.toFixed(2) + '%';
+        
+        const spreadDisplay = document.getElementById('spread_display');
+        if (spreadDisplay) spreadDisplay.textContent = spread1 + ' bps';
+        
+        const methodDisplay = document.getElementById('method_display');
+        if (methodDisplay) methodDisplay.textContent = getMethodDisplayName(spreadMethod);
+        
+        const spreadRiskDisplay = document.getElementById('spread_risk_display');
+        if (spreadRiskDisplay) spreadRiskDisplay.textContent = spread1 + ' bps';
+        
+        const riskAssessmentElement = document.getElementById('risk_assessment');
+        if (riskAssessmentElement) riskAssessmentElement.textContent = riskAssessment;
+        
+        const priceDirection = document.getElementById('price_direction');
+        if (priceDirection) priceDirection.textContent = priceImpact < 0 ? 'decrease' : 'increase';
+        
+        const impactAmount = document.getElementById('impact_amount');
+        if (impactAmount) impactAmount.textContent = Math.abs(priceImpact).toFixed(6);
+        
+        const impactPercent = document.getElementById('impact_percent');
+        if (impactPercent) impactPercent.textContent = Math.abs(percentageImpact).toFixed(2) + '%';
+            
+            // Mettre à jour les métriques d'impact avec vérifications de sécurité
+            const priceImpactElement = document.getElementById('price_impact');
+            if (priceImpactElement) {
+                priceImpactElement.textContent = priceImpact.toFixed(6);
+                priceImpactElement.className = `h4 fw-bold mb-0 text-success`;
+            }
+            
+            const percentageImpactElement = document.getElementById('percentage_impact');
+            if (percentageImpactElement) {
+                percentageImpactElement.textContent = percentageImpact.toFixed(2) + '%';
+                percentageImpactElement.className = `h4 fw-bold mb-0 text-success`;
+            }
+            
+            const riskLevelElement = document.getElementById('risk_level');
+            if (riskLevelElement) {
+                riskLevelElement.textContent = riskLevel;
+                riskLevelElement.className = `h4 fw-bold mb-0 text-success`;
+            }
+            
+            // Mettre à jour l'explication du prix initial avec vérification de sécurité
+            const initialPriceExplanation = document.getElementById('initial_price_explanation');
+            if (initialPriceExplanation) {
+                initialPriceExplanation.innerHTML = 
+                    `This is the bond's fair value using the risk-free treasury rate of <span class="fw-bold">${baseRate.toFixed(2)}%</span> ` +
+                    `and a coupon rate of <span class="fw-bold">${couponRate.toFixed(1)}%</span>.`;
+            }
+            
+            // Mettre à jour l'explication du prix avec spread avec vérification de sécurité
+            const spreadPriceExplanation = document.getElementById('spread_price_explanation');
+            if (spreadPriceExplanation) {
+                let methodExplanation = getMethodExplanation(spreadMethod, spread1, spread2);
+                spreadPriceExplanation.innerHTML = 
+                    `This price reflects the additional risk premium of <span class="fw-bold">${spread1} bps</span> ` +
+                    `using <span class="fw-bold">${getMethodDisplayName(spreadMethod)}</span> method. ${methodExplanation}`;
+            }
+        }
+        
+        function getMethodDisplayName(method) {
+            switch(method) {
+                case 'direct_shock': return 'Direct Shock';
+                case 'parallel_shift': return 'Parallel Shift';
+                case 'non_parallel_shift': return 'Non-Parallel Shift';
+                default: return method;
+            }
+        }
+        
+        function getMethodExplanation(method, spread1, spread2) {
+            switch(method) {
+                case 'direct_shock':
+                    return 'The spread is added directly to the base rate.';
+                case 'parallel_shift':
+                    return 'The spread is applied uniformly across all maturities.';
+                case 'non_parallel_shift':
+                    return `The spread varies from ${spread1} bps to ${spread2} bps across different maturities.`;
+                default:
+                    return '';
+            }
+        }
+        
+        function triggerUpdate() {
+            console.log('Triggering update...');
+            spinner.style.display = 'block';
+            errorContainer.style.display = 'none';
+            if (calculateBtn) {
+                calculateBtn.disabled = true;
+                calculateBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Calculating...';
+            }
+
+            const formData = new FormData(form);
+            console.log('Form data:', Object.fromEntries(formData));
+
+            fetch("{% url 'bonds:chapter30_credit_spreads:lab' %}", {
+                method: 'POST',
+                body: new URLSearchParams(formData),
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                spinner.style.display = 'none';
+                if (calculateBtn) {
+                    calculateBtn.disabled = false;
+                    calculateBtn.innerHTML = '<i class="bi bi-calculator me-2"></i>Calculate Bond Prices';
+                }
+                
+                if (data.error) {
+                    errorContainer.innerText = `Error: ${data.error}`;
+                    errorContainer.style.display = 'block';
+                    console.error('Server error:', data.error);
+                } else {
+                    // Hide any error messages on success
+                    errorContainer.style.display = 'none';
+                    
+                    // Afficher le prix initial (sans spread) - maintenant dynamique
+                    const initialNpvDisplay = document.getElementById('initial_npv');
+                    initialNpvDisplay.innerText = data.initial_npv.toFixed(6);
+                    
+                    // Afficher le prix avec spread
+                    npvDisplay.innerText = data.npv_with_spread.toFixed(6);
+                    console.log('Updated initial NPV:', data.initial_npv);
+                    console.log('Updated NPV with spread:', data.npv_with_spread);
+                    
+                    // Mettre à jour les explications dynamiques
+                    updateDynamicExplanations(data);
+                }
+            })
+            .catch(error => {
+                console.error('Fetch error:', error);
+                spinner.style.display = 'none';
+                if (calculateBtn) {
+                    calculateBtn.disabled = false;
+                    calculateBtn.innerHTML = '<i class="bi bi-calculator me-2"></i>Calculate Bond Prices';
+                }
+                
+                // More detailed error message
+                let errorMessage = 'An unexpected network error occurred.';
+                if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    errorMessage = 'Network connection error. Please check your internet connection.';
+                } else if (error.name === 'AbortError') {
+                    errorMessage = 'Request was cancelled.';
+                } else {
+                    errorMessage = `Error: ${error.message}`;
+                }
+                
+                errorContainer.innerText = errorMessage;
+                errorContainer.style.display = 'block';
+            });
+        }
+        
+        // Event listeners
+        if (calculateBtn) {
+            calculateBtn.addEventListener('click', triggerUpdate);
+        }
+        
+        // Add event listeners to specific form fields
+        const formFields = ['spread_method', 'spread1', 'spread2', 'base_rate', 'coupon_rate', 'issue_date', 'maturity_date', 'evaluation_date'];
+        formFields.forEach(fieldName => {
+            const field = form.elements[fieldName];
+            if (field) {
+                field.addEventListener('change', function() {
+                    console.log('Field changed:', fieldName, field.value);
+                    toggleSpread2Field();
+                    // Auto-calculate when form changes - DISABLED
+                    // triggerUpdate();
+                });
+            }
+        });
+        
+        // Initial setup
+        toggleSpread2Field();
+        
+        // Set initial values display
+        const initialNpvDisplay = document.getElementById('initial_npv');
+        if (initialNpvDisplay) {
+            initialNpvDisplay.innerText = {{ initial_npv|default:0 }}.toFixed(6);
+        }
+        
+        // Trigger initial calculation
+        triggerUpdate();
+    });
+</script>
+{% endblock %}

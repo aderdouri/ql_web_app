@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}31. Modeling Callable Bonds - Interactive Lab{% endblock %}
+
+{% block page_content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h2 class="fw-bold text-primary mb-3">
+                <i class="bi bi-calculator me-2"></i>
+                31. Modeling Callable Bonds - Interactive Lab
+            </h2>
+            <p class="text-muted mb-4">Experiment with callable bond parameters and Hull-White model settings to understand pricing dynamics.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Form Section -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h4 class="card-title fw-bold text-primary mb-0">
+                        <i class="bi bi-gear me-2"></i>
+                        Bond & Model Parameters
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <form id="callableBondForm" method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Bond Details -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h5 class="fw-bold text-primary mb-3">
+                                    <i class="bi bi-bank me-2"></i>
+                                    Bond Details
+                                </h5>
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.evaluation_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.issue_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.maturity_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.coupon_rate|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.face_amount|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.flat_rate|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Call Schedule -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h5 class="fw-bold text-primary mb-3">
+                                    <i class="bi bi-calendar-event me-2"></i>
+                                    Call Schedule
+                                </h5>
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.call_price|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.first_call_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.call_frequency_months|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.number_of_calls|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Hull-White Model -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <h5 class="fw-bold text-primary mb-3">
+                                    <i class="bi bi-graph-up me-2"></i>
+                                    Hull-White Model Parameters
+                                </h5>
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.mean_reversion|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.volatility|as_crispy_field }}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.grid_points|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Calculate Button -->
+                        <div class="text-center">
+                            <button type="button" id="calculateBtn" class="btn btn-primary btn-lg px-4">
+                                <i class="bi bi-calculator me-2"></i>
+                                Calculate Callable Bond Price
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light">
+                    <h4 class="card-title fw-bold text-primary mb-0">
+                        <i class="bi bi-bar-chart me-2"></i>
+                        Pricing Results
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div id="spinner" class="text-center" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Calculating...</span>
+                        </div>
+                        <p class="mt-2 text-muted">Calculating callable bond price...</p>
+                    </div>
+                    
+                    <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+                    
+                    <div id="results-container" style="display: none;">
+                        <!-- Bond Prices -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <div class="d-flex align-items-center justify-content-center mb-3">
+                                            <i class="bi bi-currency-dollar text-primary me-3" style="font-size: 2rem;"></i>
+                                            <h5 class="card-title fw-bold text-primary mb-0">Clean Price</h5>
+                                        </div>
+                                        <h3 class="text-success fw-bold mb-0" id="clean_price">0.000000</h3>
+                                        <small class="text-muted">Price excluding accrued interest</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <div class="d-flex align-items-center justify-content-center mb-3">
+                                            <i class="bi bi-graph-up text-primary me-3" style="font-size: 2rem;"></i>
+                                            <h5 class="card-title fw-bold text-primary mb-0">Dirty Price</h5>
+                                        </div>
+                                        <h3 class="text-success fw-bold mb-0" id="dirty_price">0.000000</h3>
+                                        <small class="text-muted">Price including accrued interest</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <div class="d-flex align-items-center justify-content-center mb-3">
+                                            <i class="bi bi-clock text-primary me-3" style="font-size: 2rem;"></i>
+                                            <h5 class="card-title fw-bold text-primary mb-0">Accrued Amount</h5>
+                                        </div>
+                                        <h3 class="text-success fw-bold mb-0" id="accrued_amount">0.000000</h3>
+                                        <small class="text-muted">Interest accrued since last coupon</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <div class="d-flex align-items-center justify-content-center mb-3">
+                                            <i class="bi bi-calculator text-primary me-3" style="font-size: 2rem;"></i>
+                                            <h5 class="card-title fw-bold text-primary mb-0">NPV</h5>
+                                        </div>
+                                        <h3 class="text-success fw-bold mb-0" id="npv">0.000000</h3>
+                                        <small class="text-muted">Net Present Value</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Model Parameters Used -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title fw-bold text-primary mb-0">
+                                            <i class="bi bi-gear me-2"></i>
+                                            Model Parameters Used
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row g-3">
+                                            <div class="col-md-4">
+                                                <div class="text-center p-3 bg-light rounded">
+                                                    <h6 class="fw-bold text-muted mb-1">Mean Reversion</h6>
+                                                    <p class="mb-0 fw-bold text-primary" id="model_mean_reversion">0.03</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="text-center p-3 bg-light rounded">
+                                                    <h6 class="fw-bold text-muted mb-1">Volatility</h6>
+                                                    <p class="mb-0 fw-bold text-primary" id="model_volatility">0.12</p>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="text-center p-3 bg-light rounded">
+                                                    <h6 class="fw-bold text-muted mb-1">Grid Points</h6>
+                                                    <p class="mb-0 fw-bold text-primary" id="model_grid_points">40</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Cash Flows -->
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="card-title fw-bold text-primary mb-0">
+                                            <i class="bi bi-list-ul me-2"></i>
+                                            Bond Cash Flows
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="table-responsive">
+                                            <table class="table table-striped table-hover">
+                                                <thead class="table-primary">
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Date</th>
+                                                        <th>Amount</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="cashflows_table">
+                                                    <!-- Cash flows will be populated here -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('callableBondForm');
+    const calculateBtn = document.getElementById('calculateBtn');
+    const spinner = document.getElementById('spinner');
+    const errorContainer = document.getElementById('error-container');
+    const resultsContainer = document.getElementById('results-container');
+    
+    function triggerCalculation() {
+        spinner.style.display = 'block';
+        errorContainer.style.display = 'none';
+        resultsContainer.style.display = 'none';
+        
+        if (calculateBtn) {
+            calculateBtn.disabled = true;
+            calculateBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Calculating...';
+        }
+        
+        const formData = new FormData(form);
+        
+        fetch('{% url "bonds:chapter31_callable_bonds:lab" %}', {
+            method: 'POST',
+            body: formData,
+            headers: { 
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            spinner.style.display = 'none';
+            if (calculateBtn) {
+                calculateBtn.disabled = false;
+                calculateBtn.innerHTML = '<i class="bi bi-calculator me-2"></i>Calculate Callable Bond Price';
+            }
+            
+            if (data.error) {
+                errorContainer.innerText = `Error: ${data.error}`;
+                errorContainer.style.display = 'block';
+                console.error('Server error:', data.error);
+            } else {
+                // Hide any error messages on success
+                errorContainer.style.display = 'none';
+                
+                // Update results
+                document.getElementById('clean_price').textContent = data.clean_price.toFixed(6);
+                document.getElementById('dirty_price').textContent = data.dirty_price.toFixed(6);
+                document.getElementById('accrued_amount').textContent = data.accrued_amount.toFixed(6);
+                document.getElementById('npv').textContent = data.npv.toFixed(6);
+                
+                // Update model parameters
+                document.getElementById('model_mean_reversion').textContent = data.model_params.mean_reversion.toFixed(3);
+                document.getElementById('model_volatility').textContent = data.model_params.volatility.toFixed(3);
+                document.getElementById('model_grid_points').textContent = data.model_params.grid_points;
+                
+                // Update cash flows table
+                const cashflowsTable = document.getElementById('cashflows_table');
+                cashflowsTable.innerHTML = '';
+                data.cashflows.forEach((cf, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${new Date(cf.date).toLocaleDateString()}</td>
+                        <td>${cf.amount.toFixed(6)}</td>
+                    `;
+                    cashflowsTable.appendChild(row);
+                });
+                
+                resultsContainer.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            spinner.style.display = 'none';
+            if (calculateBtn) {
+                calculateBtn.disabled = false;
+                calculateBtn.innerHTML = '<i class="bi bi-calculator me-2"></i>Calculate Callable Bond Price';
+            }
+            
+            let errorMessage = 'An unexpected network error occurred.';
+            if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                errorMessage = 'Network connection error. Please check your internet connection.';
+            } else if (error.name === 'AbortError') {
+                errorMessage = 'Request was cancelled.';
+            } else {
+                errorMessage = `Error: ${error.message}`;
+            }
+            
+            errorContainer.innerText = errorMessage;
+            errorContainer.style.display = 'block';
+        });
+    }
+    
+    // Event listener for calculate button
+    if (calculateBtn) {
+        calculateBtn.addEventListener('click', triggerCalculation);
+    }
+});
+</script>
+{% endblock %}
+
+
+
+

@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Bonds
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Content -->
+    <div class="row">
+        <div class="col-12">
+            <!-- Chapter Overview -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title fw-bold text-primary mb-3">
+                                <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                            </h3>
+                            <p class="card-text">
+                                This chapter explores advanced techniques for building bonds with irregular features that don't fit 
+                                standard bond structures. Based on real-world questions from QuantLib users, we'll learn how to 
+                                handle complex scenarios like bonds with missing last coupons, fixed-to-floating rate transitions, 
+                                and custom coupon schedules.
+                            </p>
+                            <p class="card-text">
+                                We'll cover three main scenarios: bonds with null last coupons, fixed-to-floater bonds that 
+                                transition from fixed to floating rates, and floating legs with short initial stubs using 
+                                different indices. Each technique demonstrates how to manipulate QuantLib's cash flow structures 
+                                to achieve the desired bond behavior.
+                            </p>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Handling bonds with irregular coupon schedules</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Creating fixed-to-floating rate bonds</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Custom coupon manipulation techniques</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Advanced cash flow engineering</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Lab Section -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">
+                                <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text mb-4">
+                                Use the interactive lab below to experiment with irregular bond modeling using QuantLib. 
+                                Try different scenarios to see how custom coupon structures affect bond pricing and cash flows.
+                            </p>
+                            <div class="text-center">
+                                <a href="{% url 'bonds:chapter29_irregular_bonds:lab' %}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Concepts -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h3 class="fw-bold text-dark mb-4">
+                        <i class="bi bi-lightbulb me-2"></i>Key Concepts
+                    </h3>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Irregular Coupon Schedules -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-calendar-x text-primary me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">Irregular Coupon Schedules</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                Bonds where the last coupon date occurs before maturity, requiring special 
+                                handling to cancel or modify the final coupon payment.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Null rate/gearing techniques</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Cash flow manipulation</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Custom bond construction</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fixed-to-Floating Bonds -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-arrow-repeat text-primary me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">Fixed-to-Floating Bonds</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                Hybrid bonds that pay fixed-rate coupons initially, then transition 
+                                to floating-rate coupons for the remainder of the term.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>FixedRateLeg construction</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>IborLeg integration</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Cash flow combination</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Custom Coupon Engineering -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-gear-fill text-primary me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">Custom Coupon Engineering</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                Advanced techniques for creating custom coupons with different indices, 
+                                rates, and payment schedules to meet specific bond requirements.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>IborCoupon customization</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Multiple index handling</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Pricer assignment</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cash Flow Manipulation -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-diagram-3 text-primary me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">Cash Flow Manipulation</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                Techniques for modifying, combining, and restructuring bond cash flows 
+                                to achieve complex payment structures and bond behaviors.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Cash flow extraction</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Leg combination</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Custom bond creation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Bond Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+
+

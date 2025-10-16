@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Bonds
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Content -->
+    <div class="row">
+        <div class="col-12">
+            <!-- Chapter Overview -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title fw-bold text-primary mb-3">
+                                <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                            </h3>
+                            <p class="card-text">
+                                Treasury futures contracts are financial derivatives that give the buyer the right to buy the underlying Treasury security by the time the contract expires. 
+                                The underlying is usually delivered from a basket of securities, making the valuation more complex than simple futures contracts.
+                            </p>
+                            <p class="card-text">
+                                In this chapter, we will learn how to value treasury futures contracts using QuantLib. We start by doing a naive calculation by constructing a fictional security 
+                                to see what is wrong about this approach. As a next step, we will perform the cheapest to deliver calculation and subsequently use that deliverable to value the same contract.
+                            </p>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Treasury futures contract modeling with QuantLib</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Cheapest to Deliver (CTD) calculations</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Conversion factor and basis calculations</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Futures pricing using BondForward class</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Concepts -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title fw-bold text-primary mb-3">
+                                <i class="bi bi-lightbulb me-2"></i>Key Concepts
+                            </h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="alert alert-info">
+                                        <h6 class="fw-bold">Futures Contract</h6>
+                                        <p class="mb-0">Agreement to buy/sell an asset at a predetermined price on a future date</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-info">
+                                        <h6 class="fw-bold">Deliverable Basket</h6>
+                                        <p class="mb-0">Multiple securities that can be delivered to fulfill the contract</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-info">
+                                        <h6 class="fw-bold">Cheapest to Deliver (CTD)</h6>
+                                        <p class="mb-0">The security that minimizes the seller's cost</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-info">
+                                        <h6 class="fw-bold">Conversion Factor</h6>
+                                        <p class="mb-0">Price adjustment factor for different deliverable securities</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Lab Section -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">
+                                <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text">
+                                Explore Treasury futures contracts with our interactive calculator. Modify parameters to see how they affect Z-Spread calculations, cheapest-to-deliver identification, futures pricing, and yield curve construction.
+                            </p>
+                            <div class="text-center">
+                                <a href="{% url 'treasury_futures:lab' %}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Methodology -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title fw-bold text-primary mb-3">
+                                <i class="bi bi-calculator me-2"></i>Methodology
+                            </h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-light">
+                                            <h5 class="fw-bold text-primary mb-0">
+                                                <i class="bi bi-1-circle me-2"></i>Naive Approach
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Start with a fictional 6% coupon bond as the deliverable. This approach shows the problems with using an arbitrary deliverable.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="bi bi-x-circle text-danger me-2"></i>High Z-Spread (71 basis points)</li>
+                                                <li><i class="bi bi-x-circle text-danger me-2"></i>Unrealistic pricing</li>
+                                                <li><i class="bi bi-x-circle text-danger me-2"></i>Doesn't reflect market reality</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card h-100">
+                                        <div class="card-header bg-light">
+                                            <h5 class="fw-bold text-primary mb-0">
+                                                <i class="bi bi-2-circle me-2"></i>Cheapest to Deliver
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>Calculate which security from the deliverable basket minimizes the seller's cost.</p>
+                                            <ul class="list-unstyled">
+                                                <li><i class="bi bi-check-circle text-success me-2"></i>Basis = Cash Price - Adjusted Futures Price</li>
+                                                <li><i class="bi bi-check-circle text-success me-2"></i>Adjusted Futures Price = Futures Price × Conversion Factor</li>
+                                                <li><i class="bi bi-check-circle text-success me-2"></i>CTD has the lowest basis</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Continue Learning -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

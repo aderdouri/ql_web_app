@@ -1,0 +1,518 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}33. Duration of Floating-Rate Bonds - {{ block.super }}{% endblock %}
+
+{% block styles %}
+    {{ block.super }}
+{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi bi-graph-up-arrow me-3"></i>33. Duration of Floating-Rate Bonds
+                            </h1>
+                            <p class="card-text lead mb-0">Interactive lab to demonstrate the correct way to calculate duration for floating-rate notes (FRNs) and understand the impact of curve linking.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:chapter33_floating_duration:description' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Description
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Form -->
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-sliders me-2"></i>Calculation Parameters
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="durationForm" method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Bond Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-bank me-2"></i>Bond Parameters
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Floating-Rate Bond:</strong> A bond with variable interest payments that adjust based on market rates. The duration calculation requires special handling.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ form.evaluation_date|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.forecast_rate|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Market Data -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-graph-up me-2"></i>Market Data
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Interest Rate:</strong> The current market rate used for duration calculation. This rate will be shocked to test bond sensitivity.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ form.yield_rate|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.dy|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Analysis Settings -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-sliders me-2"></i>Analysis Settings
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <h6><i class="bi bi-info-circle me-2"></i>How to Choose Interest Rate Change:</h6>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <strong>1e-05 (0.00001 = 0.001%)</strong><br>
+                                            <small class="text-muted">Most precise calculation, recommended for academic analysis</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <strong>1e-04 (0.0001 = 0.01%)</strong><br>
+                                            <small class="text-muted">Standard choice, good balance of precision and stability</small>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <strong>1e-03 (0.001 = 0.1%)</strong><br>
+                                            <small class="text-muted">Larger change, shows more dramatic effects</small>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <small>
+                                        <strong>Tip:</strong> Smaller values give more precise results but may be affected by numerical errors. 
+                                        Larger values are more stable but less precise. The default 1e-05 (0.00001) is optimal for most cases.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                            </div>
+                        </div>
+                        
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="card-title fw-bold mb-0">
+                        <i class="bi bi-cash-stack me-2"></i>Payment Schedule
+                    </h5>
+                </div>
+                <div class="card-body" style="max-height: 300px; overflow-y: auto;">
+                    <table class="table table-sm table-striped">
+                        <thead><tr><th>Date</th><th>Amount</th></tr></thead>
+                        <tbody id="payment_table_body">
+                            {% if results.cashflows %}
+                                {% for cf in results.cashflows %}
+                                    <tr>
+                                        <td>{{ cf.date }}</td>
+                                        <td>{{ cf.amount|floatformat:6 }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        </tbody>
+                    </table>
+            </div>
+        </div>
+    </div>
+
+        <div class="col-lg-8">
+            <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+            
+            <div id="results-wrapper" {% if error %} style="display:none;" {% endif %}>
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title fw-bold mb-0">
+                            <i class="bi bi-exclamation-triangle me-2"></i>1. The Problem: Incorrect Duration Calculation
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">The standard method treats the floating-rate bond like a fixed-rate bond. The coupon amounts do not change when the interest rate varies.</p>
+                        <div class="alert alert-secondary">
+                            <h6 class="fw-bold">Incorrect Duration Result</h6>
+                            <p class="h4 fw-bold text-dark" id="duration_incorrect">{{ results.duration_incorrect|floatformat:6 }}</p>
+                            <div id="duration_incorrect_explanation" class="mt-2 small text-muted">
+                                <!-- Dynamic explanation will be inserted here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                        <h5 class="card-title fw-bold mb-0">
+                            <i class="bi bi-question-circle me-2"></i>2. Problem Explanation
+                        </h5>
+                            </div>
+                            <div class="card-body">
+                        <p class="text-muted">The standard function fails to update coupon forecasts when the interest rate changes.</p>
+                        <div class="alert alert-info">
+                            <small>
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>What are coupons?</strong> Coupons are the regular interest payments you receive from the bond. For floating-rate bonds, these payments change based on market interest rates.
+                            </small>
+                                </div>
+                        <div class="alert alert-info">
+                            <p class="mb-2"><strong>Price with increased interest rate (P+) :</strong> <span class="fw-bold" id="p_p_incorrect">{{ results.analysis.P_p_incorrect|floatformat:6 }}</span></p>
+                            <p class="mb-0"><strong>Price with decreased interest rate (P-) :</strong> <span class="fw-bold" id="p_m_incorrect">{{ results.analysis.P_m_incorrect|floatformat:6 }}</span></p>
+                            <div id="price_incorrect_explanation" class="mt-2 small">
+                                <!-- Dynamic explanation will be inserted here -->
+                        </div>
+                    </div>
+                    
+                        <!-- Accordéon pour les détails incorrects -->
+                        <div class="mt-3">
+                            <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#incorrectDetails" aria-expanded="false">
+                                <i class="bi bi-chevron-down me-1"></i>Show Payment Details (Incorrect Method)
+                            </button>
+                            <div class="collapse mt-2" id="incorrectDetails">
+                                <div class="card card-body">
+                                    <h6>Payments with increased interest rate (P+):</h6>
+                                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped" id="cfs_p_incorrect_table">
+                                            <thead><tr><th>Date</th><th>Payment</th><th>Discount</th><th>Present Value</th></tr></thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                    <h6 class="mt-3">Payments with decreased interest rate (P-):</h6>
+                                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped" id="cfs_m_incorrect_table">
+                                            <thead><tr><th>Date</th><th>Payment</th><th>Discount</th><th>Present Value</th></tr></thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                        <h5 class="card-title fw-bold mb-0">
+                            <i class="bi bi-check-circle me-2"></i>3. The Solution: Curve Linking
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">The correct approach is to link the forecast curve to the interest rate curve. This way, when the interest rate changes, both the discount factors AND the coupon amounts change.</p>
+                        <div class="alert alert-info">
+                            <small>
+                                <i class="bi bi-info-circle me-1"></i>
+                                <strong>What are discount factors?</strong> These are used to calculate the present value of future payments. A higher interest rate means lower present value (more discounting).
+                            </small>
+                        </div>
+                        <div class="alert alert-light border">
+                            <h6 class="fw-bold">Correct Duration Result</h6>
+                            <p class="h4 fw-bold text-dark" id="duration_correct">{{ results.duration_correct|floatformat:6 }}</p>
+                            <div id="duration_correct_explanation" class="mt-2 small text-muted">
+                                <!-- Dynamic explanation will be inserted here -->
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <p class="mt-3 mb-2"><strong>With linked curves, prices P(+) and P(-) are now different:</strong></p>
+                            <p class="mb-2"><strong>Price with increased interest rate (P+) :</strong> <span class="fw-bold" id="p_p_correct">{{ results.analysis_correct.P_p_correct|floatformat:6 }}</span></p>
+                            <p class="mb-0"><strong>Price with decreased interest rate (P-) :</strong> <span class="fw-bold" id="p_m_correct">{{ results.analysis_correct.P_m_correct|floatformat:6 }}</span></p>
+                            <div id="price_correct_explanation" class="mt-2 small">
+                                <!-- Dynamic explanation will be inserted here -->
+                            </div>
+                                </div>
+                        
+                        <!-- Accordéon pour les détails corrects -->
+                        <div class="mt-3">
+                            <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#correctDetails" aria-expanded="false">
+                                <i class="bi bi-chevron-down me-1"></i>Show Payment Details (Correct Method)
+                            </button>
+                            <div class="collapse mt-2" id="correctDetails">
+                                <div class="card card-body">
+                                    <h6>Payments with increased interest rate (P+) - Linked Curves:</h6>
+                                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped" id="cfs_p_correct_table">
+                                            <thead><tr><th>Date</th><th>Payment</th><th>Discount</th><th>Present Value</th></tr></thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                    <h6 class="mt-3">Payments with decreased interest rate (P-) - Linked Curves:</h6>
+                                    <div class="table-responsive" style="max-height: 200px; overflow-y: auto;">
+                                        <table class="table table-sm table-striped" id="cfs_m_correct_table">
+                                            <thead><tr><th>Date</th><th>Payment</th><th>Discount</th><th>Present Value</th></tr></thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue Learning -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('durationForm');
+
+        function updateUI(data) {
+        const errorContainer = document.getElementById('error-container');
+        const resultsWrapper = document.getElementById('results-wrapper');
+
+            if (data.error) {
+                errorContainer.innerText = `Error: ${data.error}`;
+                errorContainer.style.display = 'block';
+                resultsWrapper.style.display = 'none';
+            } else {
+                errorContainer.style.display = 'none';
+                resultsWrapper.style.display = 'block';
+
+                document.getElementById('duration_incorrect').innerText = data.duration_incorrect.toFixed(6);
+                document.getElementById('p_p_incorrect').innerText = data.analysis.P_p_incorrect.toFixed(6);
+                document.getElementById('p_m_incorrect').innerText = data.analysis.P_m_incorrect.toFixed(6);
+
+                document.getElementById('duration_correct').innerText = data.duration_correct.toFixed(6);
+                document.getElementById('p_p_correct').innerText = data.analysis_correct.P_p_correct.toFixed(6);
+                document.getElementById('p_m_correct').innerText = data.analysis_correct.P_m_correct.toFixed(6);
+                
+                // Add dynamic explanations
+                addDynamicExplanations(data);
+                
+                // Mettre à jour le tableau des paiements de base
+                const tableBody = document.getElementById('payment_table_body');
+                tableBody.innerHTML = '';
+                data.cashflows.forEach(cf => {
+                    const row = tableBody.insertRow();
+                    row.insertCell().innerText = cf.date;
+                    row.insertCell().innerText = cf.amount.toFixed(6);
+                });
+                
+                // Remplir les tableaux détaillés pour la méthode incorrecte
+                fillDetailedTable('cfs_p_incorrect_table', data.cashflows, data.analysis.cfs_p_incorrect, data.analysis.discounts_p_incorrect);
+                fillDetailedTable('cfs_m_incorrect_table', data.cashflows, data.analysis.cfs_m_incorrect, data.analysis.discounts_m_incorrect);
+                
+                // Remplir les tableaux détaillés pour la méthode correcte
+                fillDetailedTable('cfs_p_correct_table', data.cashflows, data.analysis_correct.cfs_p_correct, data.analysis_correct.discounts_p_correct);
+                fillDetailedTable('cfs_m_correct_table', data.cashflows, data.analysis_correct.cfs_m_correct, data.analysis_correct.discounts_m_correct);
+            }
+        }
+
+        function fillDetailedTable(tableId, basePayments, payments, discounts) {
+            const table = document.getElementById(tableId);
+            if (!table) return;
+            
+            const tbody = table.querySelector('tbody');
+            if (!tbody) return;
+            
+            tbody.innerHTML = '';
+            
+            basePayments.forEach((basePayment, index) => {
+                const row = tbody.insertRow();
+                const date = basePayment.date;
+                const payment = payments[index];
+                const discount = discounts[index];
+                const pv = payment * discount;
+                
+                row.insertCell().innerText = date;
+                row.insertCell().innerText = payment.toFixed(6);
+                row.insertCell().innerText = discount.toFixed(6);
+                row.insertCell().innerText = pv.toFixed(6);
+            });
+        }
+
+        function addInterestRateChangeExplanation() {
+            // Get the current value of Interest Rate Change
+            const dyInput = document.querySelector('input[name="dy"]');
+            if (!dyInput) return;
+            
+            const dyValue = parseFloat(dyInput.value);
+            const dyPercentage = (dyValue * 100).toFixed(3);
+            
+            // Create explanation based on the chosen value
+            let explanation = "";
+            let icon = "";
+            
+            if (dyValue <= 0.00001) {
+                explanation = `Excellent choice! ${dyPercentage}% (${dyValue.toExponential()}) is very precise and ideal for academic analysis.`;
+                icon = "Good";
+            } else if (dyValue <= 0.0001) {
+                explanation = `Good choice! ${dyPercentage}% (${dyValue.toExponential()}) provides a good balance between precision and stability.`;
+                icon = "Good";
+            } else if (dyValue <= 0.001) {
+                explanation = `${dyPercentage}% (${dyValue.toExponential()}) is quite large. Results will be less precise but more stable. Consider using 1e-05 for better precision.`;
+                icon = "Warning";
+            } else {
+                explanation = `${dyPercentage}% (${dyValue.toExponential()}) is too large for accurate duration calculation. Use 1e-05 (0.001%) for best results.`;
+                icon = "Error";
+            }
+            
+            // Add the explanation to the form
+            let existingExplanation = document.getElementById('dy-explanation');
+            if (existingExplanation) {
+                existingExplanation.remove();
+            }
+            
+            const explanationDiv = document.createElement('div');
+            explanationDiv.id = 'dy-explanation';
+            explanationDiv.className = 'alert alert-info mt-2';
+            explanationDiv.innerHTML = `<small><strong>${icon} - Your choice (${dyPercentage}%):</strong> ${explanation}</small>`;
+            
+            dyInput.parentNode.appendChild(explanationDiv);
+        }
+
+        function addDynamicExplanations(data) {
+            // Duration explanations
+            const durationIncorrect = data.duration_incorrect;
+            const durationCorrect = data.duration_correct;
+            
+            // Add explanation for Interest Rate Change choice
+            addInterestRateChangeExplanation();
+            
+            let durationIncorrectText = "";
+            if (durationIncorrect > 4) {
+                durationIncorrectText = "High duration indicates significant price sensitivity to interest rate changes. This is incorrect for FRNs.";
+            } else if (durationIncorrect > 2) {
+                durationIncorrectText = "Moderate duration suggests the bond is treated as fixed-rate, which is incorrect.";
+            } else {
+                durationIncorrectText = "Low duration, but this result is still incorrect due to unlinked curves.";
+            }
+            
+            let durationCorrectText = "";
+            if (durationCorrect < 0.5) {
+                durationCorrectText = "Low duration is correct for FRNs - they are less sensitive to interest rate changes.";
+            } else if (durationCorrect < 1) {
+                durationCorrectText = "Moderate duration reflects proper curve linking for FRN sensitivity.";
+            } else {
+                durationCorrectText = "Duration result with proper curve linking methodology.";
+            }
+            
+            document.getElementById('duration_incorrect_explanation').innerHTML = durationIncorrectText;
+            document.getElementById('duration_correct_explanation').innerHTML = durationCorrectText;
+            
+            // Price explanations
+            const pPlusIncorrect = data.analysis.P_p_incorrect;
+            const pMinusIncorrect = data.analysis.P_m_incorrect;
+            const pPlusCorrect = data.analysis_correct.P_p_correct;
+            const pMinusCorrect = data.analysis_correct.P_m_correct;
+            
+            const priceDiffIncorrect = Math.abs(pPlusIncorrect - pMinusIncorrect);
+            const priceDiffCorrect = Math.abs(pPlusCorrect - pMinusCorrect);
+            
+            let priceIncorrectText = "";
+            if (priceDiffIncorrect < 0.01) {
+                priceIncorrectText = "Very small price difference indicates coupons don't change with interest rate.";
+            } else if (priceDiffIncorrect < 0.05) {
+                priceIncorrectText = "Small price difference shows limited sensitivity due to unlinked curves.";
+            } else {
+                priceIncorrectText = "Price difference exists but is based on incorrect methodology.";
+            }
+            
+            let priceCorrectText = "";
+            if (priceDiffCorrect > priceDiffIncorrect) {
+                priceCorrectText = "Larger price difference shows proper sensitivity with linked curves.";
+            } else if (priceDiffCorrect > 0.01) {
+                priceCorrectText = "Price difference reflects correct FRN behavior with curve linking.";
+            } else {
+                priceCorrectText = "Price difference with proper curve linking methodology.";
+            }
+            
+            document.getElementById('price_incorrect_explanation').innerHTML = priceIncorrectText;
+            document.getElementById('price_correct_explanation').innerHTML = priceCorrectText;
+        }
+
+        function triggerUpdate() {
+            const formData = new FormData(form);
+            fetch(window.location.pathname, {
+                method: 'POST', body: new URLSearchParams(formData),
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value }
+            })
+            .then(response => response.json())
+            .then(data => updateUI(data));
+        }
+        
+        form.addEventListener('change', function() {
+            // Update Interest Rate Change explanation immediately
+            addInterestRateChangeExplanation();
+            // Then trigger the full update
+            triggerUpdate();
+        });
+        
+        // Remplir les tableaux détaillés au chargement initial si des données sont disponibles
+        {% if results and not results.error %}
+            const initialData = {{ results|safe }};
+            if (initialData && !initialData.error) {
+                // Add Interest Rate Change explanation on initial load
+                addInterestRateChangeExplanation();
+                fillDetailedTable('cfs_p_incorrect_table', initialData.cashflows, initialData.analysis.cfs_p_incorrect, initialData.analysis.discounts_p_incorrect);
+                fillDetailedTable('cfs_m_incorrect_table', initialData.cashflows, initialData.analysis.cfs_m_incorrect, initialData.analysis.discounts_m_incorrect);
+                fillDetailedTable('cfs_p_correct_table', initialData.cashflows, initialData.analysis_correct.cfs_p_correct, initialData.analysis_correct.discounts_p_correct);
+                fillDetailedTable('cfs_m_correct_table', initialData.cashflows, initialData.analysis_correct.cfs_m_correct, initialData.analysis_correct.discounts_m_correct);
+                
+                // Add dynamic explanations for initial load
+                addDynamicExplanations(initialData);
+            }
+        {% endif %}
+    });
+</script>
+{% endblock %}

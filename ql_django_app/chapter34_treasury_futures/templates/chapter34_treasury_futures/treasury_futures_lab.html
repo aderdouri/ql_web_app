@@ -1,0 +1,422 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}34. Treasury Futures Contracts - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi bi-graph-up-arrow me-3"></i>34. Treasury Futures Contracts Lab
+                    </h1>
+                            <p class="card-text lead mb-0">Interactive lab to understand Treasury futures contracts valuation, including cheapest-to-deliver calculations and proper futures pricing using QuantLib.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'treasury_futures:description' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Chapter
+                            </a>
+                        </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Form -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        Treasury Futures Parameters
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="futuresForm" method="post">
+                        {% csrf_token %}
+                        
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                <strong>Treasury Futures:</strong> Contracts that give the right to buy Treasury securities at a predetermined price on a future date. The seller can deliver any bond from a specified basket, choosing the cheapest-to-deliver (CTD) bond.
+                                    </small>
+                                </div>
+                        
+                                <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.evaluation_date|as_crispy_field }}
+                                    </div>
+                            <div class="col-md-6">
+                                        {{ form.futures_price|as_crispy_field }}
+                                    </div>
+                        </div>
+                        
+                        <div class="mt-4 text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Calculate Treasury Futures
+                            </button>
+                                    </div>
+                    </form>
+                    
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+    <!-- Naive Calculation Section (Always Visible) -->
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        Naive Calculation (Fictional Bond)
+                    </h3>
+                            </div>
+                            <div class="card-body">
+                    {% if results and results.z_spread_fictional is not None %}
+                        <div class="alert alert-warning">
+                                    <small>
+                                <strong>Warning:</strong> This calculation uses a fictional 6% coupon 10-year bond as deliverable, which is not realistic for treasury futures.
+                                    </small>
+                                </div>
+                        
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                <div class="border rounded p-3">
+                                    <div class="text-muted small">Z-Spread (Fictional Bond)</div>
+                                    <div class="fw-bold h5">{{ results.z_spread_fictional|floatformat:0 }} bp</div>
+                                    <div class="text-muted small">Static spread for fictional 6% coupon bond</div>
+                                    <div class="text-muted small mt-1">
+                                        <strong>Analysis:</strong> 
+                                        {% if results.z_spread_fictional > 50 %}
+                                            Unusually high spread ({{ results.z_spread_fictional|floatformat:0 }} bp) - demonstrates why fictional bonds are inadequate for futures pricing
+                                        {% else %}
+                                            Moderate spread - still not representative of actual deliverable bonds
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <div class="alert alert-info">
+                                <h6 class="fw-bold">Why This Approach Fails</h6>
+                                <p class="mb-0">
+                                    The high Z-spread ({{ results.z_spread_fictional|floatformat:0 }} bp) shows that using a fictional bond gives unrealistic results. 
+                                    This is why we need to find the actual Cheapest-to-Deliver (CTD) bond from the deliverable basket.
+                                </p>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <small>
+                                <strong>Warning:</strong> This calculation uses a fictional 6% coupon 10-year bond as deliverable, which is not realistic for treasury futures.
+                            </small>
+                        </div>
+                        
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <div class="border rounded p-3">
+                                    <div class="text-muted small">Z-Spread (Fictional Bond)</div>
+                                    <div class="fw-bold h5 text-muted">71 bp</div>
+                                    <div class="text-muted small">Static spread for fictional 6% coupon bond</div>
+                                    <div class="text-warning small mt-1">
+                                        <strong>Analysis:</strong> 
+                                        Unusually high spread (71 bp) - demonstrates why fictional bonds are inadequate for futures pricing
+                                    </div>
+                </div>
+            </div>
+        </div>
+
+                        <div class="mt-3">
+                            <div class="alert alert-info">
+                                <h6 class="fw-bold">Why This Approach Fails</h6>
+                                <p class="mb-0">
+                                    The high Z-spread (71 bp) shows that using a fictional bond gives unrealistic results. 
+                                    This is why we need to find the actual Cheapest-to-Deliver (CTD) bond from the deliverable basket.
+                                </p>
+                                </div>
+                            </div>
+                    {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+    <!-- Results Section -->
+    {% if results %}
+        <div class="row g-4 mt-4">
+            <!-- CTD Analysis -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title fw-bold mb-0">
+                            CTD Analysis
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        {% if results.error %}
+                            <div class="alert alert-danger">
+                                <h6 class="fw-bold">Calculation Error</h6>
+                                <p class="mb-0">{{ results.error }}</p>
+                                </div>
+                        {% else %}
+                            <div class="alert alert-info mb-3">
+                                <small>
+                                    <strong>Cheapest-to-Deliver (CTD):</strong> The bond that minimizes the seller's cost of delivery from the deliverable basket.
+                                </small>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-6">
+                                    <div class="border rounded p-3">
+                                        <div class="text-muted small">Coupon</div>
+                                        <div class="fw-bold h5">{{ results.ctd_details.coupon }}%</div>
+                                        <div class="text-muted small">Annual interest rate paid by the bond</div>
+                                        <div class="text-muted small mt-1">
+                                            {% if results.ctd_details.coupon > 5 %}
+                                                High coupon bond - more attractive for delivery
+                                            {% elif results.ctd_details.coupon < 3 %}
+                                                Low coupon bond - less attractive for delivery
+                                            {% else %}
+                                                Medium coupon bond - balanced delivery characteristics
+                                            {% endif %}
+                                        </div>
+                    </div>
+                </div>
+                                <div class="col-6">
+                                    <div class="border rounded p-3">
+                                        <div class="text-muted small">Maturity</div>
+                                        <div class="fw-bold h6">{{ results.ctd_details.maturity }}</div>
+                                        <div class="text-muted small">Date when the bond principal is repaid</div>
+                                        <div class="text-muted small mt-1">
+                                            Maturity affects the conversion factor and delivery economics
+                                </div>
+                                </div>
+                            </div>
+                                <div class="col-6">
+                                    <div class="border rounded p-3">
+                                        <div class="text-muted small">Market Price</div>
+                                        <div class="fw-bold h5">{{ results.ctd_details.price }}</div>
+                                        <div class="text-muted small">Current market price of the bond</div>
+                                        <div class="text-muted small mt-1">
+                                            {% if results.ctd_details.price > 100 %}
+                                                Trading at premium - above par value
+                                            {% elif results.ctd_details.price < 100 %}
+                                                Trading at discount - below par value
+                                            {% else %}
+                                                Trading at par - equal to face value
+                                            {% endif %}
+                            </div>
+                        </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="border rounded p-3">
+                                        <div class="text-muted small">Conversion Factor</div>
+                                        <div class="fw-bold h5">{{ results.ctd_conversion_factor|floatformat:6 }}</div>
+                                        <div class="text-muted small">Factor to convert bond price to futures equivalent</div>
+                                        <div class="text-muted small mt-1">
+                                            {% if results.ctd_conversion_factor > 1 %}
+                                                High conversion factor - bond delivers more value
+                                            {% elif results.ctd_conversion_factor < 1 %}
+                                                Low conversion factor - bond delivers less value
+                                            {% else %}
+                                                Neutral conversion factor - delivers par value
+                                            {% endif %}
+                    </div>
+                </div>
+                    </div>
+                                <div class="col-12">
+                                    <div class="border rounded p-3">
+                                        <div class="text-muted small">Minimum Basis</div>
+                                        <div class="fw-bold h5">{{ results.ctd_details.basis|floatformat:6 }}</div>
+                                        <div class="text-muted small">
+                                            {% if results.ctd_details.basis < 0 %}
+                                                Negative basis: Futures trading at premium to cash bond
+                                            {% else %}
+                                                Positive basis: Cash bond trading at premium to futures
+                                            {% endif %}
+                                </div>
+                                        <div class="text-muted small mt-1">
+                                            {% if results.ctd_details.basis < -0.5 %}
+                                                Strong negative basis - significant arbitrage opportunity
+                                            {% elif results.ctd_details.basis < 0 %}
+                                                Negative basis - futures overpriced relative to cash
+                                            {% elif results.ctd_details.basis > 0.5 %}
+                                                Strong positive basis - cash bond overpriced
+                                            {% else %}
+                                                Basis close to zero - fair pricing between markets
+                                            {% endif %}
+                                </div>
+                            </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Final Valuation -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title fw-bold mb-0">
+                            Final Valuation
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        {% if results.error %}
+                            <div class="alert alert-danger">
+                                <h6 class="fw-bold">Calculation Error</h6>
+                                <p class="mb-0">{{ results.error }}</p>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-info mb-3">
+                                <small>
+                                    <strong>Final Pricing:</strong> Complete futures valuation using the CTD bond and forward pricing methodology.
+                                </small>
+                            </div>
+                            
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="border rounded p-3">
+                                        <div class="text-muted small">Model Futures Price</div>
+                                        <div class="fw-bold h5">{{ results.final_pricing.model_futures_price|floatformat:4 }}</div>
+                                        <div class="text-muted small">Theoretical futures price calculated by the model</div>
+                                        <div class="text-muted small mt-1">
+                                            Based on forward pricing theory and CTD bond characteristics
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="border rounded p-3">
+                                        <div class="text-muted small">Market Futures Price</div>
+                                        <div class="fw-bold h5">{{ results.final_pricing.market_futures_price|floatformat:4 }}</div>
+                                        <div class="text-muted small">Actual market price of the futures contract</div>
+                                        <div class="text-muted small mt-1">
+                                            Current market consensus on futures value
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="border rounded p-3">
+                                        <div class="text-muted small">Model Adjustment</div>
+                                        <div class="fw-bold h5">{{ results.final_pricing.model_adjustment|floatformat:4 }}</div>
+                                        <div class="text-muted small">Difference between model and market prices</div>
+                                        <div class="text-muted small mt-1">
+                                            {% if results.final_pricing.model_adjustment > 0.5 %}
+                                                Model significantly higher - futures may be undervalued
+                                            {% elif results.final_pricing.model_adjustment < -0.5 %}
+                                                Model significantly lower - futures may be overvalued
+                                            {% else %}
+                                                Model and market prices are closely aligned
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="border rounded p-3">
+                                        <div class="text-muted small">Forward Z-Spread</div>
+                                        <div class="fw-bold h5">{{ results.final_pricing.forward_z_spread_bps|floatformat:1 }} bps</div>
+                                        <div class="text-muted small">
+                                            {% if results.final_pricing.forward_z_spread_bps > 0 %}
+                                                Bond trades at premium to risk-free curve
+                                            {% elif results.final_pricing.forward_z_spread_bps < 0 %}
+                                                Bond trades at discount to risk-free curve
+                                            {% else %}
+                                                Bond trades at par with risk-free curve
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-muted small mt-1">
+                                            {% if results.final_pricing.forward_z_spread_bps > 50 %}
+                                                High spread - significant credit or liquidity premium
+                                            {% elif results.final_pricing.forward_z_spread_bps > 0 %}
+                                                Positive spread - bond trades above risk-free rate
+                                            {% elif results.final_pricing.forward_z_spread_bps < -50 %}
+                                                Large negative spread - unusual market conditions
+                                            {% elif results.final_pricing.forward_z_spread_bps < 0 %}
+                                                Negative spread - bond trades below risk-free rate
+                                            {% else %}
+                                                Zero spread - bond trades at risk-free rate
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="border rounded p-3">
+                                        <div class="text-muted small">Implied Yield</div>
+                                        <div class="fw-bold h5">{{ results.final_pricing.implied_yield_pct|floatformat:3 }}%</div>
+                                        <div class="text-muted small">Yield implied by the futures price</div>
+                                        <div class="text-muted small mt-1">
+                                            {% if results.final_pricing.implied_yield_pct > 5 %}
+                                                High implied yield - attractive investment opportunity
+                                            {% elif results.final_pricing.implied_yield_pct < 1 %}
+                                                Low implied yield - conservative investment
+                                            {% else %}
+                                                Moderate implied yield - balanced risk/return
+                                    {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="border rounded p-3">
+                                        <div class="text-muted small">Forward YTM</div>
+                                        <div class="fw-bold h5">{{ results.final_pricing.forward_ytm_pct|floatformat:3 }}%</div>
+                                        <div class="text-muted small">Forward yield-to-maturity of the CTD bond</div>
+                                        <div class="text-muted small mt-1">
+                                            Expected return if held to maturity from forward date
+                        </div>
+                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Continue Learning -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Bond Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('futuresForm');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    // Form will submit normally, no AJAX needed
+                });
+            }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Bonds
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Content -->
+    <div class="row">
+        <div class="col-12">
+            <!-- Chapter Overview -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title fw-bold text-primary mb-3">
+                                <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                            </h3>
+                            <p class="card-text">
+                                This chapter addresses a critical issue in calculating the **Modified Duration** of floating-rate bonds.
+                                Unlike fixed-rate bonds, floating-rate bonds have coupons that reset periodically based on a reference rate (e.g., Euribor).
+                                The challenge lies in ensuring that the yield curve used for duration calculation properly affects both the discounting of cash flows
+                                and the forecasting of future coupon rates.
+                            </p>
+                            <p class="card-text">
+                                You will learn about the common pitfall of using generic duration functions that treat floating-rate bonds as fixed-rate bonds,
+                                and discover the correct approach using QuantLib's curve linking capabilities. We'll demonstrate how proper curve linking
+                                ensures that both discounting and forecasting react appropriately to yield changes, resulting in accurate duration calculations.
+                            </p>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Why generic duration functions fail for floating-rate bonds.</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>How to properly link forecast curves to yield curves in QuantLib.</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>The finite difference method for duration calculation.</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Comparing correct vs. incorrect duration calculations.</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Handling credit spreads in duration calculations.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Lab Section -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">
+                                <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text mb-4">
+                                Explore the duration calculation for floating-rate bonds with our interactive lab.
+                                Compare correct and incorrect methods, adjust bond parameters, and see how curve linking affects the results.
+                            </p>
+                            <div class="text-center">
+                                <a href="{% url 'bonds:chapter33_floating_duration:lab' %}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Concepts -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h3 class="fw-bold text-dark mb-4">
+                        <i class="bi bi-lightbulb me-2"></i>Key Concepts
+                    </h3>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-primary mb-3"><i class="bi bi-exclamation-triangle me-2"></i>The Problem</h5>
+                            <p class="card-text">Generic duration functions treat floating-rate bonds as fixed-rate bonds, only considering yield changes for discounting but not for forecasting future coupon rates.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-primary mb-3"><i class="bi bi-link me-2"></i>Curve Linking</h5>
+                            <p class="card-text">The solution involves linking the forecast curve to the yield curve being modified, ensuring that both discounting and forecasting react to yield changes.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-primary mb-3"><i class="bi bi-calculator me-2"></i>Finite Difference Method</h5>
+                            <p class="card-text">Duration is calculated using the formula: -(1/P) × (P(+) - P(-)) / (2×dy), where P(+) and P(-) are prices with slightly different yields.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-primary mb-3"><i class="bi bi-shield-check me-2"></i>Credit Spreads</h5>
+                            <p class="card-text">The methodology works even when credit spreads are applied to the discounting curve, as long as the forecast curve is properly linked.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Implementation -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">
+                                <i class="bi bi-code-slash me-2"></i>Technical Implementation Steps
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <ol class="list-group list-group-numbered">
+                                <li class="list-group-item">
+                                    <strong>Setup:</strong> Create a floating-rate bond with Euribor6M index and add past fixings for known coupon rates.
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Incorrect Method:</strong> Use generic BondFunctions.duration() which treats the bond as fixed-rate, resulting in duration close to time to maturity.
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Correct Method:</strong> Link the forecast curve to the yield curve being modified using forecast_curve.linkTo(yield_curve).
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Finite Difference:</strong> Calculate P(+) and P(-) by slightly adjusting the yield and recalculating bond prices.
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Duration Formula:</strong> Apply the formula -(1/P) × (P(+) - P(-)) / (2×dy) to get the correct modified duration.
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Verification:</strong> Compare results to show that correct duration approximates time to next coupon reset, not time to maturity.
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Continue Learning -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                        <i class="bi bi-list me-2"></i>View All Bond Chapters
+                                    </a>
+                                </div>
+                                <div class="col-md-6">
+                                    <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                        <i class="bi bi-house me-2"></i>Back to Home
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+

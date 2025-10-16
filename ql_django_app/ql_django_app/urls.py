@@ -18,5 +18,10 @@ urlpatterns = [
     path('interest-rate-curves/', include('interest_rate_curves.urls')),
     path('interest-rate-models/', include('interest_rate_models.urls')),
     path('equity-models/', include('equity_models.urls')),
+    path('bonds/', include('bonds.urls')),
     path('chapter-heston-calibration/', include('chapter22_heston_calibration.urls')),
+    path('chapter33-floating-duration/', include('chapter33_floating_duration.urls')),
+    path('chapter34-treasury-futures/', include('chapter34_treasury_futures.urls')),
+    path('chapter35-pricing-conventions/', include('chapter35_pricing_conventions.urls')),
+    path('chapter36-more-conventions/', include('chapter36_more_conventions.urls')),
 ]

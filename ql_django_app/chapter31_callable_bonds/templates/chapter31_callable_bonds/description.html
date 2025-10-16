@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Bonds
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Content -->
+    <div class="row">
+        <div class="col-12">
+            <!-- Chapter Overview -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title fw-bold text-primary mb-3">
+                                <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                            </h3>
+                            <p class="card-text">
+                                In this chapter, we explore how to value callable bonds in QuantLib Python. The approach to construct a callable bond is similar to modeling a fixed rate bond, with the additional input of call or put schedule details.
+                            </p>
+                            <p class="card-text">
+                                We'll learn how to create callability schedules, build callable fixed rate bonds, implement Hull-White interest rate models, and use tree-based pricing engines to value these complex instruments.
+                            </p>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Callable bond modeling with QuantLib</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Callability schedule construction</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Hull-White interest rate model implementation</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Tree-based pricing engines for callable bonds</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Lab Section -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">
+                                <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text mb-4">
+                                Use the interactive lab below to experiment with callable bond modeling using QuantLib. 
+                                Try different parameters to see how they affect the bond pricing and volatility sensitivity.
+                            </p>
+                            <div class="text-center">
+                                <a href="{% url 'bonds:chapter31_callable_bonds:lab' %}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Concepts -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h3 class="fw-bold text-dark mb-4">
+                        <i class="bi bi-lightbulb me-2"></i>Key Concepts
+                    </h3>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Callable Bonds -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-telephone text-primary me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">Callable Bonds</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                Bonds that can be redeemed by the issuer before maturity at predetermined call dates and prices.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Call schedule definition</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Call price specification</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Early redemption option</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hull-White Model -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-graph-up text-primary me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">Hull-White Model</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                A one-factor interest rate model that captures mean reversion and volatility in interest rates.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Mean reversion parameter</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Volatility parameter</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Tree-based implementation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tree Pricing -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-diagram-3 text-primary me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">Tree Pricing</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                Lattice-based valuation method that models the evolution of interest rates over time.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Grid point specification</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Backward induction</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Optimal exercise decisions</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Volatility Sensitivity -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-speedometer2 text-primary me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">Volatility Sensitivity</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                Analysis of how bond prices change with respect to volatility in the underlying interest rate model.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Price volatility relationship</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Call option value impact</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Risk assessment</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Bond Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

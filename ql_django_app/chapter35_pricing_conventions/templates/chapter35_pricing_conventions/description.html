@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Bonds
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Content -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title fw-bold mb-4">Understanding Pricing Conventions</h3>
+                    
+                    <p class="lead">
+                        This chapter demonstrates the critical importance of consistent day-count conventions 
+                        when pricing floating rate bonds using QuantLib.
+                    </p>
+
+                    <h4 class="fw-bold mt-4 mb-3">The Problem</h4>
+                    <p>
+                        When pricing floating rate bonds, we often expect them to trade at par when using 
+                        a flat rate curve. However, inconsistent day-count conventions between the bond, 
+                        the interest rate index, and the discounting curve can lead to unexpected pricing results.
+                    </p>
+
+                    <div class="alert alert-warning">
+                        <h5 class="alert-heading fw-bold">Key Issue</h5>
+                        <p class="mb-0">
+                            <strong>Mismatched conventions</strong> can cause bonds to trade significantly 
+                            away from par even when using flat rate curves, leading to pricing errors and 
+                            arbitrage opportunities.
+                        </p>
+                    </div>
+
+                    <h4 class="fw-bold mt-4 mb-3">What You'll Learn</h4>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Day-count convention mismatches</strong> and their impact on bond pricing
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Three pricing scenarios</strong> with different levels of convention consistency
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Coupon rate analysis</strong> showing how conventions affect individual payments
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <strong>Best practices</strong> for consistent convention usage in QuantLib
+                        </li>
+                    </ul>
+
+                    <div class="text-center my-5">
+                        <a href="{% url 'pricing_conventions:lab' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-play-circle me-2"></i>Start Interactive Lab
+                        </a>
+                    </div>
+
+                    <h4 class="fw-bold mt-4 mb-3">Interactive Lab Features</h4>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="border rounded p-3">
+                                <h6 class="fw-bold text-primary">Parameter Controls</h6>
+                                <ul class="small mb-0">
+                                    <li>Evaluation date</li>
+                                    <li>Bond maturity</li>
+                                    <li>Coupon frequency</li>
+                                    <li>Flat interest rate</li>
+                                    <li>Face amount</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded p-3">
+                                <h6 class="fw-bold text-primary">Analysis Results</h6>
+                                <ul class="small mb-0">
+                                    <li>Three pricing scenarios</li>
+                                    <li>Par deviation analysis</li>
+                                    <li>Coupon rate details</li>
+                                    <li>Convention comparison</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info mt-4">
+                        <h5 class="alert-heading fw-bold">Real-World Impact</h5>
+                        <p class="mb-0">
+                            Understanding these conventions is crucial for accurate bond pricing, 
+                            risk management, and avoiding costly pricing errors in production systems.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue Learning -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Bond Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block title %}35. Mischievous Pricing Conventions - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi bi-exclamation-triangle me-3"></i>35. Mischievous Pricing Conventions Lab
+                            </h1>
+                            <p class="card-text lead mb-0">Interactive analysis of day-count convention effects on floating rate bond pricing using QuantLib.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'pricing_conventions:description' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Chapter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parameters Form -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">Bond Parameters</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="conventionsForm">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                {{ form.evaluation_date|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.bond_maturity_years|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.coupon_frequency_months|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.flat_rate|as_crispy_field }}
+                            </div>
+                            <div class="col-md-6">
+                                {{ form.face_amount|as_crispy_field }}
+                            </div>
+                        </div>
+                        <div class="mt-4 text-center">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Analyze Conventions
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    {% if results %}
+        {% if results.error %}
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title fw-bold mb-0">Calculation Error</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-danger">
+                        <h6 class="fw-bold">Error Details:</h6>
+                        <p class="mb-0">{{ results.error }}</p>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Summary Analysis -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">Convention Analysis Summary</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <h6 class="fw-bold">Expected Par Price: {{ results.analysis.expected_par_price }}</h6>
+                                <p class="mb-0">All scenarios use the same flat rate curve, but different day-count conventions lead to different pricing results.</p>
+                            </div>
+                            
+                            <div class="row g-3">
+                                {% for scenario_key, scenario in results.scenarios.items %}
+                                <div class="col-lg-4">
+                                    <div class="border rounded p-3 {% if scenario_key == results.analysis.best_scenario %}border-success{% elif scenario_key == results.analysis.worst_scenario %}border-danger{% endif %}">
+                                        <h6 class="fw-bold {% if scenario_key == results.analysis.best_scenario %}text-success{% elif scenario_key == results.analysis.worst_scenario %}text-danger{% endif %}">
+                                            {{ scenario.name }}
+                                        </h6>
+                                        <div class="text-muted small mb-2">{{ scenario.description }}</div>
+                                        <div class="fw-bold h5">{{ scenario.price|floatformat:6 }}</div>
+                                        <div class="text-muted small">Bond Price</div>
+                                        <div class="text-muted small mt-1">
+                                            <strong>Par Deviation:</strong> {{ scenario.par_deviation|floatformat:6 }}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Results -->
+            <div class="row g-4">
+                {% for scenario_key, scenario in results.scenarios.items %}
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header {% if scenario_key == results.analysis.best_scenario %}bg-success text-white{% elif scenario_key == results.analysis.worst_scenario %}bg-danger text-white{% endif %}">
+                            <h4 class="card-title fw-bold mb-0">{{ scenario.name }}</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-light">
+                                <small><strong>Conventions:</strong> {{ scenario.description }}</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="text-muted small">Bond Price</div>
+                                <div class="fw-bold h4 {% if scenario_key == results.analysis.best_scenario %}text-success{% elif scenario_key == results.analysis.worst_scenario %}text-danger{% endif %}">
+                                    {{ scenario.price|floatformat:6 }}
+                                </div>
+                                <div class="text-muted small mt-1">
+                                    <strong>Par Deviation:</strong> {{ scenario.par_deviation|floatformat:6 }}
+                                </div>
+                            </div>
+
+                            <h6 class="fw-bold mb-3">Coupon Details (First 8 Periods)</h6>
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Period</th>
+                                            <th>Date</th>
+                                            <th>Rate (%)</th>
+                                            <th>Accrual</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for coupon in scenario.coupons %}
+                                        <tr>
+                                            <td>{{ coupon.period }}</td>
+                                            <td>{{ coupon.date }}</td>
+                                            <td>{{ coupon.rate|floatformat:4 }}</td>
+                                            <td>{{ coupon.accrual_period|floatformat:4 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Analysis Insights -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title fw-bold mb-0">Key Insights</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="border rounded p-3">
+                                        <h6 class="fw-bold text-danger">Inconsistent Conventions</h6>
+                                        <p class="small mb-0">Leads to significant pricing errors and coupon rate variations. The bond trades away from par even with flat rate curves.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="border rounded p-3">
+                                        <h6 class="fw-bold text-warning">More Consistent Conventions</h6>
+                                        <p class="small mb-0">Reduces pricing errors but may still show small discrepancies due to underlying index conventions.</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="border rounded p-3">
+                                        <h6 class="fw-bold text-success">Perfect Consistency</h6>
+                                        <p class="small mb-0">Achieves theoretical par pricing with consistent conventions across bond, index, and curve.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="card-title fw-bold mb-0">Ready to Analyze</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="py-5">
+                    <i class="bi bi-calculator text-muted" style="font-size: 3rem;"></i>
+                    <h5 class="text-muted mt-3">Enter Parameters and Click Analyze</h5>
+                    <p class="text-muted">Modify the bond parameters and click "Analyze Conventions" to see how different day-count conventions affect pricing.</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+
+    <!-- Continue Learning -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Bond Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    {{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('conventionsForm');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Form will submit normally, no AJAX needed
+            });
+        }
+    });
+</script>
+{% endblock %}

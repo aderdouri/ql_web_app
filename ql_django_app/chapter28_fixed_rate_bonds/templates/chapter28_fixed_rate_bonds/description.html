@@ -1,0 +1,212 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Bonds
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Content -->
+    <div class="row">
+        <div class="col-12">
+            <!-- Chapter Overview -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title fw-bold text-primary mb-3">
+                                <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                            </h3>
+                            <p class="card-text">
+                                In this chapter we will consider a simple example to model fixed rate bonds. Let's consider a
+                                hypothetical bond with a par value of 100, that pays 6% coupon semi-annually issued on January
+                                15th, 2015 and set to mature on January 15th, 2016. The bond will pay a coupon on July 15th, 2015
+                                and January 15th, 2016. The par amount of 100 will also be paid on the January 15th, 2016.
+                            </p>
+                            <p class="card-text">
+                                To make things simpler, lets assume that we know the spot rates of the treasury as of January 15th,
+                                2015. The annualized spot rates are 0.5% for 6 months and 0.7% for 1 year point. Lets calculate the
+                                net present value of the cash flows directly as shown below.
+                            </p>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Fixed rate bond modeling with QuantLib</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Yield curve construction and usage</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Bond pricing using discounting engines</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Bond analytics and yield calculations</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Lab Section -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">
+                                <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text mb-4">
+                                Use the interactive lab below to experiment with fixed rate bond modeling using QuantLib. 
+                                Try different parameters to see how they affect the bond pricing and analytics.
+                            </p>
+                            <div class="text-center">
+                                <a href="{% url 'bonds:chapter28_fixed_rate_bonds:lab' %}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Concepts -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h3 class="fw-bold text-dark mb-4">
+                        <i class="bi bi-lightbulb me-2"></i>Key Concepts
+                    </h3>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Fixed Rate Bonds -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-bank text-primary me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">Fixed Rate Bonds</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                Bonds that pay a fixed coupon rate at regular intervals until maturity, 
+                                when the principal is repaid.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Regular coupon payments</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Fixed interest rate</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Principal repayment at maturity</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Yield Curves -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-graph-up text-primary me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">Yield Curves</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                A curve showing the relationship between interest rates and time to maturity, 
+                                used for bond pricing and valuation.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Spot rate construction</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Discount factor calculation</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Present value computation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bond Pricing -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-calculator text-primary me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">Bond Pricing</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                The process of determining the fair value of a bond using discounting 
+                                methods and yield curve information.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Cash flow discounting</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Clean vs dirty pricing</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Yield to maturity</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- QuantLib Framework -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-gear text-primary me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">QuantLib Framework</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                A comprehensive library for quantitative finance that provides tools 
+                                for bond modeling, pricing, and risk analysis.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>FixedRateBond class</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>DiscountingBondEngine</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Schedule generation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Bond Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

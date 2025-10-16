@@ -1,0 +1,505 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}32. Discount Margin Calculation - {{ block.super }}{% endblock %}
+
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi bi-calculator me-3"></i>32. Discount Margin Calculation
+                            </h1>
+                            <p class="card-text lead mb-0">An interactive lab to calculate the discount margin for floating-rate bonds using numerical solvers.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:chapter32_discount_margin:description' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Description
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Form -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-sliders me-2"></i>Discount Margin Parameters
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="dmForm" method="post" action="{% url 'bonds:chapter32_discount_margin:lab' %}">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Bond Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-calendar3 me-2"></i>Basic Bond Parameters
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        {{ form.evaluation_date|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.issue_date|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.maturity_date|as_crispy_field }}
+                                    </div>
+                                </div>
+                                <div class="row g-3 mt-2">
+                                    <div class="col-md-6">
+                                        {{ form.face_amount|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.forecast_rate|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Target Price and Calculation Settings -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-gear me-2"></i>Target Price and Calculation Settings
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ form.target_price|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.solver_accuracy|as_crispy_field }}
+                                    </div>
+                                </div>
+                                <div class="row g-3 mt-2">
+                                    <div class="col-md-12">
+                                        {{ form.margin_range|as_crispy_field }}
+                                    </div>
+                                </div>
+                                <div class="row g-3 mt-2" id="custom-margin-fields" style="display: none;">
+                                    <div class="col-md-6">
+                                        {{ form.min_margin|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.max_margin|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Calculate Button -->
+                        <div class="d-flex justify-content-center mt-4">
+                            <button type="submit" id="calculateBtn" class="btn btn-primary btn-lg px-5">
+                                <span id="btnText">Calculate Discount Margin</span>
+                                <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2" style="display: none;"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+
+            <div id="results-wrapper">
+                <!-- Main Results -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h3 class="card-title fw-bold mb-0">
+                            <i class="bi bi-graph-up me-2"></i>Discount Margin Calculation Results
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h5 class="text-primary fw-bold mb-2">Discount Margin</h5>
+                                    <h4 class="text-success fw-bold" id="dm_continuous">0.00</h4>
+                                    <small class="text-muted">Basis points (continuous)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h5 class="text-primary fw-bold mb-2">Equivalent Rate</h5>
+                                    <h4 class="text-success fw-bold" id="dm_simple">0.00</h4>
+                                    <small class="text-muted">Basis points (simple)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <h5 class="text-primary fw-bold mb-2">Calculated Price</h5>
+                                    <h4 class="text-success fw-bold" id="calculated_bond_price">0.000000</h4>
+                                    <small class="text-muted">Verification</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Analysis -->
+                        <div class="mt-4">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="alert alert-light border alert-sm" id="margin_analysis" style="display: none;">
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <strong>Spread Analysis:</strong><br>
+                                                <span id="margin_analysis_text"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-light border alert-sm" id="price_accuracy" style="display: none;">
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <strong>Calculation Precision:</strong><br>
+                                                <span id="price_accuracy_text"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-light border alert-sm" id="equivalent_rate" style="display: none;">
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <strong>Rate Conversion:</strong><br>
+                                                <span id="equivalent_rate_text"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-light border alert-sm" id="face_amount_info" style="display: none;">
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <strong>Face Amount Impact:</strong><br>
+                                                <span id="face_amount_info_text"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-12">
+                                    <div class="alert alert-light border alert-sm" id="dates_info" style="display: none;">
+                                        <div class="d-flex align-items-center">
+                                            <div>
+                                                <strong>Date Impact:</strong><br>
+                                                <span id="dates_info_text"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Cashflows Table -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title fw-bold mb-0">
+                            <i class="bi bi-table me-2"></i>Bond Cashflows
+                        </h3>
+                    </div>
+                    <div class="card-body p-0">
+                        <div style="max-height: 400px; overflow-y: auto;">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover mb-0">
+                                    <thead class="table-dark sticky-top">
+                                        <tr>
+                                            <th class="fw-bold px-4">Payment Date</th>
+                                            <th class="text-end fw-bold px-4">Amount ($)</th>
+                                            <th class="text-center fw-bold px-4">Type</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cashflow_table_body">
+                                        <!-- Cashflows will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue Learning -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+       <script>
+           document.addEventListener('DOMContentLoaded', function() {
+               const form = document.getElementById('dmForm');
+               const errorContainer = document.getElementById('error-container');
+               const resultsWrapper = document.getElementById('results-wrapper');
+               
+               // Gestion de l'affichage conditionnel des champs personnalisés
+               const marginRangeSelect = document.querySelector('[name="margin_range"]');
+               const customMarginFields = document.getElementById('custom-margin-fields');
+               
+               function toggleCustomMarginFields() {
+                   if (marginRangeSelect && customMarginFields) {
+                       if (marginRangeSelect.value === 'custom') {
+                           customMarginFields.style.display = 'block';
+                       } else {
+                           customMarginFields.style.display = 'none';
+                       }
+                   }
+               }
+               
+               if (marginRangeSelect) {
+                   marginRangeSelect.addEventListener('change', toggleCustomMarginFields);
+                   toggleCustomMarginFields(); // Initial call
+               }
+
+        function updateUI(data) {
+            errorContainer.style.display = 'none';
+            resultsWrapper.style.display = 'block';
+
+            // Update main results
+            document.getElementById('dm_continuous').innerText = data.discount_margin_continuous.toFixed(4);
+            document.getElementById('dm_simple').innerText = data.equivalent_rate_simple.toFixed(4);
+            document.getElementById('calculated_bond_price').innerText = data.calculated_bond_price.toFixed(6);
+
+            // Update dynamic explanations
+            updateDynamicExplanations(data.explanations);
+
+            // Update cashflows table
+            updateCashflowsTable(data.cashflows);
+        }
+
+        function updateDynamicExplanations(explanations) {
+            // Margin analysis
+            const marginAnalysis = document.getElementById('margin_analysis');
+            const marginAnalysisText = document.getElementById('margin_analysis_text');
+            if (explanations.margin_analysis) {
+                marginAnalysisText.textContent = explanations.margin_analysis;
+                marginAnalysis.style.display = 'block';
+            } else {
+                marginAnalysis.style.display = 'none';
+            }
+
+            // Price accuracy
+            const priceAccuracy = document.getElementById('price_accuracy');
+            const priceAccuracyText = document.getElementById('price_accuracy_text');
+            if (explanations.price_accuracy) {
+                priceAccuracyText.textContent = explanations.price_accuracy;
+                priceAccuracy.style.display = 'block';
+            } else {
+                priceAccuracy.style.display = 'none';
+            }
+
+            // Equivalent rate
+            const equivalentRate = document.getElementById('equivalent_rate');
+            const equivalentRateText = document.getElementById('equivalent_rate_text');
+            if (explanations.equivalent_rate) {
+                equivalentRateText.textContent = explanations.equivalent_rate;
+                equivalentRate.style.display = 'block';
+            } else {
+                equivalentRate.style.display = 'none';
+            }
+
+
+            // Face amount info
+            const faceAmountInfo = document.getElementById('face_amount_info');
+            const faceAmountInfoText = document.getElementById('face_amount_info_text');
+            if (explanations.face_amount_info) {
+                faceAmountInfoText.textContent = explanations.face_amount_info;
+                faceAmountInfo.style.display = 'block';
+            } else {
+                faceAmountInfo.style.display = 'none';
+            }
+
+            // Dates info
+            const datesInfo = document.getElementById('dates_info');
+            const datesInfoText = document.getElementById('dates_info_text');
+            if (explanations.dates_info) {
+                datesInfoText.textContent = explanations.dates_info;
+                datesInfo.style.display = 'block';
+            } else {
+                datesInfo.style.display = 'none';
+            }
+        }
+
+        function updateCashflowsTable(cashflows) {
+            const tableBody = document.getElementById('cashflow_table_body');
+            tableBody.innerHTML = '';
+
+            cashflows.forEach((cf, index) => {
+                const row = tableBody.insertRow();
+
+                // Date cell
+                const dateCell = row.insertCell();
+                dateCell.className = 'fw-medium';
+                dateCell.innerText = cf.date;
+
+                // Amount cell
+                const amountCell = row.insertCell();
+                amountCell.className = 'text-end fw-bold';
+                amountCell.innerText = `$${cf.amount.toFixed(6)}`;
+
+                // Type cell
+                const typeCell = row.insertCell();
+                typeCell.className = 'text-center';
+
+                if (index === cashflows.length - 1) {
+                    // Last payment is principal
+                    typeCell.innerHTML = '<span class="badge bg-primary">Principal</span>';
+                    row.classList.add('table-success');
+                } else {
+                    // Other payments are coupons
+                    typeCell.innerHTML = '<span class="badge bg-secondary">Coupon</span>';
+                }
+            });
+        }
+
+
+               function handleError(errorMsg) {
+                   resultsWrapper.style.display = 'none';
+                   
+                   // Créer un message d'erreur plus professionnel
+                   let displayMsg = errorMsg;
+                   if (errorMsg.includes('form_errors')) {
+                       displayMsg = 'Please correct the following errors in the form:';
+                   } else if (errorMsg.includes('Invalid form data')) {
+                       displayMsg = 'Please check your input values and try again.';
+                   }
+                   
+                   errorContainer.innerHTML = `
+                       <div class="d-flex align-items-center">
+                           <i class="bi bi-exclamation-triangle me-2"></i>
+                           <div>
+                               <strong>Calculation Error</strong><br>
+                               ${displayMsg}
+                           </div>
+                       </div>
+                   `;
+                   errorContainer.style.display = 'block';
+               }
+
+        function triggerUpdate() {
+            // Validation simplifiée - les choix prédéfinis sont déjà validés
+            const marginRangeSelect = document.querySelector('[name="margin_range"]');
+            
+            // Si c'est un choix personnalisé, valider les champs min/max
+            if (marginRangeSelect && marginRangeSelect.value === 'custom') {
+                const minMarginInput = document.querySelector('[name="min_margin"]');
+                const maxMarginInput = document.querySelector('[name="max_margin"]');
+                
+                if (!minMarginInput || !maxMarginInput) {
+                    handleError("System error: Required form fields are missing. Please refresh the page and try again.");
+                    return;
+                }
+                
+                const minMargin = parseFloat(minMarginInput.value);
+                const maxMargin = parseFloat(maxMarginInput.value);
+                
+                if (isNaN(minMargin) || isNaN(maxMargin)) {
+                    handleError("Invalid input: Please enter valid numerical values for both Minimum and Maximum Margin fields. Only numbers are accepted.");
+                    return;
+                }
+                
+                if (minMargin >= maxMargin) {
+                    handleError(`Invalid margin bounds: The minimum margin (${minMargin.toFixed(2)}%) must be strictly less than the maximum margin (${maxMargin.toFixed(2)}%). Please adjust the values to create a valid search range.`);
+                    return;
+                }
+            }
+            
+            // Show loading indicator
+            const calculateBtn = document.getElementById('calculateBtn');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+            
+            calculateBtn.disabled = true;
+            btnText.textContent = 'Calculating...';
+            btnSpinner.style.display = 'inline-block';
+            
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST',
+                body: new URLSearchParams(formData),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+                   .then(response => response.json())
+                   .then(data => {
+                       if (data.error) {
+                           if (data.form_errors) {
+                               // Afficher les erreurs de validation du formulaire de manière plus claire
+                               let errorMsg = 'Please correct the following errors:\n\n';
+                               for (const field in data.form_errors) {
+                                   const fieldName = field.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                   errorMsg += `• ${fieldName}: ${data.form_errors[field].join(', ')}\n`;
+                               }
+                               handleError(errorMsg);
+                           } else {
+                               handleError(data.error);
+                           }
+                       } else {
+                           updateUI(data);
+                       }
+                   })
+            .catch(err => {
+                handleError("An unexpected network error occurred.");
+            })
+            .finally(() => {
+                // Hide loading indicator
+                calculateBtn.disabled = false;
+                btnText.textContent = 'Calculate Discount Margin';
+                btnSpinner.style.display = 'none';
+            });
+        }
+
+        // Add event listener to the form submit
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            triggerUpdate();
+        });
+
+        // Initial calculation on page load
+        triggerUpdate();
+    });
+</script>
+{% endblock %}

@@ -59,8 +59,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if 'chapter4_quotes' in request.resolver_match.namespace %}active{% endif %}" href="{% url 'chapter4_quotes:bond_curve_lab' %}">
-                            <i class="bi bi-graph-up-arrow me-1"></i>Bond Curves
+                        <a class="nav-link {% if 'bonds' in request.resolver_match.namespace %}active{% endif %}" href="{% url 'bonds:home' %}">
+                            <i class="bi bi-bank me-1"></i>Bonds
                         </a>
                     </li>
                 </ul>

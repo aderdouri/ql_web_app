@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Bonds
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Content -->
+    <div class="row">
+        <div class="col-12">
+            <!-- Chapter Overview -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title fw-bold text-primary mb-3">
+                                <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                            </h3>
+                            <p class="card-text">
+                                In this chapter, we will explore how to value bonds with credit spreads using QuantLib. 
+                                We'll demonstrate different approaches to incorporate credit risk into bond pricing, 
+                                including parallel and non-parallel shifts of yield curves.
+                            </p>
+                            <p class="card-text">
+                                We'll start with a simple example using a flat treasury yield curve and then show how 
+                                to add credit spreads using three different methods: direct rate shocks, 
+                                ZeroSpreadedTermStructure for parallel shifts, and SpreadedLinearZeroInterpolatedTermStructure 
+                                for non-parallel shifts.
+                            </p>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Understanding credit spreads and their impact on bond pricing</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Implementing parallel shifts using ZeroSpreadedTermStructure</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Creating non-parallel shifts with SpreadedLinearZeroInterpolatedTermStructure</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Comparing different credit spread methodologies</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Lab Section -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">
+                                <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text mb-4">
+                                Use the interactive lab below to experiment with credit spread calculations using QuantLib. 
+                                Try different spread scenarios to see how they affect bond pricing and valuation.
+                            </p>
+                            <div class="text-center">
+                                <a href="{% url 'bonds:chapter30_credit_spreads:lab' %}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Concepts -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h3 class="fw-bold text-dark mb-4">
+                        <i class="bi bi-lightbulb me-2"></i>Key Concepts
+                    </h3>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-primary">
+                                <i class="bi bi-shield-check me-2"></i>Credit Spread
+                            </h5>
+                            <p class="card-text">
+                                The additional yield required above the risk-free treasury rate to compensate 
+                                investors for credit risk. Measured in basis points (bps).
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-success">
+                                <i class="bi bi-arrow-up me-2"></i>Parallel Shift
+                            </h5>
+                            <p class="card-text">
+                                A uniform shift of the entire yield curve by the same amount across all maturities. 
+                                Uses ZeroSpreadedTermStructure.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-warning">
+                                <i class="bi bi-diagram-3 me-2"></i>Non-Parallel Shift
+                            </h5>
+                            <p class="card-text">
+                                A varying shift where different maturities experience different spread changes. 
+                                Uses SpreadedLinearZeroInterpolatedTermStructure.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Practical Applications -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title fw-bold text-dark mb-3">
+                                <i class="bi bi-gear me-2"></i>Practical Applications
+                            </h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-primary">Direct Rate Shocks</h6>
+                                    <p class="small text-muted">
+                                        Simple approach where the base rate is directly modified. Useful for flat yield curves 
+                                        and quick sensitivity analysis.
+                                    </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-success">Structured Approaches</h6>
+                                    <p class="small text-muted">
+                                        Using QuantLib's specialized term structure classes for more sophisticated 
+                                        credit spread modeling and risk management.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Bond Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

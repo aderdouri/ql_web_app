@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Bonds
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Content -->
+    <div class="row">
+        <div class="col-12">
+            <!-- Chapter Overview -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title fw-bold text-primary mb-3">
+                                <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                            </h3>
+                            <p class="card-text">
+                                In this chapter, we will learn how to calculate the discount margin for floating-rate bonds using QuantLib Python. 
+                                The discount margin is the spread over the reference rate (like Euribor) that makes the bond's theoretical price equal to its market price.
+                            </p>
+                            <p class="card-text">
+                                This is a classic inverse problem: we know the market price and want to find the spread that produces it. 
+                                We'll use numerical solvers (Brent's method) to find the discount margin and convert between different compounding conventions.
+                            </p>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Understanding discount margins for floating-rate bonds</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Building floating-rate bonds with Euribor as reference rate</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Using numerical solvers for inverse calculations</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Converting between different interest rate conventions</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Lab Section -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">
+                                <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text mb-4">
+                                Use the interactive lab below to calculate discount margins for different bond parameters and target prices. 
+                                Experiment with various scenarios to understand how the discount margin affects bond pricing.
+                            </p>
+                            <div class="text-center">
+                                <a href="{% url 'bonds:chapter32_discount_margin:lab' %}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key Concepts -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h3 class="fw-bold text-dark mb-4">
+                        <i class="bi bi-lightbulb me-2"></i>Key Concepts
+                    </h3>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-primary">
+                                <i class="bi bi-cash-coin me-2"></i>Floating-Rate Bonds
+                            </h5>
+                            <p class="card-text">
+                                Bonds with coupon rates that reset periodically based on a reference rate like Euribor. 
+                                The coupon payments adjust to reflect current market conditions.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-primary">
+                                <i class="bi bi-percent me-2"></i>Discount Margin
+                            </h5>
+                            <p class="card-text">
+                                The spread over the reference rate that reflects the bond's credit risk and liquidity. 
+                                It's the additional yield required by investors above the risk-free rate.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-primary">
+                                <i class="bi bi-arrow-repeat me-2"></i>Inverse Problems
+                            </h5>
+                            <p class="card-text">
+                                Mathematical problems where we know the result (market price) and need to find the input 
+                                (discount margin) that produces it. We use numerical solvers to find the solution.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title fw-bold text-primary">
+                                <i class="bi bi-gear me-2"></i>Numerical Solvers
+                            </h5>
+                            <p class="card-text">
+                                Algorithms like Brent's method that find roots of equations numerically. 
+                                They're essential for solving complex financial problems where analytical solutions don't exist.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Implementation -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">
+                                <i class="bi bi-code-slash me-2"></i>Technical Implementation
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text mb-3">
+                                The implementation involves several key steps:
+                            </p>
+                            <ol class="list-group list-group-numbered">
+                                <li class="list-group-item">
+                                    <strong>Bond Construction:</strong> Create a floating-rate bond with Euribor 6M as the reference rate
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Curve Setup:</strong> Establish forecast and discount curves with appropriate spreads
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Pricing Engine:</strong> Use DiscountingBondEngine to calculate bond prices
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Numerical Solver:</strong> Apply Brent's method to find the discount margin
+                                </li>
+                                <li class="list-group-item">
+                                    <strong>Rate Conversion:</strong> Convert between continuous and simple compounding conventions
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue Learning -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'bonds:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Bond Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
