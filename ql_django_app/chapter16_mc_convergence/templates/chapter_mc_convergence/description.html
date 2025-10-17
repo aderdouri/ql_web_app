@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Interest Rate Models
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Overview -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title fw-bold text-primary mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                    </h3>
+                    <p class="card-text">
+                        This chapter explores the convergence properties of Monte Carlo simulations when applied to 
+                        Hull-White interest rate models. Understanding convergence is crucial for reliable pricing 
+                        and risk management in quantitative finance.
+                    </p>
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Monte Carlo convergence theory</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Statistical error estimation</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Variance reduction techniques</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Convergence diagnostics</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">Key Topics:</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Law of large numbers</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Central limit theorem</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Confidence intervals</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Antithetic variates</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Lab Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="card-text mb-4">
+                        Experiment with different Monte Carlo parameters to observe convergence behavior. 
+                        Compare results with varying numbers of paths and analyze the statistical properties 
+                        of the simulation results.
+                    </p>
+                    <div class="text-center">
+                        <a href="{% url 'interest_rate_models:chapter16_mc_convergence:convergence_lab' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-play-circle me-2"></i>Launch Convergence Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Concepts -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="fw-bold text-dark mb-4">
+                <i class="bi bi-lightbulb me-2"></i>Key Concepts
+            </h3>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Convergence Theory -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-graph-up text-primary me-3" style="font-size: 2rem;"></i>
+                        <h5 class="card-title fw-bold mb-0">Convergence Theory</h5>
+                    </div>
+                    <p class="card-text text-muted">
+                        Monte Carlo methods rely on the law of large numbers to converge to the true expected value 
+                        as the number of simulations increases.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Strong law of large numbers</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Central limit theorem</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Rate of convergence</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Analysis -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-exclamation-triangle text-primary me-3" style="font-size: 2rem;"></i>
+                        <h5 class="card-title fw-bold mb-0">Error Analysis</h5>
+                    </div>
+                    <p class="card-text text-muted">
+                        Understanding and quantifying the statistical error in Monte Carlo simulations is essential 
+                        for reliable results and risk management.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Standard error estimation</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Confidence intervals</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Bias and variance</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Convergence Properties -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Convergence Properties
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Strong Convergence</h5>
+                            <p class="text-muted">The simulation converges almost surely to the true value as the number of paths increases.</p>
+                            <ul class="list-unstyled small">
+                                <li>• Guaranteed convergence</li>
+                                <li>• Pathwise convergence</li>
+                                <li>• Almost sure convergence</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Weak Convergence</h5>
+                            <p class="text-muted">The distribution of the simulation results converges to the true distribution.</p>
+                            <ul class="list-unstyled small">
+                                <li>• Distributional convergence</li>
+                                <li>• Central limit theorem</li>
+                                <li>• Asymptotic normality</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Variance Reduction</h5>
+                            <p class="text-muted">Techniques to reduce the variance of Monte Carlo estimates for faster convergence.</p>
+                            <ul class="list-unstyled small">
+                                <li>• Antithetic variates</li>
+                                <li>• Control variates</li>
+                                <li>• Importance sampling</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue Learning -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

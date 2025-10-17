@@ -1,0 +1,511 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Chapter 18: Par vs Indexed Coupons - Interactive Lab{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                Chapter 18: Par vs Indexed Coupons
+                            </h1>
+                            <p class="card-text lead mb-0">Interactive laboratory to analyze the differences between par coupons and indexed coupons in interest rate swap calculations.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Chapters
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Lab Section -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-light">
+                    <h5 class="card-title fw-bold text-primary mb-0">
+                        Swap Parameters
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="swapAnalysisForm" method="post" action="{% url 'chapter18_par_indexed_coupons:par_indexed_coupons_lab' %}">
+                        {% csrf_token %}
+                        
+                        <!-- Basic Swap Parameters -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-primary mb-3">Basic Swap Parameters</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    {{ form.notional|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.swap_length|as_crispy_field }}
+                                </div>
+                                <div class="col-md-4">
+                                    {{ form.evaluation_date|as_crispy_field }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Coupon Calculation Methods -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold text-primary mb-3">Coupon Calculation Methods</h5>
+                            <div class="alert alert-info border-0 mb-3">
+                                <small class="text-muted">
+                                    <strong>Method selection:</strong> Choose which coupon calculation methods to include in the analysis.
+                                </small>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        {{ form.use_par_coupons }}
+                                        <label class="form-check-label" for="{{ form.use_par_coupons.id_for_label }}">
+                                            <strong>Use Par Coupons</strong>
+                                            <small class="d-block text-muted">Calculate using par coupon method (rate over coupon period)</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        {{ form.use_indexed_coupons }}
+                                        <label class="form-check-label" for="{{ form.use_indexed_coupons.id_for_label }}">
+                                            <strong>Use Indexed Coupons</strong>
+                                            <small class="d-block text-muted">Calculate using indexed coupon method (rate over LIBOR tenor)</small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5" id="analyzeBtn">
+                                Run Swap Analysis
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary">
+                    <h5 class="card-title fw-bold text-white mb-0">
+                        Analysis Results
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if results %}
+                        <!-- Results Dashboard -->
+                        <div class="row g-3 mb-4">
+                            <!-- Swap Info Card -->
+                            <div class="col-12">
+                                <div class="card border-primary h-100">
+                                    <div class="card-body text-center p-4">
+                                        <h5 class="card-title text-primary fw-bold mb-2">Swap Information</h5>
+                                        <div class="row g-2">
+                                            <div class="col-6">
+                                                <small class="text-muted">Notional</small>
+                                                <div class="fw-bold text-primary">${{ results.swap_info.notional|floatformat:0 }}</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">Length</small>
+                                                <div class="fw-bold text-primary">{{ results.swap_info.swap_length }} years</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">Coupons</small>
+                                                <div class="fw-bold text-primary">{{ results.swap_info.num_coupons }}</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">Date</small>
+                                                <div class="fw-bold text-primary">{{ results.swap_info.evaluation_date }}</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Dynamic Explanation for Swap Info -->
+                                        <div class="mt-3 p-3 bg-light rounded">
+                                            <h6 class="fw-bold text-primary mb-2">What This Means:</h6>
+                                            <p class="small text-muted mb-0">
+                                                This is a <strong>{{ results.swap_info.swap_length }}-year interest rate swap</strong> with a notional amount of 
+                                                <strong>${{ results.swap_info.notional|floatformat:0 }}</strong>. The swap will generate 
+                                                <strong>{{ results.swap_info.num_coupons }} coupon payments</strong> over its lifetime, 
+                                                evaluated as of <strong>{{ results.swap_info.evaluation_date }}</strong>.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Par Coupons Results -->
+                        {% if results.par_coupons %}
+                        <div class="mb-4">
+                            <div class="card border-primary">
+                                <div class="card-header bg-light">
+                                    <h6 class="fw-bold text-primary mb-0">
+                                        Par Coupons Analysis
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <small class="text-muted">Total Amount</small>
+                                            <div class="fw-bold text-primary">${{ results.par_coupons.total_amount|floatformat:2 }}</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Number of Coupons</small>
+                                            <div class="fw-bold text-primary">{{ results.par_coupons.data|length }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Debug: Show all coupon numbers -->
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <strong>Coupons available:</strong> 
+                                            {% for coupon in results.par_coupons.data %}
+                                                {{ coupon.coupon_number }}{% if not forloop.last %}, {% endif %}
+                                            {% endfor %}
+                                            <br>
+                                            <strong>Total coupons in data:</strong> {{ results.par_coupons.data|length }}
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Coupon</th>
+                                                    <th>Fixing Date</th>
+                                                    <th>Index Fixing</th>
+                                                    <th>Start Date</th>
+                                                    <th>End Date</th>
+                                                    <th>Days</th>
+                                                    <th>Accrual Period</th>
+                                                    <th>Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for coupon in results.par_coupons.data %}
+                                                <tr>
+                                                    <td>{{ coupon.coupon_number }}</td>
+                                                    <td>{{ coupon.fixing_date }}</td>
+                                                    <td>{{ coupon.rate|floatformat:6 }}</td>
+                                                    <td>{{ coupon.start_date }}</td>
+                                                    <td>{{ coupon.end_date }}</td>
+                                                    <td>{{ coupon.coupon_days }}</td>
+                                                    <td>{{ coupon.accrual_period|floatformat:5 }}</td>
+                                                    <td>${{ coupon.amount|floatformat:2 }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <!-- Dynamic Explanation for Par Coupons -->
+                                    <div class="mt-3 p-3 bg-light rounded">
+                                        <h6 class="fw-bold text-primary mb-2">What This Means:</h6>
+                                        <p class="small text-muted mb-2">
+                                            <strong>Par Coupons</strong> use the interest rate over the actual coupon period{% if results.par_coupons.data.0.coupon_days %} ({{ results.par_coupons.data.0.coupon_days }} days for the first coupon){% endif %}. 
+                                            This method provides a straightforward calculation where:
+                                        </p>
+                                        <ul class="small text-muted mb-0">
+                                            <li><strong>Rate:</strong> Applied directly over the coupon period</li>
+                                            <li><strong>Days:</strong> Actual number of days in each coupon period</li>
+                                            <li><strong>Amount:</strong> Rate × Days × Notional / 365</li>
+                                            <li><strong>Total:</strong> Sum of all coupon amounts = ${{ results.par_coupons.total_amount|floatformat:2 }}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Indexed Coupons Results -->
+                        {% if results.indexed_coupons %}
+                        <div class="mb-4">
+                            <div class="card border-primary">
+                                <div class="card-header bg-light">
+                                    <h6 class="fw-bold text-primary mb-0">
+                                        Indexed Coupons Analysis
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <small class="text-muted">Total Amount</small>
+                                            <div class="fw-bold text-primary">${{ results.indexed_coupons.total_amount|floatformat:2 }}</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Number of Coupons</small>
+                                            <div class="fw-bold text-primary">{{ results.indexed_coupons.data|length }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Debug: Show all coupon numbers -->
+                                    <div class="mb-2">
+                                        <small class="text-muted">
+                                            <strong>Coupons available:</strong> 
+                                            {% for coupon in results.indexed_coupons.data %}
+                                                {{ coupon.coupon_number }}{% if not forloop.last %}, {% endif %}
+                                            {% endfor %}
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Coupon</th>
+                                                    <th>Fixing Date</th>
+                                                    <th>Index Fixing</th>
+                                                    <th>LIBOR Start</th>
+                                                    <th>LIBOR End</th>
+                                                    <th>LIBOR Days</th>
+                                                    <th>Coupon Start</th>
+                                                    <th>Coupon End</th>
+                                                    <th>Coupon Days</th>
+                                                    <th>Accrual Period</th>
+                                                    <th>Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for coupon in results.indexed_coupons.data %}
+                                                <tr>
+                                                    <td>{{ coupon.coupon_number }}</td>
+                                                    <td>{{ coupon.fixing_date }}</td>
+                                                    <td>{{ coupon.rate|floatformat:6 }}</td>
+                                                    <td>{{ coupon.libor_start_date }}</td>
+                                                    <td>{{ coupon.libor_end_date }}</td>
+                                                    <td>{{ coupon.libor_days }}</td>
+                                                    <td>{{ coupon.coupon_start_date }}</td>
+                                                    <td>{{ coupon.coupon_end_date }}</td>
+                                                    <td>{{ coupon.coupon_days }}</td>
+                                                    <td>{{ coupon.accrual_period|floatformat:5 }}</td>
+                                                    <td>${{ coupon.amount|floatformat:2 }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <!-- Dynamic Explanation for Indexed Coupons -->
+                                    <div class="mt-3 p-3 bg-light rounded">
+                                        <h6 class="fw-bold text-primary mb-2">What This Means:</h6>
+                                        <p class="small text-muted mb-2">
+                                            <strong>Indexed Coupons</strong> use the interest rate over the LIBOR tenor period{% if results.indexed_coupons.data.0.libor_days %} ({{ results.indexed_coupons.data.0.libor_days }} days for the first coupon){% endif %}, 
+                                            which may differ from the actual coupon period{% if results.indexed_coupons.data.0.coupon_days %} ({{ results.indexed_coupons.data.0.coupon_days }} days){% endif %}. This method:
+                                        </p>
+                                        <ul class="small text-muted mb-0">
+                                            <li><strong>LIBOR Days:</strong> Period over which the rate is calculated (usually 6 months = 182-184 days)</li>
+                                            <li><strong>Coupon Days:</strong> Actual period for which the coupon is paid</li>
+                                            <li><strong>Rate:</strong> Applied over LIBOR period, then adjusted for coupon period</li>
+                                            <li><strong>Amount:</strong> Rate × Coupon Days × Notional / 365</li>
+                                            <li><strong>Total:</strong> Sum of all coupon amounts = ${{ results.indexed_coupons.total_amount|floatformat:2 }}</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Comparison Results -->
+                        {% if results.comparison %}
+                        <div class="mb-4">
+                            <div class="card border-primary">
+                                <div class="card-header bg-light">
+                                    <h6 class="fw-bold text-primary mb-0">
+                                        Comparison Analysis
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-6">
+                                            <small class="text-muted">Max Rate Difference</small>
+                                            <div class="fw-bold text-primary">{{ results.comparison.max_rate_difference|floatformat:6 }}</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Total Amount Difference</small>
+                                            <div class="fw-bold text-primary">${{ results.comparison.total_amount_difference|floatformat:2 }}</div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Coupon</th>
+                                                    <th>Rate Diff</th>
+                                                    <th>Days Diff</th>
+                                                    <th>Amount Diff</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for comp in results.comparison.data %}
+                                                <tr>
+                                                    <td>{{ comp.coupon_number }}</td>
+                                                    <td>{{ comp.rate_difference|floatformat:6 }}</td>
+                                                    <td>{{ comp.days_difference }}</td>
+                                                    <td>${{ comp.amount_difference|floatformat:2 }}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <!-- Dynamic Explanation for Comparison -->
+                                    <div class="mt-3 p-3 bg-light rounded">
+                                        <h6 class="fw-bold text-primary mb-2">What This Means:</h6>
+                                        <p class="small text-muted mb-2">
+                                            <strong>Comparison Analysis</strong> shows the differences between Par and Indexed coupon methods. 
+                                            The total difference of <strong>${{ results.comparison.total_amount_difference|floatformat:2 }}</strong> represents:
+                                        </p>
+                                        <ul class="small text-muted mb-2">
+                                            <li><strong>Rate Difference:</strong> How much the interest rates differ between methods (max: {{ results.comparison.max_rate_difference|floatformat:6 }})</li>
+                                            <li><strong>Days Difference:</strong> Difference in day count conventions between methods</li>
+                                            <li><strong>Amount Difference:</strong> Financial impact of using different calculation methods</li>
+                                        </ul>
+                                        {% if results.comparison.total_amount_difference > 0 %}
+                                        <div class="alert alert-warning border-0 p-2 mb-0">
+                                            <small class="text-warning">
+                                                <strong>Par coupons result in higher amounts</strong> - the indexed method is more conservative.
+                                            </small>
+                                        </div>
+                                        {% elif results.comparison.total_amount_difference < 0 %}
+                                        <div class="alert alert-info border-0 p-2 mb-0">
+                                            <small class="text-info">
+                                                <strong>Indexed coupons result in higher amounts</strong> - the par method is more conservative.
+                                            </small>
+                                        </div>
+                                        {% else %}
+                                        <div class="alert alert-success border-0 p-2 mb-0">
+                                            <small class="text-success">
+                                                <strong>Both methods give identical results</strong> - no difference in this case.
+                                            </small>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <!-- Explanation Section -->
+                        <div class="mt-4">
+                            <div class="card border-0 bg-light">
+                                <div class="card-body p-4">
+                                    <h5 class="fw-bold text-dark mb-3">
+                                        Understanding the Results
+                                    </h5>
+                                    
+                                    <div class="row g-4">
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-white rounded border">
+                                                <h6 class="fw-bold text-primary mb-2">Par Coupons</h6>
+                                                <p class="small text-muted mb-2">
+                                                    Par coupons use the rate over the actual coupon period, providing a straightforward calculation method.
+                                                </p>
+                                                <ul class="small text-muted mb-0">
+                                                    <li><strong>Simple:</strong> Rate × Days in coupon period</li>
+                                                    <li><strong>Direct:</strong> No complex adjustments needed</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-6">
+                                            <div class="p-3 bg-white rounded border">
+                                                <h6 class="fw-bold text-primary mb-2">Indexed Coupons</h6>
+                                                <p class="small text-muted mb-2">
+                                                    Indexed coupons use the rate over the LIBOR tenor period, which may differ from the coupon period.
+                                                </p>
+                                                <ul class="small text-muted mb-0">
+                                                    <li><strong>Complex:</strong> Rate × Days in LIBOR period</li>
+                                                    <li><strong>Realistic:</strong> Matches market conventions</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-3 p-3 bg-primary text-white rounded">
+                                        <h6 class="fw-bold text-white mb-2">Key Insights</h6>
+                                        <p class="small text-white mb-0">
+                                            <strong>The difference between methods:</strong> Shows how day count conventions and rate application periods affect swap pricing. 
+                                            This is crucial for accurate risk management and pricing in real-world financial markets.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    {% else %}
+                        <div class="text-center py-5">
+                            <h5 class="fw-bold text-muted mb-3">Ready to Analyze</h5>
+                            <p class="text-muted mb-4">
+                                Enter the parameters above and click "Run Swap Analysis" to see the results.
+                            </p>
+                            <div class="alert alert-light border-0">
+                                <small class="text-muted">
+                                    <strong>Tip:</strong> Start with the default values to see the book's example, then experiment with different parameters.
+                                </small>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3 text-center">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list-ul me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('swapAnalysisForm');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    
+    if (form && analyzeBtn) {
+        form.addEventListener('submit', function() {
+            // Disable button and show loading state
+            analyzeBtn.disabled = true;
+            analyzeBtn.innerHTML = 'Analyzing...';
+            
+            // Re-enable button after 10 seconds as fallback
+            setTimeout(function() {
+                analyzeBtn.disabled = false;
+                analyzeBtn.innerHTML = 'Run Swap Analysis';
+            }, 10000);
+        });
+    }
+});
+</script>
+{% endblock %}

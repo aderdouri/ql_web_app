@@ -1,0 +1,651 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}Hull-White Monte Carlo Convergence - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi bi-cpu me-3"></i>16. Hull-White Model Convergence Lab
+                            </h1>
+                            <p class="card-text lead mb-0">Interactive analysis of Monte Carlo simulation convergence for the Hull-White model</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'interest_rate_models:chapter16_mc_convergence:description' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Description
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Introduction Card -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="fw-bold text-primary mb-0">
+                        <i class="bi bi-lightbulb me-2"></i>What is Monte Carlo Convergence?
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info mb-0">
+                        <p class="mb-0">
+                            <strong>Monte Carlo convergence</strong> measures the accuracy of numerical simulations. 
+                            The higher the number of simulated paths, the closer the results get to theory. 
+                            This page allows you to explore how Hull-White model parameters affect this convergence.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Input Form -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-sliders me-2"></i>Convergence Analysis Parameters
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="convergenceForm" method="post" action="{% url 'interest_rate_models:chapter16_mc_convergence:convergence_lab' %}">
+                        {% csrf_token %}
+                        
+                        <!-- Experiment Type -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-gear me-2"></i>Experiment Type
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Choose the type of analysis:</strong><br>
+                                        • <strong>Impact of σ</strong>: Vary volatility with fixed a<br>
+                                        • <strong>Impact of a</strong>: Vary mean reversion with fixed σ<br>
+                                        • <strong>Standard Deviation</strong>: Compare empirical vs theoretical
+                                    </small>
+                                </div>
+                                {{ form.experiment_type|as_crispy_field }}
+                            </div>
+                        </div>
+
+                        <!-- Hull-White Model Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-sliders me-2"></i>Hull-White Model Parameters
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Key parameters:</strong> These values control the behavior of the Hull-White model
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ form.a|as_crispy_field }}
+                                        <div class="form-text">
+                                            <strong>a (Mean Reversion):</strong> Speed at which interest rates return to their mean. 
+                                            The higher a is, the faster the mean reversion.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.sigma|as_crispy_field }}
+                                        <div class="form-text">
+                                            <strong>σ (Volatility):</strong> Measures the amplitude of interest rate fluctuations. 
+                                            The higher σ is, the more volatile the rates are.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Simulation Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-cpu me-2"></i>Simulation Parameters
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-warning mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Performance Tips:</strong><br>
+                                        • <strong>100 paths</strong> = Fast (~1-2 seconds)<br>
+                                        • <strong>500 paths</strong> = Medium (~5-10 seconds)<br>
+                                        • <strong>1000+ paths</strong> = Slow but more accurate (~30+ seconds)
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        {{ form.num_paths|as_crispy_field }}
+                                        <div class="form-text">
+                                            <strong>Number of paths:</strong> The more paths, the more accurate the simulation but the longer it takes.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.time_steps|as_crispy_field }}
+                                        <div class="form-text">
+                                            <strong>Time steps:</strong> Number of discretization points in time. The more steps, the more accurate the simulation.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.simulation_length|as_crispy_field }}
+                                        <div class="form-text">
+                                            <strong>Duration (years):</strong> Time horizon of the simulation. The longer the duration, the more error can accumulate.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-tools me-2"></i>Additional Parameters
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ form.forward_rate|as_crispy_field }}
+                                        <div class="form-text">
+                                            <strong>Forward rate:</strong> Initial interest rate used to build the yield curve.
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.random_seed|as_crispy_field }}
+                                        <div class="form-text">
+                                            <strong>Random seed:</strong> Allows reproducing the same results (for reproducibility).
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid mt-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-play-circle me-2"></i>Run Analysis
+                            </button>
+                        </div>
+                        
+                        <!-- Hidden fields -->
+                        {% for field in form %}
+                            {% if field.is_hidden %}
+                                {{ field }}
+                            {% endif %}
+                        {% endfor %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row g-3 mt-2">
+        <div class="col-12">
+            <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+            <div id="results-wrapper" class="card" style="display: none;">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-graph-up me-2"></i><span id="chart-title">Convergence Analysis Results</span>
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <canvas id="convergenceChart" style="max-height: 500px;"></canvas>
+                    </div>
+                    
+                    <!-- Dynamic Analysis -->
+                    <div id="dynamic-explanation" class="card mt-4">
+                        <div class="card-header bg-light">
+                            <h6 class="fw-bold text-primary mb-0">
+                                <i class="bi bi-info-circle me-2"></i>Analyse des Résultats
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="explanation-content">
+                                <!-- Le contenu sera généré dynamiquement par JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technical Glossary -->
+    <div class="row mt-2">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title fw-bold mb-0">
+                        <i class="bi bi-book me-2"></i>Technical Glossary
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Convergence Error</h6>
+                                <p class="small text-muted mb-0">Difference between theoretical value and Monte Carlo simulated value</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Discount Factor</h6>
+                                <p class="small text-muted mb-0">Present value of one euro received in the future, calculated with interest rates</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Monte Carlo Simulation</h6>
+                                <p class="small text-muted mb-0">Numerical method using random numbers to solve complex problems</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Mean Reversion</h6>
+                                <p class="small text-muted mb-0">Tendency of interest rates to return to their long-term average level</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Volatility</h6>
+                                <p class="small text-muted mb-0">Measure of the amplitude of interest rate fluctuations over time</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="border rounded p-2 h-100">
+                                <h6 class="fw-bold text-primary mb-1">Standard Deviation</h6>
+                                <p class="small text-muted mb-0">Statistical measure of the dispersion of values around the mean</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if results_json %}
+        {{ results_json|json_script:"initial-data" }}
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Wait for Chart.js to be loaded
+        if (typeof Chart === 'undefined') {
+            console.error("Chart.js not loaded");
+            return;
+        }
+        
+        const form = document.getElementById('convergenceForm');
+        const errorContainer = document.getElementById('error-container');
+        const resultsWrapper = document.getElementById('results-wrapper');
+        
+        // Ensure all required elements exist
+        if (!form || !errorContainer || !resultsWrapper) {
+            console.error("Required elements not found:", {
+                form: !!form,
+                errorContainer: !!errorContainer,
+                resultsWrapper: !!resultsWrapper
+            });
+            return;
+        }
+        
+        let convergenceChart;
+
+        function generateDynamicExplanation(data) {
+            const explanationContent = document.getElementById('explanation-content');
+            if (!explanationContent) {
+                console.error("explanation-content element not found");
+                return;
+            }
+            let explanation = '';
+            
+            if (data.experiment_type === 'vary_sigma') {
+                explanation = `
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading"><i class="bi bi-graph-up me-2"></i>Analysis of Volatility Impact (σ)</h6>
+                        <ul class="mb-2">
+                            <li>This chart shows how <strong>volatility</strong> affects convergence error</li>
+                            <li>The higher σ is, the more error increases with time</li>
+                            <li>For low σ (0.01), convergence is excellent</li>
+                            <li>For high σ (0.10), error can become significant over long periods</li>
+                        </ul>
+                        <p class="mb-0"><strong>Interpretation:</strong> High volatility makes Monte Carlo simulations less reliable, 
+                        especially for long time horizons.</p>
+                    </div>
+                `;
+            } else if (data.experiment_type === 'vary_a') {
+                explanation = `
+                    <div class="alert alert-success">
+                        <h6 class="alert-heading"><i class="bi bi-arrow-repeat me-2"></i>Analysis of Mean Reversion Impact (a)</h6>
+                        <ul class="mb-2">
+                            <li>This chart shows how <strong>mean reversion</strong> affects error</li>
+                            <li>The higher a is, the more error decreases</li>
+                            <li>For low a (0.10), error can be significant</li>
+                            <li>For high a (0.50), convergence is excellent</li>
+                        </ul>
+                        <p class="mb-0"><strong>Interpretation:</strong> Strong mean reversion (high a) improves the stability 
+                        of Monte Carlo simulations.</p>
+                    </div>
+                `;
+            } else if (data.experiment_type === 'std_dev') {
+                explanation = `
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading"><i class="bi bi-bar-chart me-2"></i>Analysis of Discount Factor Standard Deviation</h6>
+                        <ul class="mb-2">
+                            <li>The <strong>Empirical</strong> curve (blue) shows standard deviation calculated from simulations</li>
+                            <li>The <strong>Theoretical</strong> curve (orange) shows standard deviation calculated by mathematical formula</li>
+                            <li>Agreement between the two curves validates simulation quality</li>
+                            <li>Standard deviation increases with time, reflecting growing uncertainty</li>
+                        </ul>
+                        <p class="mb-0"><strong>Interpretation:</strong> Good agreement between empirical and theoretical confirms that 
+                        the Monte Carlo simulation is correctly implemented.</p>
+                    </div>
+                `;
+            }
+            
+            explanationContent.innerHTML = explanation;
+        }
+
+        function renderChart(data) {
+            const resultsWrapper = document.getElementById('results-wrapper');
+            const errorContainer = document.getElementById('error-container');
+            const chartTitle = document.getElementById('chart-title');
+
+            if (!resultsWrapper || !errorContainer || !chartTitle) {
+                console.error("Required elements not found in renderChart:", {
+                    resultsWrapper: !!resultsWrapper,
+                    errorContainer: !!errorContainer,
+                    chartTitle: !!chartTitle
+                });
+                return;
+            }
+
+            resultsWrapper.style.display = 'block';
+            errorContainer.style.display = 'none';
+            
+            const titleMap = {
+                'vary_sigma': 'Discount Factor Error - Varying σ',
+                'vary_a': 'Discount Factor Error - Varying a',
+                'std_dev': 'Standard Deviation of Discount Factors'
+            };
+            chartTitle.innerText = titleMap[data.experiment_type] || 'Convergence Analysis';
+            
+            // Générer les explications dynamiques
+            generateDynamicExplanation(data);
+
+            // ==============================================================================
+            // CORRECTION : Le JavaScript gère maintenant les deux types de données
+            // ==============================================================================
+            let datasets, yLabel;
+            if (data.experiment_type === 'std_dev') {
+                datasets = data.plots.map((plot, i) => ({
+                    label: plot.label,
+                    data: plot.values,
+                    borderColor: ['rgb(54, 162, 235)', 'rgb(255, 159, 64)'][i],
+                    borderDash: i === 0 ? [5, 5] : [],
+                    borderWidth: i === 0 ? 3 : 2,
+                    pointRadius: 0, tension: 0.1
+                }));
+                yLabel = 'Standard Deviation (%)';
+            } else {
+                datasets = data.plots.map((plot, i) => ({
+                    label: plot.label,
+                    data: plot.error,
+                    borderColor: `hsla(${i * 60}, 70%, 50%, 0.8)`,
+                    borderWidth: 2, pointRadius: 0, tension: 0.1
+                }));
+                yLabel = 'Convergence Error';
+            }
+            
+            const timeLabels = data.plots[0].time.map(t => t.toFixed(2));
+
+            if (convergenceChart) { convergenceChart.destroy(); }
+            const ctx = document.getElementById('convergenceChart').getContext('2d');
+            convergenceChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: timeLabels, datasets: datasets },
+                options: { 
+                    scales: { 
+                        x: { title: {display: true, text: 'T (years)'} }, 
+                        y: { title: {display: true, text: yLabel}} 
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    plugins: {
+                        tooltip: {
+                            enabled: true,
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                title: function(context) {
+                                    return 'Time: ' + context[0].label + ' years';
+                                },
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y.toFixed(6);
+                                }
+                            }
+                        },
+                        legend: {
+                            onClick: function(e, legendItem, legend) {
+                                const index = legendItem.datasetIndex;
+                                const chart = legend.chart;
+                                const meta = chart.getDatasetMeta(index);
+                                meta.hidden = meta.hidden === null ? !chart.data.datasets[index].hidden : null;
+                                chart.update();
+                            }
+                        }
+                    },
+                    onClick: function(event, elements) {
+                        if (elements.length > 0) {
+                            const element = elements[0];
+                            const datasetIndex = element.datasetIndex;
+                            const dataIndex = element.index;
+                            const dataset = this.data.datasets[datasetIndex];
+                            const value = dataset.data[dataIndex];
+                            const label = dataset.label;
+                            const time = this.data.labels[dataIndex];
+                            
+                            alert(`${label}\nTime: ${time} years\nValue: ${value.toFixed(6)}`);
+                        }
+                    }
+                }
+            });
+        }
+        
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                const resultsWrapper = document.getElementById('results-wrapper');
+                const errorContainer = document.getElementById('error-container');
+                
+                // Show loading state
+                resultsWrapper.style.display = 'block';
+                errorContainer.style.display = 'none';
+                resultsWrapper.innerHTML = `
+                    <div class="card-header">
+                        <h3 class="card-title fw-bold mb-0">
+                            <i class="bi bi-graph-up me-2"></i>Convergence Analysis Results
+                        </h3>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-3">Running analysis...</p>
+                    </div>
+                `;
+                
+                const formData = new FormData(form);
+                console.log('Form data being sent:', Object.fromEntries(formData));
+                
+                fetch(form.action, {
+                    method: 'POST', 
+                    body: new URLSearchParams(formData),
+                    headers: { 
+                        'X-Requested-With': 'XMLHttpRequest', 
+                        'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value 
+                    }
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Response data:', data);
+                    if (data.error) {
+                        let errorMessage = `Error: ${data.error}`;
+                        if (data.form_errors) {
+                            errorMessage += '\nForm errors: ' + JSON.stringify(data.form_errors);
+                        }
+                        errorContainer.innerText = errorMessage;
+                        errorContainer.style.display = 'block';
+                        resultsWrapper.style.display = 'none';
+                    } else {
+                        // Restore the proper structure before rendering chart
+                        resultsWrapper.innerHTML = `
+                            <div class="card-header">
+                                <h3 class="card-title fw-bold mb-0">
+                                    <i class="bi bi-graph-up me-2"></i><span id="chart-title">Convergence Analysis Results</span>
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="text-center mb-4">
+                                    <canvas id="convergenceChart" style="max-height: 500px;"></canvas>
+                                </div>
+                                
+                                <!-- Dynamic Analysis -->
+                                <div id="dynamic-explanation" class="card mt-4">
+                                    <div class="card-header bg-light">
+                                        <h6 class="fw-bold text-primary mb-0">
+                                            <i class="bi bi-info-circle me-2"></i>Results Analysis
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="explanation-content">
+                                            <!-- Content will be generated dynamically by JavaScript -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        renderChart(data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Fetch error:', error);
+                    errorContainer.innerText = `Network error: ${error.message}`;
+                    errorContainer.style.display = 'block';
+                    resultsWrapper.style.display = 'none';
+                });
+            });
+
+        // Auto-load initial data on page load
+        function loadInitialData() {
+            const formData = new FormData(form);
+            fetch(form.action, {
+                method: 'POST', 
+                body: new URLSearchParams(formData),
+                headers: { 
+                    'X-Requested-With': 'XMLHttpRequest', 
+                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value 
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.error) {
+                    renderChart(data);
+                } else {
+                    // Show error if there is one
+                    const errorContainer = document.getElementById('error-container');
+                    if (errorContainer) {
+                        errorContainer.innerText = `Error: ${data.error}`;
+                        errorContainer.style.display = 'block';
+                    }
+                }
+            })
+            .catch(error => {
+                console.error("Failed to load initial data:", error);
+                const errorContainer = document.getElementById('error-container');
+                if (errorContainer) {
+                    errorContainer.innerText = `Network error: ${error.message}`;
+                    errorContainer.style.display = 'block';
+                }
+            });
+        }
+
+        // Try to load initial data from server-side data first
+        const initialDataEl = document.getElementById('initial-data');
+        if(initialDataEl) {
+            try {
+                const initialData = JSON.parse(initialDataEl.textContent);
+                if (!initialData.error && initialData.plots && initialData.plots.length > 0) {
+                    console.log("Loading initial data from server");
+                    renderChart(initialData);
+                } else {
+                    console.log("No valid initial data, loading with form defaults");
+                    setTimeout(loadInitialData, 1000);
+                }
+            } catch (e) { 
+                console.error("Failed to parse initial data:", e);
+                setTimeout(loadInitialData, 1000);
+            }
+        } else {
+            console.log("No initial data element, loading with form defaults");
+            setTimeout(loadInitialData, 1000);
+        }
+    });
+</script>
+{% endblock %}

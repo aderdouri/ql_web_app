@@ -1,0 +1,530 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+<!-- Updated: 2025-10-16 16:06 - Vertical Layout -->
+
+{% block title %}Hull-White Simulation Lab - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi bi-graph-up-arrow me-3"></i>Hull-White Simulation Lab
+                            </h1>
+                            <p class="card-text lead mb-0">Interactive laboratory to simulate short-rate paths and compare with theoretical properties using the Hull-White model.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Chapters
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Form -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-sliders me-2"></i>Simulation Parameters
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="hwForm" method="post" action="{% url 'interest_rate_models:chapter15_hull_white:simulation' %}">
+                        {% csrf_token %}
+                        
+                        <!-- Hull-White Model Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-calculator me-2"></i>Hull-White Model Parameters
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>What is the Hull-White model?</strong> The Hull-White model is a mathematical framework for modeling interest rates. It captures two key behaviors: mean reversion (rates tend to return to a long-term average) and volatility (rates fluctuate randomly).
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        {{ form.sigma|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.a|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.forward_rate|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Simulation Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-graph-up me-2"></i>Simulation Parameters
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Monte Carlo Simulation:</strong> We generate thousands of possible future interest rate scenarios to understand the model's behavior. More paths and time steps give more accurate results but take longer to compute.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        {{ form.timestep|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.simulation_length|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.num_paths|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Randomization -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-shuffle me-2"></i>Randomization
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-warning mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Random Seed:</strong> This controls the random number generation. Using the same seed gives reproducible results, which is useful for testing and comparison. Different seeds will produce different but equally valid simulations.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+        <div class="col-md-4">
+                                        {{ form.random_seed|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden fields -->
+                        {% for field in form %}
+                            {% if field.is_hidden %}
+                                {{ field }}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <div class="d-grid mt-3">
+                            <button type="button" id="runSimBtn" class="btn btn-primary btn-lg">
+                                <i class="bi bi-play-circle me-2"></i>Run Simulation
+                            </button>
+                        </div>
+                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+            
+    <!-- Results Section -->
+    <div class="row g-3 mt-2">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Simulation Results
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+                    <div id="spinner" class="text-center py-5" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Simulating...</span>
+                        </div>
+                        <p class="mt-2">Simulation in progress...</p>
+                    </div>
+                    
+                    <div id="results-wrapper" style="display: block; width: 100%;">
+                        <!-- Dynamic Analysis Section -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="fw-bold text-primary mb-0">
+                                            <i class="bi bi-lightbulb me-2"></i>Analysis of Results
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="dynamic-analysis">
+                        <div class="alert alert-info">
+                                                <h6 class="alert-heading">
+                                                    <i class="bi bi-info-circle me-2"></i>Understanding Your Simulation
+                                                </h6>
+                                                <p class="mb-2">Based on your current parameters:</p>
+                                                <ul class="mb-0" id="parameter-analysis">
+                                                    <!-- Dynamic content will be inserted here -->
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Simulation Paths Chart -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="fw-bold text-primary mb-0">
+                                            <i class="bi bi-graph-up me-2"></i>Hull-White Short Rate Simulation (10 Paths)
+                                        </h5>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <div class="alert alert-info mb-4">
+                                            <small>
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                <strong>Understanding the Paths:</strong> Each colored line represents a possible future scenario for interest rates. The paths show how rates might evolve over time, with some going up, some going down, and some staying relatively stable.
+                                            </small>
+                                        </div>
+                                            <div class="chart-container" style="position: relative; height: 500px; width: 100%; margin: 20px auto; display: flex; justify-content: center; align-items: center;">
+                                                <canvas id="pathsChart" style="max-width: 100%; max-height: 100%;"></canvas>
+                                            </div>
+                                        <div class="alert alert-light mt-3" id="paths-explanation">
+                                            <h6 class="alert-heading">
+                                                <i class="bi bi-graph-up me-2"></i>What You're Seeing
+                                            </h6>
+                                            <p class="mb-0" id="paths-analysis">
+                                                <!-- Dynamic explanation will be inserted here -->
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mean Chart -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="fw-bold text-primary mb-0">
+                                            <i class="bi bi-bar-chart me-2"></i>Mean of Short Rates
+                                        </h5>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <div class="alert alert-info mb-4">
+                                            <small>
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                <strong>Mean Comparison:</strong> The dashed line shows the average of all simulated paths, while the solid line shows the theoretical mean from the Hull-White model. They should be very close if the simulation is working correctly.
+                                            </small>
+                                        </div>
+                                            <div class="chart-container" style="position: relative; height: 500px; width: 100%; margin: 20px auto; display: flex; justify-content: center; align-items: center;">
+                                                <canvas id="meanChart" style="max-width: 100%; max-height: 100%;"></canvas>
+                                            </div>
+                                        <div class="alert alert-light mt-3" id="mean-explanation">
+                                            <h6 class="alert-heading">
+                                                <i class="bi bi-bar-chart me-2"></i>What This Means
+                                            </h6>
+                                            <p class="mb-0" id="mean-analysis">
+                                                <!-- Dynamic explanation will be inserted here -->
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Variance Chart -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="fw-bold text-primary mb-0">
+                                            <i class="bi bi-graph-down me-2"></i>Variance of Short Rates
+                                        </h5>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <div class="alert alert-info mb-4">
+                                            <small>
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                <strong>Variance Comparison:</strong> The dashed line shows the variance (spread) of all simulated paths, while the solid line shows the theoretical variance. This measures how much the rates vary around their mean.
+                                            </small>
+                                        </div>
+                                            <div class="chart-container" style="position: relative; height: 500px; width: 100%; margin: 20px auto; display: flex; justify-content: center; align-items: center;">
+                                                <canvas id="varianceChart" style="max-width: 100%; max-height: 100%;"></canvas>
+                                            </div>
+                                        <div class="alert alert-light mt-3" id="variance-explanation">
+                                            <h6 class="alert-heading">
+                                                <i class="bi bi-graph-down me-2"></i>What This Shows
+                                            </h6>
+                                            <p class="mb-0" id="variance-analysis">
+                                                <!-- Dynamic explanation will be inserted here -->
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Chart === 'undefined') { return; }
+
+        const form = document.getElementById('hwForm');
+        const runBtn = document.getElementById('runSimBtn');
+        const spinner = document.getElementById('spinner');
+        const errorContainer = document.getElementById('error-container');
+        const resultsWrapper = document.getElementById('results-wrapper');
+        
+        let pathsChart, meanChart, varianceChart;
+
+        function generateDynamicAnalysis(data, formData) {
+            // Get current form values
+            const sigma = parseFloat(formData.get('sigma') || 0.1);
+            const a = parseFloat(formData.get('a') || 0.1);
+            const timestep = parseInt(formData.get('timestep') || 360);
+            const simulationLength = parseInt(formData.get('simulation_length') || 30);
+            const numPaths = parseInt(formData.get('num_paths') || 1000);
+            const forwardRate = parseFloat(formData.get('forward_rate') || 0.05);
+
+            // Calculate some statistics
+            const finalMean = data.analysis.simulated_mean[data.analysis.simulated_mean.length - 1];
+            const finalVariance = data.analysis.simulated_variance[data.analysis.simulated_variance.length - 1];
+            const maxRate = Math.max(...data.simulation_paths.flat());
+            const minRate = Math.min(...data.simulation_paths.flat());
+            const rateSpread = maxRate - minRate;
+
+            // Generate parameter analysis
+            generateParameterAnalysis(sigma, a, timestep, simulationLength, numPaths, maxRate, minRate, rateSpread);
+            
+            // Generate explanations for each graph
+            generatePathsExplanation(data, sigma, a, maxRate, minRate, rateSpread);
+            generateMeanExplanation(data, finalMean, sigma, a);
+            generateVarianceExplanation(data, finalVariance, sigma, a);
+        }
+
+        function generateParameterAnalysis(sigma, a, timestep, simulationLength, numPaths, maxRate, minRate, rateSpread) {
+            const parameterAnalysis = document.getElementById('parameter-analysis');
+            parameterAnalysis.innerHTML = `
+                <li><strong>Volatility (σ = ${sigma}):</strong> ${sigma > 0.15 ? 'High volatility - rates will fluctuate significantly' : sigma > 0.08 ? 'Moderate volatility - balanced rate movements' : 'Low volatility - rates will be relatively stable'}</li>
+                <li><strong>Mean Reversion (a = ${a}):</strong> ${a > 0.2 ? 'Strong mean reversion - rates quickly return to long-term average' : a > 0.05 ? 'Moderate mean reversion - gradual return to average' : 'Weak mean reversion - rates drift more freely'}</li>
+                <li><strong>Simulation Scale:</strong> ${numPaths} paths over ${simulationLength} years with ${timestep} time steps (${(timestep/simulationLength).toFixed(1)} steps per year)</li>
+                <li><strong>Rate Range:</strong> Simulated rates range from ${minRate.toFixed(3)} to ${maxRate.toFixed(3)} (${((maxRate-minRate)*100).toFixed(1)}% spread)</li>
+            `;
+        }
+
+        function generatePathsExplanation(data, sigma, a, maxRate, minRate, rateSpread) {
+            const pathsAnalysis = document.getElementById('paths-analysis');
+            
+            let explanation = `With your current parameters (σ=${sigma}, a=${a}), the simulation shows `;
+            
+            if (rateSpread > 0.5) {
+                explanation += `high variability in interest rates, ranging from ${minRate.toFixed(3)} to ${maxRate.toFixed(3)}. `;
+            } else if (rateSpread > 0.2) {
+                explanation += `moderate variability in interest rates, ranging from ${minRate.toFixed(3)} to ${maxRate.toFixed(3)}. `;
+            } else {
+                explanation += `low variability in interest rates, ranging from ${minRate.toFixed(3)} to ${maxRate.toFixed(3)}. `;
+            }
+            
+            if (sigma > 0.15) {
+                explanation += `The high volatility (σ=${sigma}) creates wide fluctuations, while `;
+            } else if (sigma > 0.08) {
+                explanation += `The moderate volatility (σ=${sigma}) creates balanced movements, while `;
+            } else {
+                explanation += `The low volatility (σ=${sigma}) keeps rates relatively stable, while `;
+            }
+            
+            if (a > 0.2) {
+                explanation += `strong mean reversion (a=${a}) pulls rates back toward the long-term average.`;
+            } else if (a > 0.05) {
+                explanation += `moderate mean reversion (a=${a}) gradually returns rates to the average.`;
+            } else {
+                explanation += `weak mean reversion (a=${a}) allows rates to drift more freely.`;
+            }
+            
+            pathsAnalysis.innerHTML = explanation;
+        }
+
+        function generateMeanExplanation(data, finalMean, sigma, a) {
+            const meanAnalysis = document.getElementById('mean-analysis');
+            const theoreticalMean = data.analysis.theoretical_mean[data.analysis.theoretical_mean.length - 1];
+            const meanError = Math.abs(finalMean - theoreticalMean);
+            
+            let explanation = `The mean comparison shows how well your simulation matches the theoretical Hull-White model. `;
+            
+            if (meanError < 0.01) {
+                explanation += `Excellent agreement! Your simulated mean (${finalMean.toFixed(4)}) is very close to the theoretical mean (${theoreticalMean.toFixed(4)}), `;
+            } else if (meanError < 0.05) {
+                explanation += `Good agreement! Your simulated mean (${finalMean.toFixed(4)}) closely matches the theoretical mean (${theoreticalMean.toFixed(4)}), `;
+            } else {
+                explanation += `Some discrepancy exists. Your simulated mean (${finalMean.toFixed(4)}) differs from the theoretical mean (${theoreticalMean.toFixed(4)}), `;
+            }
+            
+            explanation += `indicating that the Hull-White model is working correctly with your parameters. The mean reversion parameter (a=${a}) controls how quickly rates return to the long-term average.`;
+            
+            meanAnalysis.innerHTML = explanation;
+        }
+
+        function generateVarianceExplanation(data, finalVariance, sigma, a) {
+            const varianceAnalysis = document.getElementById('variance-analysis');
+            const theoreticalVariance = data.analysis.theoretical_variance[data.analysis.theoretical_variance.length - 1];
+            const varianceError = Math.abs(finalVariance - theoreticalVariance);
+            
+            let explanation = `The variance comparison measures the spread of interest rates around their mean. `;
+            
+            if (varianceError < 0.001) {
+                explanation += `Perfect match! Your simulated variance (${finalVariance.toFixed(6)}) exactly matches the theoretical variance (${theoreticalVariance.toFixed(6)}), `;
+            } else if (varianceError < 0.005) {
+                explanation += `Very close! Your simulated variance (${finalVariance.toFixed(6)}) closely matches the theoretical variance (${theoreticalVariance.toFixed(6)}), `;
+            } else {
+                explanation += `Some difference exists. Your simulated variance (${finalVariance.toFixed(6)}) differs from the theoretical variance (${theoreticalVariance.toFixed(6)}), `;
+            }
+            
+            explanation += `showing how the volatility parameter (σ=${sigma}) controls the uncertainty in future interest rates. Higher volatility creates more spread, while mean reversion (a=${a}) helps stabilize the variance over time.`;
+            
+            varianceAnalysis.innerHTML = explanation;
+        }
+
+        function updateCharts(data) {
+            const timeGrid = data.time_grid;
+            
+            // ==============================================================================
+            // CORRECTION : On formate les labels de l'axe X pour être lisibles
+            // ==============================================================================
+            const timeLabels = timeGrid.map(t => Math.round(t));
+
+            // Paths Chart
+            const pathsCtx = document.getElementById('pathsChart').getContext('2d');
+            const pathColors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'];
+            const pathDatasets = data.simulation_paths.map((path, i) => ({
+                label: `Path ${i + 1}`, data: path,
+                borderColor: pathColors[i % pathColors.length],
+                borderWidth: 0.8, pointRadius: 0, tension: 0.1
+            }));
+            if (pathsChart && typeof pathsChart.destroy === 'function') {
+                pathsChart.destroy();
+            }
+                pathsChart = new Chart(pathsCtx, {
+                    type: 'line',
+                    data: { labels: timeLabels, datasets: pathDatasets },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } }, 
+                        scales: { x: { title: {display: true, text: 'Temps (années)'} }} 
+                    }
+                });
+
+            // Mean Chart
+            const meanCtx = document.getElementById('meanChart').getContext('2d');
+            if (meanChart && typeof meanChart.destroy === 'function') {
+                meanChart.destroy();
+            }
+                meanChart = new Chart(meanCtx, {
+                    type: 'line', 
+                    data: { labels: timeLabels, datasets: [
+                        { label: 'Simulée', data: data.analysis.simulated_mean, borderColor: 'rgb(54, 162, 235)', borderWidth: 3, borderDash: [5, 5], pointRadius: 0 },
+                        { label: 'Théorique', data: data.analysis.theoretical_mean, borderColor: 'rgb(255, 159, 64)', borderWidth: 2, pointRadius: 0, tension: 0.1 }
+                    ]}, 
+                    options: { 
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { x: { title: {display: true, text: 'Temps (années)'} }} 
+                    }
+                });
+
+            // Variance Chart
+            const varianceCtx = document.getElementById('varianceChart').getContext('2d');
+            if (varianceChart && typeof varianceChart.destroy === 'function') {
+                varianceChart.destroy();
+            }
+                varianceChart = new Chart(varianceCtx, {
+                    type: 'line', 
+                    data: { labels: timeLabels, datasets: [
+                        { label: 'Simulée', data: data.analysis.simulated_variance, borderColor: 'rgb(54, 162, 235)', borderWidth: 3, borderDash: [5, 5], pointRadius: 0 },
+                        { label: 'Théorique', data: data.analysis.theoretical_variance, borderColor: 'rgb(255, 159, 64)', borderWidth: 2, pointRadius: 0, tension: 0.1 }
+                    ]}, 
+                    options: { 
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: { x: { title: {display: true, text: 'Temps (années)'} }} 
+                    }
+                });
+        }
+        
+        function triggerUpdate() {
+            spinner.style.display = 'block';
+            resultsWrapper.style.display = 'none';
+            errorContainer.style.display = 'none';
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST', body: new URLSearchParams(formData),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                spinner.style.display = 'none';
+                if (data.error) {
+                    errorContainer.innerText = `Erreur: ${data.error}`;
+                    errorContainer.style.display = 'block';
+                } else {
+                    resultsWrapper.style.display = 'block';
+                    updateCharts(data);
+                    generateDynamicAnalysis(data, formData);
+                }
+            });
+        }
+        
+        runBtn.addEventListener('click', triggerUpdate);
+        
+        // Initial load
+        triggerUpdate();
+    });
+    </script>
+{% endblock %}

@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+<!-- Updated: 2025-10-16 16:30 - Monte Carlo Convergence Lab -->
+
+{% block title %}Monte Carlo Convergence Lab - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi bi-cpu me-3"></i>Monte Carlo Convergence Lab
+                            </h1>
+                            <p class="card-text lead mb-0">Interactive laboratory to analyze convergence properties and numerical stability in Monte Carlo simulations for the Hull-White model.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'interest_rate_models:chapter16_mc_convergence:description' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Description
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Form -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-sliders me-2"></i>Convergence Analysis Parameters
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="convergenceForm" method="post" action="{% url 'interest_rate_models:chapter16_mc_convergence:convergence_lab' %}">
+                        {% csrf_token %}
+                        
+                        <!-- Experiment Type -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-flask me-2"></i>Experiment Type
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Choose your analysis:</strong> Different experiments reveal different aspects of Monte Carlo convergence in the Hull-White model.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        {{ form.experiment_type|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hull-White Model Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-calculator me-2"></i>Hull-White Model Parameters
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Key insight:</strong> Convergence quality depends on the ratio σ/a. Good convergence occurs when σ/a < 1.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ form.a|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.sigma|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Simulation Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-graph-up me-2"></i>Simulation Parameters
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        <strong>Monte Carlo Simulation:</strong> More paths and time steps give better accuracy but require more computation time.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        {{ form.num_paths|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.timestep|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-4">
+                                        {{ form.simulation_length|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Parameters -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    <i class="bi bi-gear me-2"></i>Additional Parameters
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ form.forward_rate|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.random_seed|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Hidden fields -->
+                        {% for field in form %}
+                            {% if field.is_hidden %}
+                                {{ field }}
+                            {% endif %}
+                        {% endfor %}
+                        
+                        <div class="d-grid mt-3">
+                            <button type="button" id="runExperimentBtn" class="btn btn-primary btn-lg">
+                                <i class="bi bi-play-circle me-2"></i>Run Convergence Analysis
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+            
+    <!-- Results Section -->
+    <div class="row g-3 mt-2">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Convergence Analysis Results
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+                    <div id="spinner" class="text-center py-5" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Analyzing convergence...</span>
+                        </div>
+                        <p class="mt-2">Running convergence analysis...</p>
+                    </div>
+                    
+                    <div id="results-wrapper" style="display: block; width: 100%;">
+                        <!-- Dynamic Analysis Section -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="fw-bold text-primary mb-0">
+                                            <i class="bi bi-lightbulb me-2"></i>Convergence Analysis
+                                        </h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="dynamic-analysis">
+                                            <div class="alert alert-info">
+                                                <h6 class="alert-heading">
+                                                    <i class="bi bi-info-circle me-2"></i>Understanding Convergence
+                                                </h6>
+                                                <p class="mb-2">Based on your current parameters:</p>
+                                                <ul class="mb-0" id="convergence-analysis">
+                                                    <!-- Dynamic content will be inserted here -->
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main Chart -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="fw-bold text-primary mb-0" id="chart-title">
+                                            <i class="bi bi-graph-up me-2"></i>Convergence Analysis Chart
+                                        </h5>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <div class="alert alert-info mb-4">
+                                            <small>
+                                                <i class="bi bi-info-circle me-1"></i>
+                                                <strong>Understanding the Results:</strong> The chart shows how Monte Carlo simulation errors vary with different parameters. Lower errors indicate better convergence.
+                                            </small>
+                                        </div>
+                                        <div class="chart-container" style="position: relative; height: 500px; width: 100%; margin: 20px auto; display: flex; justify-content: center; align-items: center;">
+                                            <canvas id="convergenceChart" style="max-width: 100%; max-height: 100%;"></canvas>
+                                        </div>
+                                        <div class="alert alert-light mt-3" id="chart-explanation">
+                                            <h6 class="alert-heading">
+                                                <i class="bi bi-graph-up me-2"></i>What This Shows
+                                            </h6>
+                                            <p class="mb-0" id="chart-analysis">
+                                                <!-- Dynamic explanation will be inserted here -->
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Chart === 'undefined') { return; }
+
+        const form = document.getElementById('convergenceForm');
+        const runBtn = document.getElementById('runExperimentBtn');
+        const spinner = document.getElementById('spinner');
+        const errorContainer = document.getElementById('error-container');
+        const resultsWrapper = document.getElementById('results-wrapper');
+        
+        let convergenceChart;
+
+        function generateConvergenceAnalysis(data, formData) {
+            // Get current form values
+            const a = parseFloat(formData.get('a') || 0.1);
+            const sigma = parseFloat(formData.get('sigma') || 0.1);
+            const experimentType = formData.get('experiment_type') || 'vary_sigma';
+            const numPaths = parseInt(formData.get('num_paths') || 500);
+            const timestep = parseInt(formData.get('timestep') || 180);
+            const simulationLength = parseInt(formData.get('simulation_length') || 15);
+
+            const convergenceRatio = sigma / a;
+            const convergenceQuality = convergenceRatio < 1 ? 'Good' : 'Poor';
+            const convergenceColor = convergenceRatio < 1 ? 'success' : 'danger';
+
+            const analysis = document.getElementById('convergence-analysis');
+            analysis.innerHTML = `
+                <li><strong>Convergence Ratio (σ/a):</strong> <span class="text-${convergenceColor}">${convergenceRatio.toFixed(2)}</span> - ${convergenceQuality} convergence expected</li>
+                <li><strong>Experiment Type:</strong> ${getExperimentDescription(experimentType)}</li>
+                <li><strong>Simulation Scale:</strong> ${numPaths} paths over ${simulationLength} years with ${timestep} time steps</li>
+                <li><strong>Key Insight:</strong> ${getKeyInsight(experimentType, convergenceRatio)}</li>
+            `;
+        }
+
+        function getExperimentDescription(experimentType) {
+            const descriptions = {
+                'vary_sigma': 'Varying volatility (σ) with fixed mean reversion (a)',
+                'vary_a': 'Varying mean reversion (a) with fixed volatility (σ)',
+                'discount_factor_std': 'Comparing empirical vs theoretical standard deviation of discount factors',
+                'convergence_analysis': 'Complete convergence analysis with multiple metrics'
+            };
+            return descriptions[experimentType] || 'Unknown experiment type';
+        }
+
+        function getKeyInsight(experimentType, convergenceRatio) {
+            if (experimentType === 'vary_sigma') {
+                return `For σ/a = ${convergenceRatio.toFixed(2)}, convergence ${convergenceRatio < 1 ? 'improves' : 'deteriorates'} as σ increases`;
+            } else if (experimentType === 'vary_a') {
+                return `For σ/a = ${convergenceRatio.toFixed(2)}, convergence ${convergenceRatio < 1 ? 'improves' : 'deteriorates'} as a increases`;
+            } else if (experimentType === 'discount_factor_std') {
+                return `Empirical and theoretical standard deviations should ${convergenceRatio < 1 ? 'closely match' : 'show discrepancies'}`;
+            } else {
+                return `Overall convergence is ${convergenceRatio < 1 ? 'good' : 'poor'} when σ/a < 1`;
+            }
+        }
+
+        function updateChart(data) {
+            const ctx = document.getElementById('convergenceChart').getContext('2d');
+            
+            // Update chart title
+            document.getElementById('chart-title').innerHTML = `<i class="bi bi-graph-up me-2"></i>${data.title}`;
+            
+            // Prepare datasets
+            const datasets = data.plots.map(plot => ({
+                label: plot.label,
+                data: plot.data,
+                borderColor: plot.borderColor || 'rgb(54, 162, 235)',
+                backgroundColor: plot.borderColor || 'rgb(54, 162, 235)',
+                borderWidth: plot.borderWidth || 2,
+                borderDash: plot.borderDash || [],
+                pointRadius: plot.pointRadius || 0,
+                tension: plot.tension || 0.1
+            }));
+
+            // Destroy existing chart
+            if (convergenceChart && typeof convergenceChart.destroy === 'function') {
+                convergenceChart.destroy();
+            }
+
+            // Create new chart
+            convergenceChart = new Chart(ctx, {
+                type: 'line',
+                data: { datasets: datasets },
+                options: { 
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    parsing: { xAxisKey: '0', yAxisKey: '1' },
+                    scales: { 
+                        x: { 
+                            type: 'linear', 
+                            position: 'bottom', 
+                            title: {display: true, text: data.x_axis || 'Time (Years)'} 
+                        },
+                        y: { 
+                            title: { display: true, text: data.y_axis || 'Value' } 
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    }
+                }
+            });
+
+            // Update chart explanation
+            const chartAnalysis = document.getElementById('chart-analysis');
+            if (data.analysis) {
+                let explanation = '';
+                if (data.analysis.convergence_quality) {
+                    explanation += `Convergence quality: ${data.analysis.convergence_quality}. `;
+                }
+                if (data.analysis.key_insight) {
+                    explanation += data.analysis.key_insight;
+                }
+                if (data.analysis.recommendation) {
+                    explanation += ` Recommendation: ${data.analysis.recommendation}.`;
+                }
+                chartAnalysis.innerHTML = explanation;
+            }
+        }
+        
+        function triggerUpdate() {
+            spinner.style.display = 'block';
+            resultsWrapper.style.display = 'none';
+            errorContainer.style.display = 'none';
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST', 
+                body: new URLSearchParams(formData),
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                spinner.style.display = 'none';
+                if (data.error) {
+                    errorContainer.innerText = `Error: ${data.error}`;
+                    errorContainer.style.display = 'block';
+                } else {
+                    resultsWrapper.style.display = 'block';
+                    updateChart(data);
+                    generateConvergenceAnalysis(data, formData);
+                }
+            })
+            .catch(error => {
+                spinner.style.display = 'none';
+                errorContainer.innerText = `Error: ${error.message}`;
+                errorContainer.style.display = 'block';
+            });
+        }
+        
+        runBtn.addEventListener('click', triggerUpdate);
+        
+        // Initial load
+        triggerUpdate();
+    });
+    </script>
+{% endblock %}

@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Interest Rate Models
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Overview -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title fw-bold text-primary mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                    </h3>
+                    <p class="card-text">
+                        This chapter covers caps and floors, which are fundamental interest rate derivatives 
+                        used for hedging and speculation. Understanding these instruments is essential for 
+                        fixed income trading and risk management.
+                    </p>
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Cap and floor mechanics</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Pricing models</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Parity relationships</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Risk management</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">Key Topics:</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Interest rate caps</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Interest rate floors</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Cap-floor parity</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Black model pricing</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Lab Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="card-text mb-4">
+                        Explore the relationship between caps, floors, and swaps through interactive analysis. 
+                        Understand how cap-floor parity works and experiment with different market scenarios.
+                    </p>
+                    <div class="text-center">
+                        <a href="{% url 'interest_rate_models:chapter20_caps_floors:parity_lab' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-play-circle me-2"></i>Launch Parity Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Concepts -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="fw-bold text-dark mb-4">
+                <i class="bi bi-lightbulb me-2"></i>Key Concepts
+            </h3>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Interest Rate Caps -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-arrow-up-circle text-primary me-3" style="font-size: 2rem;"></i>
+                        <h5 class="card-title fw-bold mb-0">Interest Rate Caps</h5>
+                    </div>
+                    <p class="card-text text-muted">
+                        Interest rate caps provide protection against rising interest rates by 
+                        paying the holder when rates exceed a predetermined strike level.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Upward rate protection</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Series of caplets</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Strike rate</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Interest Rate Floors -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-arrow-down-circle text-primary me-3" style="font-size: 2rem;"></i>
+                        <h5 class="card-title fw-bold mb-0">Interest Rate Floors</h5>
+                    </div>
+                    <p class="card-text text-muted">
+                        Interest rate floors provide protection against falling interest rates by 
+                        paying the holder when rates fall below a predetermined strike level.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Downward rate protection</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Series of floorlets</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Minimum rate guarantee</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cap-Floor Parity -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Cap-Floor Parity
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Parity Relationship</h5>
+                            <p class="text-muted">The fundamental relationship between caps, floors, and swaps in interest rate markets.</p>
+                            <ul class="list-unstyled small">
+                                <li>• Cap - Floor = Swap</li>
+                                <li>• No arbitrage condition</li>
+                                <li>• Market consistency</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Pricing Models</h5>
+                            <p class="text-muted">Black model and other pricing approaches for caps and floors.</p>
+                            <ul class="list-unstyled small">
+                                <li>• Black-Scholes framework</li>
+                                <li>• Volatility smile</li>
+                                <li>• Market conventions</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Risk Management</h5>
+                            <p class="text-muted">Using caps and floors for hedging interest rate risk exposure.</p>
+                            <ul class="list-unstyled small">
+                                <li>• Portfolio hedging</li>
+                                <li>• Delta hedging</li>
+                                <li>• Volatility risk</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue Learning -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{% url 'interest_rate_models:chapter20_caps_floors:parity_lab' %}" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-play-circle me-2"></i>Interactive Lab
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'home' %}" class="btn btn-outline-success btn-lg w-100">
+                                <i class="bi bi-arrow-right me-2"></i>Explore Other Sections
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

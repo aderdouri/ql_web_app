@@ -20,6 +20,8 @@ urlpatterns = [
     path('equity-models/', include('equity_models.urls')),
     path('bonds/', include('bonds.urls')),
     path('chapter-heston-calibration/', include('chapter22_heston_calibration.urls')),
+    path('chapter17-calibration/', include('chapter17_calibration.urls')),
+    path('chapter18-par-indexed-coupons/', include('chapter18_par_indexed_coupons.urls')),
     path('chapter33-floating-duration/', include('chapter33_floating_duration.urls')),
     path('chapter34-treasury-futures/', include('chapter34_treasury_futures.urls')),
     path('chapter35-pricing-conventions/', include('chapter35_pricing_conventions.urls')),

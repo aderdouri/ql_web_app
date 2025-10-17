@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Interest-Rate Models - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+
+    <!-- Chapter Navigation -->
+    <div class="chapter-nav">
+        <div class="row">
+            <div class="col-12">
+                <h3 class="fw-bold text-center mb-4">
+                    <i class="bi bi-book me-2"></i>Available Chapters
+                </h3>
+            </div>
+        </div>
+        <div class="row g-3">
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-graph-up-arrow text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">15. Simulating interest rates using Hull White model</h5>
+                        <p class="card-text text-muted small">Advanced simulation techniques for interest rate modeling using the Hull-White model</p>
+                        <a href="{% url 'interest_rate_models:chapter15_hull_white:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>Start Learning
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-cpu text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">16. Thoughts on the convergence of Hull-White model Monte Carlo simulations</h5>
+                        <p class="card-text text-muted small">Understanding convergence properties and numerical stability in Monte Carlo simulations</p>
+                        <a href="{% url 'interest_rate_models:chapter16_mc_convergence:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>Start Learning
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-sliders text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">17. Short interest rate model calibration</h5>
+                        <p class="card-text text-muted small">Calibration techniques for short-rate models using market data</p>
+                        <a href="{% url 'interest_rate_models:chapter17_calibration:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>Start Learning
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-arrow-left-right text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">18. Par versus indexed coupons</h5>
+                        <p class="card-text text-muted small">Understanding the differences between par and indexed coupon structures</p>
+                        <a href="{% url 'interest_rate_models:chapter18_par_indexed_coupons:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>Start Learning
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-arrow-repeat text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">19. Modeling interest rate swaps using QuantLib</h5>
+                        <p class="card-text text-muted small">Comprehensive modeling and pricing of interest rate swaps</p>
+                        <a href="{% url 'interest_rate_models:chapter19_swap:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>Start Learning
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-shield text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">20. Caps and floors</h5>
+                        <p class="card-text text-muted small">Pricing and analysis of interest rate caps and floors</p>
+                        <a href="{% url 'interest_rate_models:chapter20_caps_floors:description' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>Start Learning
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

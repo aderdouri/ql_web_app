@@ -1,0 +1,224 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Interest Rate Models
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Overview -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title fw-bold text-primary mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                    </h3>
+                    <p class="card-text">
+                        This chapter covers the modeling and pricing of interest rate swaps using QuantLib. 
+                        Interest rate swaps are fundamental instruments in fixed income markets, allowing 
+                        parties to exchange fixed and floating interest rate payments.
+                    </p>
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Swap pricing mechanics</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Forward rate agreements</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Swap curve construction</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Risk management</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">Key Topics:</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Vanilla interest rate swaps</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Swap valuation</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Basis swaps</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Cross-currency swaps</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Lab Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="card-text mb-4">
+                        Practice pricing vanilla interest rate swaps with different parameters. 
+                        Experiment with various swap structures and understand how market conditions 
+                        affect swap pricing and valuation.
+                    </p>
+                    <div class="text-center">
+                        <a href="{% url 'interest_rate_models:chapter19_swap:pricer' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-play-circle me-2"></i>Launch Swap Pricer
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Concepts -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="fw-bold text-dark mb-4">
+                <i class="bi bi-lightbulb me-2"></i>Key Concepts
+            </h3>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Swap Mechanics -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-arrow-repeat text-primary me-3" style="font-size: 2rem;"></i>
+                        <h5 class="card-title fw-bold mb-0">Swap Mechanics</h5>
+                    </div>
+                    <p class="card-text text-muted">
+                        Interest rate swaps involve the exchange of fixed and floating interest rate 
+                        payments between two parties over a specified period.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Fixed leg payments</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Floating leg payments</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Net settlement</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing Methods -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-calculator text-primary me-3" style="font-size: 2rem;"></i>
+                        <h5 class="card-title fw-bold mb-0">Pricing Methods</h5>
+                    </div>
+                    <p class="card-text text-muted">
+                        Swap pricing involves discounting future cash flows using appropriate 
+                        discount factors derived from the yield curve.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Present value calculation</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Forward rate estimation</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Par swap rate</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Swap Types -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Swap Types
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Vanilla Swaps</h5>
+                            <p class="text-muted">Standard interest rate swaps exchanging fixed for floating rate payments.</p>
+                            <ul class="list-unstyled small">
+                                <li>• Fixed vs floating</li>
+                                <li>• Single currency</li>
+                                <li>• Standard conventions</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Basis Swaps</h5>
+                            <p class="text-muted">Swaps exchanging two different floating rate indices.</p>
+                            <ul class="list-unstyled small">
+                                <li>• Floating vs floating</li>
+                                <li>• Different indices</li>
+                                <li>• Basis risk</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Cross-Currency Swaps</h5>
+                            <p class="text-muted">Swaps involving different currencies with principal exchange.</p>
+                            <ul class="list-unstyled small">
+                                <li>• Multi-currency</li>
+                                <li>• Principal exchange</li>
+                                <li>• FX risk</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continue Learning -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{% url 'interest_rate_models:chapter19_swap:pricer' %}" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-play-circle me-2"></i>Interactive Lab
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'interest_rate_models:chapter20_caps_floors:description' %}" class="btn btn-outline-success btn-lg w-100">
+                                <i class="bi bi-arrow-right me-2"></i>Next Chapter
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

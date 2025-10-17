@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Interest Rate Models
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Overview -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title fw-bold text-primary mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                    </h3>
+                    <p class="card-text">
+                        This chapter demonstrates how to calibrate short-rate models to market data using QuantLib. 
+                        Learn different calibration techniques including standard calibration, constrained calibration, 
+                        and normal volatility calibration for negative interest rate environments.
+                    </p>
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Model calibration fundamentals</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Hull-White model calibration</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Black-Karasinski model calibration</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>G2++ two-factor model calibration</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Normal vs lognormal volatility calibration</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">Calibration Types:</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Standard calibration</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Constrained calibration</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Normal volatility calibration</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Optimization methods</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Lab Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="card-text mb-4">
+                        Use the interactive calibration lab to fit different short-rate models to market data. 
+                        Experiment with various calibration techniques and compare the results across different models.
+                    </p>
+                    <div class="text-center">
+                        <a href="{% url 'chapter17_calibration:calibration_lab' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-play-circle me-2"></i>Launch Calibration Lab
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parameter Explanation -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold text-primary mb-0">
+                        <i class="bi bi-question-circle me-2"></i>What Do These Parameters Mean?
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark mb-3">Basic Parameters:</h5>
+                            <div class="mb-3">
+                                <h6 class="fw-bold text-primary">a (alpha) - Mean Reversion Speed</h6>
+                                <p class="mb-1">Controls how quickly interest rates return to their long-term average.</p>
+                                <ul class="list-unstyled small text-muted">
+                                    <li>• <strong>a = 0.1</strong> : Slow, gentle reversion</li>
+                                    <li>• <strong>a = 0.5</strong> : Fast, strong reversion</li>
+                                </ul>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="fw-bold text-primary">σ (sigma) - Volatility Level</h6>
+                                <p class="mb-1">Controls the randomness and unpredictability of rate movements.</p>
+                                <ul class="list-unstyled small text-muted">
+                                    <li>• <strong>σ = 0.01</strong> : Low volatility, stable rates</li>
+                                    <li>• <strong>σ = 0.05</strong> : High volatility, erratic rates</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark mb-3">Advanced Parameters (G2++):</h5>
+                            <div class="mb-3">
+                                <h6 class="fw-bold text-primary">b, η (eta) - Second Factor</h6>
+                                <p class="mb-1">Additional factors that influence interest rate dynamics.</p>
+                                <ul class="list-unstyled small text-muted">
+                                    <li>• <strong>b</strong> : Mean reversion speed of second factor</li>
+                                    <li>• <strong>η</strong> : Volatility of second factor</li>
+                                </ul>
+                            </div>
+                            <div class="mb-3">
+                                <h6 class="fw-bold text-primary">ρ (rho) - Correlation</h6>
+                                <p class="mb-1">How the two factors interact with each other.</p>
+                                <ul class="list-unstyled small text-muted">
+                                    <li>• <strong>ρ = 0</strong> : Independent factors</li>
+                                    <li>• <strong>ρ = 0.5</strong> : Factors move together</li>
+                                    <li>• <strong>ρ = -0.5</strong> : Factors move in opposite directions</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <h6 class="alert-heading">
+                            <i class="bi bi-lightbulb me-2"></i>Simple Analogy
+                        </h6>
+                        <p class="mb-0">
+                            Think of driving a car: <strong>a</strong> is like the steering wheel force that pulls you back to the center of the road, 
+                            <strong>σ</strong> is like bumps on the road that make you deviate, and <strong>ρ</strong> is like how wind and bumps 
+                            interact to influence your path.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Concepts -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="fw-bold text-dark mb-4">
+                <i class="bi bi-lightbulb me-2"></i>Key Concepts
+            </h3>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Hull-White Model -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-graph-up-arrow text-primary me-3" style="font-size: 2rem;"></i>
+                        <h5 class="card-title fw-bold mb-0">Hull-White 1-Factor</h5>
+                    </div>
+                    <p class="card-text text-muted">
+                        Hull-White model was one of the first practical exogenous models that attempted to fit to the market
+                        interest rate term structures.
+                    </p>
+                    <div class="bg-light p-3 rounded border text-center">
+                        <strong>dr<sub>t</sub> = (θ(t) - ar<sub>t</sub>)dt + σdW<sub>t</sub></strong>
+                    </div>
+                    <ul class="list-unstyled mt-3">
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>a: mean reversion constant</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>σ: volatility parameter</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>θ(t): fitted to term structure</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Black-Karasinski Model -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-graph-down-arrow text-primary me-3" style="font-size: 2rem;"></i>
+                        <h5 class="card-title fw-bold mb-0">Black-Karasinski</h5>
+                    </div>
+                    <p class="card-text text-muted">
+                        Black-Karasinski is not an affine model, and hence we cannot use the JamshidianSwaptionEngine.
+                        We use the TreeSwaptionEngine which works with all short rate models.
+                    </p>
+                    <div class="bg-light p-3 rounded border text-center">
+                        <strong>dln(r<sub>t</sub>) = (θ<sub>t</sub> - a ln(r<sub>t</sub>))dt + σdW<sub>t</sub></strong>
+                    </div>
+                    <ul class="list-unstyled mt-3">
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Log-normal model</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Ensures positive rates</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Tree-based pricing</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- G2++ Model -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-diagram-3 text-primary me-3" style="font-size: 2rem;"></i>
+                        <h5 class="card-title fw-bold mb-0">G2++ 2-Factor</h5>
+                    </div>
+                    <p class="card-text text-muted">
+                        G2++ is a two-factor model that allows for more complex interest rate dynamics. 
+                        It includes correlation between the two factors, providing better fit to market data.
+                    </p>
+                    <div class="bg-light p-3 rounded border text-center">
+                        <strong>dx<sub>t</sub> = -ax<sub>t</sub>dt + σdW<sub>t</sub><sup>1</sup><br>
+                        dy<sub>t</sub> = -by<sub>t</sub>dt + ηdW<sub>t</sub><sup>2</sup></strong>
+                    </div>
+                    <ul class="list-unstyled mt-3">
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Two correlated factors</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Better volatility fitting</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>More complex calibration</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calibration Methods -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-gear me-2"></i>Calibration Methods
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Standard Calibration</h5>
+                            <p class="text-muted">Optimize all model parameters to fit market data.</p>
+                            <ul class="list-unstyled small">
+                                <li>• Full parameter optimization</li>
+                                <li>• Best fit to market</li>
+                                <li>• Most flexible approach</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Constrained Calibration</h5>
+                            <p class="text-muted">Fix certain parameters while optimizing others.</p>
+                            <ul class="list-unstyled small">
+                                <li>• Fixed reversion rate</li>
+                                <li>• Reduced complexity</li>
+                                <li>• Faster computation</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Normal Volatility</h5>
+                            <p class="text-muted">Use normal volatilities for negative rate environments.</p>
+                            <ul class="list-unstyled small">
+                                <li>• European/Japanese markets</li>
+                                <li>• Negative rate handling</li>
+                                <li>• Market consistency</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

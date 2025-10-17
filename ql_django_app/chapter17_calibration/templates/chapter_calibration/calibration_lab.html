@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+<!-- Updated: 2025-10-17 07:25 - Short Rate Model Calibration Lab - Dynamic Explanations -->
+
+{% block title %}Short Rate Model Calibration Lab - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                17. Short Rate Model Calibration Lab
+                            </h1>
+                            <p class="card-text lead mb-0">Interactive laboratory to calibrate short-rate models to market data using various calibration techniques and optimization methods.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-light btn-lg">
+                                Back to Chapters
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Notification -->
+    {% if results %}
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="background-color: #d4edda !important; border: 3px solid #28a745 !important; font-size: 18px !important;">
+                <h4 class="alert-heading">✅ CALIBRATION COMPLETED SUCCESSFULLY!</h4>
+                <p class="mb-0"><strong>Model:</strong> {{ results.model_name }}</p>
+                <p class="mb-0"><strong>Parameters:</strong> {{ results.param_string }}</p>
+                <p class="mb-0"><strong>Scroll down to see detailed results!</strong></p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="alert alert-info" role="alert" style="background-color: #d1ecf1 !important; border: 2px solid #17a2b8 !important;">
+                <h4 class="alert-heading">ℹ️ Ready to Calibrate</h4>
+                <p class="mb-0">Select your model and calibration type, then click "Run Calibration" to see results.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Error Notification -->
+    {% if error_message %}
+    <div class="row g-4 mb-4">
+        <div class="col-12">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background-color: #f8d7da !important; border: 3px solid #dc3545 !important; font-size: 18px !important;">
+                <h4 class="alert-heading">❌ CALIBRATION FAILED!</h4>
+                <p class="mb-0"><strong>Error:</strong> {{ error_message }}</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Input Form -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        Calibration Parameters
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form id="calibrationForm" method="post" action="{% url 'chapter17_calibration:calibration_lab' %}">
+                    {% csrf_token %}
+                        
+                        <!-- Model Selection -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    Model Selection
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-info mb-3">
+                                    <small>
+                                        <strong>What is model calibration?</strong> Calibration finds model parameters that best fit observed market data. Different models capture different aspects of interest rate behavior.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ form.model_name|as_crispy_field }}
+                                    </div>
+                                    <div class="col-md-6">
+                                        {{ form.calibration_type|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fixed Reversion Rate -->
+                        <div class="card mb-3">
+                            <div class="card-header bg-light">
+                                <h5 class="fw-bold text-primary mb-0">
+                                    Constrained Calibration Settings
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="alert alert-warning mb-3">
+                                    <small>
+                                        <strong>Note:</strong> Fixed Reversion Rate only applies to "Constrained Calibration" of Hull-White model. For other calibration types, this parameter is ignored.
+                                    </small>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        {{ form.fixed_reversion|as_crispy_field }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Run Calibration Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                Run Calibration
+                            </button>
+                        </div>
+                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <!-- DEBUG: results = {{ results }} -->
+    {% if results %}
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div class="alert alert-success">
+                <strong>DEBUG:</strong> Results section is being rendered! Model: {{ results.model_name }}
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        Calibration Results
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <!-- Results Summary -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="fw-bold text-primary mb-3">
+                                        Calibrated Parameters
+                                    </h5>
+                                    <h6 class="fw-bold">{{ results.model_name }}</h6>
+                                    <code class="d-block bg-white p-2 rounded border mt-2">{{ results.param_string }}</code>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h5 class="fw-bold text-primary mb-3">
+                                        Goodness of Fit
+                                    </h5>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong>Price Error:</strong><br>
+                                            <span class="badge bg-primary fs-6">{{ results.report.rmse_price|floatformat:5 }}</span>
+                                            <br><small class="text-muted">{% if results.report.rmse_price < 0.05 %}Excellent{% elif results.report.rmse_price < 0.1 %}Good{% else %}Fair{% endif %} fit</small>
+                                        </div>
+                                        <div class="col-6">
+                                            <strong>Vol Error:</strong><br>
+                                            <span class="badge bg-secondary fs-6">{{ results.report.rmse_vol|floatformat:5 }}</span>
+                                            <br><small class="text-muted">{% if results.report.rmse_vol < 0.05 %}Excellent{% elif results.report.rmse_vol < 0.1 %}Good{% else %}Fair{% endif %} fit</small>
+                                        </div>
+                                    </div>
+                                    {% if results.book_error %}
+                                    <div class="mt-2">
+                                        <strong>Book Match:</strong><br>
+                                        <span class="badge bg-info fs-6">{{ results.book_error|floatformat:5 }}</span>
+                                        <br><small class="text-muted">{% if results.book_error < 0.01 %}Very close{% elif results.book_error < 0.05 %}Close{% else %}Some difference{% endif %} to expected</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed Report -->
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="fw-bold text-primary mb-0">
+                                Detailed Calibration Report
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>Instrument</th>
+                                            <th>Model Price</th>
+                                            <th>Market Price</th>
+                                            <th>Implied Vol</th>
+                                            <th>Market Vol</th>
+                                            <th>Price Error</th>
+                                            <th>Vol Error</th>
+                                        </tr>
+                                    </thead>
+                            <tbody>
+                                        {% for row in results.report.report_data %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}Y into {{ forloop.counter|add:5 }}Y</td>
+                                            <td>{{ row.0|floatformat:6 }}</td>
+                                            <td>{{ row.1|floatformat:6 }}</td>
+                                            <td>{{ row.2|floatformat:6 }}</td>
+                                            <td>{{ row.3|floatformat:6 }}</td>
+                                            <td class="{% if row.4 > 0.05 or row.4 < -0.05 %}text-danger{% elif row.4 > 0.01 or row.4 < -0.01 %}text-warning{% else %}text-success{% endif %}">{{ row.4|floatformat:3 }}</td>
+                                            <td class="{% if row.5 > 0.05 or row.5 < -0.05 %}text-danger{% elif row.5 > 0.01 or row.5 < -0.01 %}text-warning{% else %}text-success{% endif %}">{{ row.5|floatformat:3 }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Results Explanation -->
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        Results Explanation
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary mb-3">What These Results Mean:</h6>
+                            <div class="mb-3">
+                                <strong>Model Parameters:</strong><br>
+                                <small class="text-muted">
+                                    {% if results.model_name == 'Hull-White 1-Factor' %}
+                                        • <strong>a (alpha):</strong> {{ results.params.a|floatformat:5 }} - How quickly rates return to normal<br>
+                                        • <strong>σ (sigma):</strong> {{ results.params.sigma|floatformat:5 }} - How much rates fluctuate
+                                    {% elif results.model_name == 'Black-Karasinski' %}
+                                        • <strong>a (alpha):</strong> {{ results.params.a|floatformat:5 }} - Mean reversion speed<br>
+                                        • <strong>σ (sigma):</strong> {{ results.params.sigma|floatformat:5 }} - Volatility level
+                                    {% elif 'G2++' in results.model_name %}
+                                        • <strong>a:</strong> {{ results.params.a|floatformat:5 }} - First factor mean reversion<br>
+                                        • <strong>σ:</strong> {{ results.params.sigma|floatformat:5 }} - First factor volatility<br>
+                                        • <strong>b:</strong> {{ results.params.b|floatformat:5 }} - Second factor mean reversion<br>
+                                        • <strong>η:</strong> {{ results.params.eta|floatformat:5 }} - Second factor volatility<br>
+                                        • <strong>ρ:</strong> {{ results.params.rho|floatformat:5 }} - Correlation between factors
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary mb-3">Quality Assessment:</h6>
+                            <div class="mb-3">
+                                <strong>Price Error (RMSE):</strong><br>
+                                <span class="badge bg-primary fs-6">{{ results.report.rmse_price|floatformat:5 }}</span>
+                                <br><small class="text-muted">
+                                    {% if results.report.rmse_price < 0.05 %}
+                                        <strong>Excellent fit</strong> - Model matches market prices very well
+                                    {% elif results.report.rmse_price < 0.1 %}
+                                        <strong>Good fit</strong> - Model reasonably matches market prices
+                                    {% else %}
+                                        <strong>Fair fit</strong> - Model has some differences from market prices
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div class="mb-3">
+                                <strong>Volatility Error (RMSE):</strong><br>
+                                <span class="badge bg-secondary fs-6">{{ results.report.rmse_vol|floatformat:5 }}</span>
+                                <br><small class="text-muted">
+                                    {% if results.report.rmse_vol < 0.05 %}
+                                        <strong>Excellent volatility fit</strong> - Model captures market volatility well
+                                    {% elif results.report.rmse_vol < 0.1 %}
+                                        <strong>Good volatility fit</strong> - Model reasonably captures volatility
+                                    {% else %}
+                                        <strong>Fair volatility fit</strong> - Model has some volatility differences
+                                    {% endif %}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <strong>Interpretation:</strong> 
+                        {% if results.report.rmse_price < 0.05 and results.report.rmse_vol < 0.05 %}
+                            This calibration is excellent! The model parameters fit the market data very well, making it reliable for pricing and risk management.
+                        {% elif results.report.rmse_price < 0.1 and results.report.rmse_vol < 0.1 %}
+                            This calibration is good. The model parameters provide a reasonable fit to market data and can be used for most applications.
+                    {% else %}
+                            This calibration shows some differences from market data. Consider using different initial parameters or checking market data quality.
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+                    {% endif %}
+
+    <!-- Parameter Guide -->
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        Parameter Guide
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary mb-3">Basic Parameters:</h6>
+                            <div class="mb-3">
+                                <strong>α (alpha):</strong> Mean reversion speed<br>
+                                <small class="text-muted">How quickly rates return to normal</small>
+                            </div>
+                            <div class="mb-3">
+                                <strong>σ (sigma):</strong> Volatility level<br>
+                                <small class="text-muted">How much rates fluctuate</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary mb-3">G2++ Parameters:</h6>
+                            <div class="mb-3">
+                                <strong>β, η (eta):</strong> Second factor parameters<br>
+                                <small class="text-muted">Additional factors for complex dynamics</small>
+                            </div>
+                            <div class="mb-3">
+                                <strong>ρ (rho):</strong> Correlation between factors<br>
+                                <small class="text-muted">How factors interact with each other</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-light mt-3 mb-0">
+                        <strong>Tip:</strong> Think of a thermostat - <strong>α</strong> controls return speed, 
+                        <strong>σ</strong> controls variations, and <strong>ρ</strong> controls factor interaction.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Market Data Information -->
+    <div class="row g-4 mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        Market Data Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary">Market Setup:</h6>
+                            <ul class="list-unstyled small">
+                                <li><strong>Evaluation Date:</strong> February 15, 2002</li>
+                                <li><strong>Term Structure:</strong> Flat forward curve at 4.875825%</li>
+                                <li><strong>Index:</strong> Euribor 1Y</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="fw-bold text-primary">Expected Results:</h6>
+                            <ul class="list-unstyled small">
+                                <li><strong>G2++:</strong> α=0.04511, σ=0.00301, β=0.04041, η=0.00473, ρ=0.03500</li>
+                                <li><strong>Hull-White (Normal):</strong> α=0.00009, σ=0.10388</li>
+                                <li><strong>Price Error:</strong> ~0.12482</li>
+                                <li><strong>Vol Error:</strong> ~0.12514</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                            <h5 class="card-title fw-bold text-primary mb-3">
+                                Continue Learning
+                            </h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <a href="{% url 'interest_rate_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                        View All Chapters
+                                    </a>
+                                </div>
+                                <div class="col-md-6">
+                                    <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                        Back to Home
+                                    </a>
+                                </div>
+                            </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Page loaded, checking for results...');
+    
+    // Check if results are present
+    const debugAlert = document.querySelector('.alert-success');
+    if (debugAlert) {
+        console.log('DEBUG: Results section found in DOM');
+        debugAlert.style.backgroundColor = '#d4edda';
+        debugAlert.style.border = '2px solid #28a745';
+    } else {
+        console.log('DEBUG: No results section found in DOM');
+    }
+    
+    // NO JAVASCRIPT INTERFERENCE - Let the form work naturally
+    console.log('Form should work without JavaScript interference');
+});
+</script>
+{% endblock %}

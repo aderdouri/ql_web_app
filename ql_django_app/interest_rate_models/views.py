@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 def home(request):
     """Affiche la page d'accueil de la catégorie Interest-Rate Models."""
-    return render(request, 'interest_rate_models/base.html')
+    return render(request, 'interest_rate_models/index.html')
 
 # --- Vues placeholder pour chaque chapitre ---
 

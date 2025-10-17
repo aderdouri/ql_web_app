@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Interest Rate Models
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Overview -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title fw-bold text-primary mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                    </h3>
+                    <p class="card-text">
+                        This chapter introduces the Hull-White short rate model, one of the most widely used 
+                        interest rate models in quantitative finance. Learn how to simulate interest rate paths 
+                        and understand the model's key properties using QuantLib.
+                    </p>
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Hull-White model fundamentals</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Interest rate simulation</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Monte Carlo path generation</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Statistical analysis of results</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">Model Features:</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Mean reversion property</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Term structure fitting</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Analytical tractability</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Negative rate capability</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Lab Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <p class="card-text mb-4">
+                        Use the interactive lab to simulate Hull-White interest rate paths with different parameters. 
+                        Experiment with mean reversion speed, volatility, and other model parameters to see how they affect the results.
+                    </p>
+                    <div class="text-center">
+                        <a href="{% url 'interest_rate_models:chapter15_hull_white:lab' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-play-circle me-2"></i>Launch Hull-White Simulation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Concepts -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h3 class="fw-bold text-dark mb-4">
+                <i class="bi bi-lightbulb me-2"></i>Key Concepts
+            </h3>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Model Definition -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-graph-up-arrow text-primary me-3" style="font-size: 2rem;"></i>
+                        <h5 class="card-title fw-bold mb-0">Model Definition</h5>
+                    </div>
+                    <p class="card-text text-muted">
+                        The Hull-White model describes the evolution of short-term interest rates using a stochastic differential equation.
+                    </p>
+                    <div class="bg-light p-3 rounded border text-center">
+                        <strong>dr<sub>t</sub> = (θ(t) - ar<sub>t</sub>)dt + σdW<sub>t</sub></strong>
+                    </div>
+                    <ul class="list-unstyled mt-3">
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Mean reversion to θ(t)</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Volatility σ</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Speed of reversion a</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Simulation Process -->
+        <div class="col-lg-6">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-cpu text-primary me-3" style="font-size: 2rem;"></i>
+                        <h5 class="card-title fw-bold mb-0">Simulation Process</h5>
+                    </div>
+                    <p class="card-text text-muted">
+                        Monte Carlo simulation generates multiple interest rate paths to analyze the model's behavior and properties.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Random path generation</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Statistical analysis</li>
+                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Convergence verification</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model Properties -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Model Properties
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Mean Reversion</h5>
+                            <p class="text-muted">Interest rates tend to return to a long-term average over time.</p>
+                            <ul class="list-unstyled small">
+                                <li>• Prevents extreme rate levels</li>
+                                <li>• Realistic market behavior</li>
+                                <li>• Controllable reversion speed</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Term Structure Fit</h5>
+                            <p class="text-muted">The model can be calibrated to match current market yield curves exactly.</p>
+                            <ul class="list-unstyled small">
+                                <li>• θ(t) function calibration</li>
+                                <li>• Market consistency</li>
+                                <li>• No arbitrage conditions</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-4">
+                            <h5 class="fw-bold text-dark">Analytical Solutions</h5>
+                            <p class="text-muted">Many derivatives can be priced analytically under this model.</p>
+                            <ul class="list-unstyled small">
+                                <li>• Bond pricing formulas</li>
+                                <li>• Option pricing</li>
+                                <li>• Fast computation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

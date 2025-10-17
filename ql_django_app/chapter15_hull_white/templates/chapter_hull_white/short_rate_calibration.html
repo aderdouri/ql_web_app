@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Lab Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi bi-sliders me-3"></i>Short Rate Model Calibration Lab
+                            </h1>
+                            <p class="card-text lead mb-0">Calibrate short-rate models to market data using various calibration techniques and optimization methods.</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'interest_rate_models:chapter15_hull_white:description' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Description
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lab Content -->
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card card-body">
+                <h5 class="card-title fw-bold mb-3">Calibration Parameters</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <button type="submit" class="btn btn-primary mt-3 w-100">Run Calibration</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header font-weight-bold">Calibration Results</div>
+                <div class="card-body">
+                    {% if results %}
+                        <div class="alert alert-success">
+                            <h6 class="alert-heading">Calibration Successful!</h6>
+                            <p class="mb-0">The model has been successfully calibrated to market data.</p>
+                        </div>
+                        <!-- Add results display here -->
+                        <pre class="bg-light p-3 rounded"><code>{{ results }}</code></pre>
+                    {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            Select a model and click "Run Calibration" to see the calibration results.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+

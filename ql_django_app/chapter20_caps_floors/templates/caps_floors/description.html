@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
+                            </h1>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Interest Rate Models
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chapter Overview -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title fw-bold text-primary mb-3">
+                        <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                    </h3>
+                    <p class="card-text">
+                        This chapter covers the valuation of interest rate caps and floors using QuantLib. 
+                        Caps and floors are important interest rate derivatives that provide protection against 
+                        adverse interest rate movements.
+                    </p>
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Cap and floor pricing mechanics</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Constant volatility approach</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Volatility surface modeling</li>
+                                <li><i class="bi bi-check-circle text-success me-2"></i>Optionlet stripping techniques</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">Key Concepts:</h5>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Black formula for caplets</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Volatility smile effects</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Market data construction</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Implied volatility calculation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Lab Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title fw-bold mb-0">
+                        <i class="bi bi-calculator me-2"></i>Interactive Laboratory
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Experience hands-on cap and floor pricing with two different approaches:
+                    </p>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">
+                                    <i class="bi bi-graph-up text-primary" style="font-size: 2rem;"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1">Constant Volatility</h5>
+                                    <p class="text-muted mb-0">Price caps using a single volatility value</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="me-3">
+                                    <i class="bi bi-graph-down text-primary" style="font-size: 2rem;"></i>
+                                </div>
+                                <div>
+                                    <h5 class="fw-bold mb-1">Volatility Surface</h5>
+                                    <p class="text-muted mb-0">Use market volatility surfaces for pricing</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <a href="{% url 'interest_rate_models:chapter20_caps_floors:lab' %}" class="btn btn-primary btn-lg">
+                            <i class="bi bi-play-circle me-2"></i>Start Interactive Lab
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Theory Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h3 class="card-title fw-bold text-primary mb-3">
+                        <i class="bi bi-book me-2"></i>Theoretical Background
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">What are Caps and Floors?</h5>
+                            <p class="text-muted">
+                                <strong>Caps</strong> provide protection against rising interest rates by paying the holder 
+                                when rates exceed a predetermined strike level. <strong>Floors</strong> provide protection 
+                                against falling interest rates.
+                            </p>
+                            <p class="text-muted">
+                                Each cap can be decomposed into a series of <strong>caplets</strong>, each valued 
+                                using the Black formula for interest rate options.
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark">Pricing Approaches</h5>
+                            <p class="text-muted">
+                                <strong>Constant Volatility:</strong> Uses a single volatility value for all caplets, 
+                                suitable for simple analysis and educational purposes.
+                            </p>
+                            <p class="text-muted">
+                                <strong>Volatility Surface:</strong> Uses market-implied volatilities that vary by 
+                                strike and tenor, providing more realistic pricing.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Interest Rate Models
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
