@@ -12,8 +12,7 @@ urlpatterns = [
     path('heston-option-pricer/', include('chapter21_heston_option.urls')),
     
     # Chapter 22: Volatility Smile and Heston Model Calibration
-    # path('volatility-smile-heston-calibration/', volatility_smile_views.volatility_smile_description_view, name='volatility_smile_description'),
-    # path('volatility-smile-heston-calibration/lab/', volatility_smile_views.volatility_smile_lab_view, name='volatility_smile_lab'),
+    path('volatility-smile-heston-calibration/', include('chapter22_heston_calibration.urls')),
     
     # Chapter 23: Heston Parameter Calibration
     path('heston-calibration-scipy/', include('chapter23_heston_parameter_calibration.urls')),

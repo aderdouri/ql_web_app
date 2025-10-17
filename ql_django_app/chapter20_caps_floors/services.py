@@ -40,14 +40,8 @@ def calculate_caps_floors_metrics(
     
     # Fix the fixing date if it's in the future relative to evaluation date
     if fixing_date >= evaluation_date:
-        # Set fixing date to 2 days before evaluation date
-        fixing_date = evaluation_date.replace(day=max(1, evaluation_date.day - 2))
-        # If that would make it the same month, go to previous month
-        if fixing_date.day > evaluation_date.day:
-            if evaluation_date.month > 1:
-                fixing_date = evaluation_date.replace(month=evaluation_date.month - 1, day=28)
-            else:
-                fixing_date = evaluation_date.replace(year=evaluation_date.year - 1, month=12, day=28)
+        # Set fixing date to 2 days before evaluation date using timedelta
+        fixing_date = evaluation_date - timedelta(days=2)
     
     # Ensure fixing date is a business day (not weekend)
     from datetime import timedelta
@@ -63,18 +57,19 @@ def calculate_caps_floors_metrics(
     
     # 2. Build the yield curve - exactly as in the book
     # Create dates for the term structure (3M, 6M, 9M, 1Y, 3Y, 5Y, 10Y, 15Y, 20Y, 30Y)
+    # Use evaluation_date as the base for term structure dates
     start_date_ql = ql.Date(start_date.day, start_date.month, start_date.year)
     dates = [
-        ql.Date(start_date.day, start_date.month + 3, start_date.year) if start_date.month <= 9 else ql.Date(start_date.day, start_date.month - 9, start_date.year + 1),
-        ql.Date(start_date.day, start_date.month + 6, start_date.year) if start_date.month <= 6 else ql.Date(start_date.day, start_date.month - 6, start_date.year + 1),
-        ql.Date(start_date.day, start_date.month + 9, start_date.year) if start_date.month <= 3 else ql.Date(start_date.day, start_date.month - 3, start_date.year + 1),
-        ql.Date(start_date.day, start_date.month, start_date.year + 1),
-        ql.Date(start_date.day, start_date.month, start_date.year + 3),
-        ql.Date(start_date.day, start_date.month, start_date.year + 5),
-        ql.Date(start_date.day, start_date.month, start_date.year + 10),
-        ql.Date(start_date.day, start_date.month, start_date.year + 15),
-        ql.Date(start_date.day, start_date.month, start_date.year + 20),
-        ql.Date(start_date.day, start_date.month, start_date.year + 30)
+        ql.Date(evaluation_date.day, evaluation_date.month + 3, evaluation_date.year) if evaluation_date.month <= 9 else ql.Date(evaluation_date.day, evaluation_date.month - 9, evaluation_date.year + 1),
+        ql.Date(evaluation_date.day, evaluation_date.month + 6, evaluation_date.year) if evaluation_date.month <= 6 else ql.Date(evaluation_date.day, evaluation_date.month - 6, evaluation_date.year + 1),
+        ql.Date(evaluation_date.day, evaluation_date.month + 9, evaluation_date.year) if evaluation_date.month <= 3 else ql.Date(evaluation_date.day, evaluation_date.month - 3, evaluation_date.year + 1),
+        ql.Date(evaluation_date.day, evaluation_date.month, evaluation_date.year + 1),
+        ql.Date(evaluation_date.day, evaluation_date.month, evaluation_date.year + 3),
+        ql.Date(evaluation_date.day, evaluation_date.month, evaluation_date.year + 5),
+        ql.Date(evaluation_date.day, evaluation_date.month, evaluation_date.year + 10),
+        ql.Date(evaluation_date.day, evaluation_date.month, evaluation_date.year + 15),
+        ql.Date(evaluation_date.day, evaluation_date.month, evaluation_date.year + 20),
+        ql.Date(evaluation_date.day, evaluation_date.month, evaluation_date.year + 30)
     ]
     
     yields = [

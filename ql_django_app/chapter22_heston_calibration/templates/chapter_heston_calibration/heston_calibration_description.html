@@ -1,81 +1,177 @@
 {% extends "equity_models/chapter_base.html" %}
 
 {% block chapter_content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h4 class="card-title mb-4">
-                        <i class="bi bi-gear me-2"></i>Chapter 23: Heston Model Parameter Calibration
-                    </h4>
-                    
-                    <div class="alert alert-info">
-                        <h5 class="alert-heading">Advanced Parameter Calibration Techniques</h5>
-                        <p>This chapter demonstrates how to calibrate Heston model parameters using both QuantLib Python and SciPy optimization methods. We'll explore different solvers and their performance characteristics.</p>
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter explores volatility smile modeling and Heston model calibration for European options. 
+                    Learn how to construct implied volatility surfaces from market data and calibrate the Heston 
+                    stochastic volatility model to fit market quotes.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li>Volatility smile construction</li>
+                            <li>Implied volatility surface modeling</li>
+                            <li>Heston model calibration techniques</li>
+                            <li>Model parameter optimization</li>
+                        </ul>
                     </div>
-                    
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="card border-primary">
-                                <div class="card-header bg-primary text-white">
-                                    <h6 class="mb-0">Local Optimization Methods</h6>
-                                </div>
-                                <div class="card-body">
-                                    <ul class="list-unstyled">
-                                        <li><strong>QuantLib Levenberg-Marquardt:</strong> Built-in QuantLib solver</li>
-                                        <li><strong>SciPy Levenberg-Marquardt:</strong> Enhanced SciPy implementation</li>
-                                        <li><strong>SciPy Least Squares:</strong> Robust least squares optimization</li>
-                                    </ul>
-                                    <p class="small text-muted">These methods find local minima and are sensitive to initial conditions.</p>
-                                </div>
-                            </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Key Features:</h5>
+                        <ul class="list-unstyled">
+                            <li>Interactive volatility surface visualization</li>
+                            <li>Real-time calibration results</li>
+                            <li>Market data analysis tools</li>
+                            <li>Parameter sensitivity analysis</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Explore volatility smile modeling and calibrate the Heston model to market data. 
+                    Visualize implied volatility surfaces and analyze calibration quality.
+                </p>
+                <div class="text-center">
+                    <a href="{% url 'equity_models:chapter22_heston_calibration:calibration_lab' %}" class="btn btn-primary btn-lg">
+                        Launch Heston Calibration Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mathematical Background -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    Mathematical Background
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-primary">Heston Model Equations</h5>
+                        <p><strong>Asset Price Process:</strong></p>
+                        <div class="bg-light p-3 rounded mb-3">
+                            <code>dS<sub>t</sub> = μS<sub>t</sub> dt + √V<sub>t</sub> S<sub>t</sub> dW¹</code>
                         </div>
-                        
-                        <div class="col-md-6">
-                            <div class="card border-success">
-                                <div class="card-header bg-success text-white">
-                                    <h6 class="mb-0">Global Optimization Methods</h6>
-                                </div>
-                                <div class="card-body">
-                                    <ul class="list-unstyled">
-                                        <li><strong>Differential Evolution:</strong> Global search algorithm</li>
-                                        <li><strong>Basin Hopping:</strong> Annealing-like method</li>
-                                    </ul>
-                                    <p class="small text-muted">These methods search for global minima and are less sensitive to initial conditions.</p>
-                                </div>
-                            </div>
+                        <p><strong>Variance Process:</strong></p>
+                        <div class="bg-light p-3 rounded">
+                            <code>dV<sub>t</sub> = κ(θ - V<sub>t</sub>) dt + σ√V<sub>t</sub> dW²</code>
                         </div>
                     </div>
-                    
-                    <div class="mt-4">
-                        <h5>Key Features:</h5>
-                        <div class="row g-3">
-                            <div class="col-md-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                    <span>Multiple Solver Comparison</span>
-                                </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-primary">Model Parameters</h5>
+                        <ul class="list-unstyled">
+                            <li><strong>V<sub>0</sub>:</strong> Initial variance</li>
+                            <li><strong>κ:</strong> Mean reversion speed</li>
+                            <li><strong>θ:</strong> Long-term variance level</li>
+                            <li><strong>σ:</strong> Volatility of volatility</li>
+                            <li><strong>ρ:</strong> Correlation between price and volatility</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Concepts -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    Key Concepts
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <span class="fw-bold fs-4">σ</span>
                             </div>
-                            <div class="col-md-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                    <span>Parameter Stability Analysis</span>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-check-circle-fill text-success me-2"></i>
-                                    <span>Calibration Quality Metrics</span>
-                                </div>
-                            </div>
+                            <h5 class="fw-bold">Volatility Smile</h5>
+                            <p class="text-muted small">The phenomenon where implied volatility varies with strike price, creating a smile-shaped curve</p>
                         </div>
                     </div>
-                    
-                    <div class="mt-4">
-                        <a href="{% url 'equity_models:chapter22_heston_calibration:calibration_lab' %}" class="btn btn-primary btn-lg">
-                            <i class="bi bi-play-circle me-2"></i>Start Interactive Lab
-                        </a>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <span class="fw-bold fs-4">3D</span>
+                            </div>
+                            <h5 class="fw-bold">Volatility Surface</h5>
+                            <p class="text-muted small">A 3D representation of implied volatility as a function of both strike and time to maturity</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="text-center">
+                            <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                                <span class="fw-bold fs-4">⚙</span>
+                            </div>
+                            <h5 class="fw-bold">Model Calibration</h5>
+                            <p class="text-muted small">The process of finding model parameters that best fit observed market prices</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Practical Example -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    Practical Example
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    In this lab, you'll work with S&P 500 options data with the following characteristics:
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li>Spot Price: $659.37</li>
+                            <li>Strikes: 527.50 to 758.28</li>
+                            <li>Maturities: 1 month to 2 years</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="list-unstyled">
+                            <li>Risk-Free Rate: 1%</li>
+                            <li>Dividend Yield: 0%</li>
+                            <li>Volatility Range: 25% to 38%</li>
+                        </ul>
                     </div>
                 </div>
             </div>

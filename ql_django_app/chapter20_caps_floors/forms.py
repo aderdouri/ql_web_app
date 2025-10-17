@@ -1,172 +1,125 @@
 from django import forms
-from datetime import date
+from datetime import date, timedelta
 
-class CapsFloorsForm(forms.Form):
-    """
-    A form for pricing caps and floors using QuantLib.
-    Based on Chapter 20 example from the book.
-    """
-    
-    # Date Parameters
+class CapFloorForm(forms.Form):
+    # Basic Parameters
     evaluation_date = forms.DateField(
-        label="Evaluation Date", 
-        initial=date(2016, 6, 14),  # Book date: June 14, 2016
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        help_text="The date on which the cap/floor is evaluated (defaults to book date: June 14, 2016)."
+        label="Evaluation Date",
+        initial=date(2016, 6, 14),  # calc_date from QuantLib book
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
     )
-    
-    # Cap/Floor Parameters
     notional = forms.FloatField(
-        label="Notional (USD)", 
+        label="Notional Amount",
         initial=1000000,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="The principal amount of the cap/floor (1M USD in book example)."
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '1000'})
     )
-    
     start_date = forms.DateField(
-        label="Start Date", 
-        initial=date(2016, 6, 14),  # Book date: June 14, 2016
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        help_text="The start date of the cap/floor (defaults to book date: June 14, 2016)."
+        label="Start Date",
+        initial=date(2016, 6, 14),  # start_date from QuantLib book
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
     )
-    
     end_date = forms.DateField(
-        label="End Date", 
-        initial=date(2026, 6, 14),  # Book date: June 14, 2026 (10 years later)
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        help_text="The end date of the cap/floor (defaults to book date: June 14, 2026)."
+        label="End Date",
+        initial=date(2026, 6, 14),  # end_date from QuantLib book (10 years)
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
     )
     
+    # Strike and Market Data
     strike_rate = forms.FloatField(
-        label="Strike Rate (%)", 
-        initial=2.0,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="The strike rate of the cap/floor (2% in book example)."
+        label="Strike Rate (%)",
+        initial=2.0,  # strike = 0.02 from QuantLib book
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
     )
-    
-    # Market Data Parameters
     fixing_date = forms.DateField(
-        label="Fixing Date", 
-        initial=date(2016, 6, 10),  # Book date: June 10, 2016
-        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        help_text="The fixing date for the first rate (defaults to book date: June 10, 2016)."
+        label="Fixing Date",
+        initial=date(2016, 6, 10),  # fixing date from QuantLib book
+        widget=forms.DateInput(attrs={'type': 'date', 'class': 'form-control'})
     )
-    
     fixing_rate = forms.FloatField(
-        label="Fixing Rate (%)", 
-        initial=0.6556,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="The fixing rate for the first period (0.6556% in book example)."
+        label="Fixing Rate (%)",
+        initial=0.6556,  # 0.0065560 from QuantLib book
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'})
     )
-    
-    # Volatility Parameters
     pricing_method = forms.ChoiceField(
         label="Pricing Method",
         choices=[
-            ('constant', 'Constant Volatility'),
-            ('surface', 'Volatility Surface')
+            ('Constant Volatility', 'Constant Volatility'),
+            ('Volatility Surface', 'Volatility Surface')
         ],
-        initial='constant',
-        widget=forms.Select(attrs={'class': 'form-select'}),
-        help_text="Choose between constant volatility or volatility surface pricing."
+        initial='Constant Volatility',
+        widget=forms.Select(attrs={'class': 'form-control'})
     )
     
+    # Volatility Parameters
     constant_volatility = forms.FloatField(
-        label="Constant Volatility (%)", 
-        initial=54.7295,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="The constant volatility for pricing (54.7295% in book example)."
+        label="Constant Volatility (%)",
+        initial=54.7295,  # 0.547295 from QuantLib book
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'})
     )
-    
-    # Volatility Surface Parameters (for surface method)
     surface_strike_1 = forms.FloatField(
-        label="Surface Strike 1 (%)", 
-        initial=1.0,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="First strike for volatility surface (1%)."
+        label="Surface Strike 1 (%)",
+        initial=1.0,  # 0.01 from QuantLib book
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
     )
-    
     surface_strike_2 = forms.FloatField(
-        label="Surface Strike 2 (%)", 
-        initial=1.5,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="Second strike for volatility surface (1.5%)."
+        label="Surface Strike 2 (%)",
+        initial=1.5,  # 0.015 from QuantLib book
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
     )
-    
     surface_strike_3 = forms.FloatField(
-        label="Surface Strike 3 (%)", 
-        initial=2.0,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="Third strike for volatility surface (2%)."
+        label="Surface Strike 3 (%)",
+        initial=2.0,  # 0.02 from QuantLib book
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
     )
     
-    # Term Structure Parameters
+    # Zero Rate Term Structure
     zero_rate_1 = forms.FloatField(
-        label="Zero Rate 1 (%)", 
-        initial=0.0,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="Zero rate for 3 months (0%)."
+        label="1Y Rate (%)",
+        initial=0.7795,  # 0.007795 from QuantLib book
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'})
     )
-    
     zero_rate_2 = forms.FloatField(
-        label="Zero Rate 2 (%)", 
-        initial=0.6616,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="Zero rate for 6 months (0.6616%)."
+        label="2Y Rate (%)",
+        initial=0.9599,  # 0.009599 from QuantLib book
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'})
     )
-    
     zero_rate_3 = forms.FloatField(
-        label="Zero Rate 3 (%)", 
-        initial=0.7049,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="Zero rate for 9 months (0.7049%)."
+        label="3Y Rate (%)",
+        initial=1.1203,  # 0.011203 from QuantLib book
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'})
     )
-    
     zero_rate_4 = forms.FloatField(
-        label="Zero Rate 4 (%)", 
-        initial=0.7795,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="Zero rate for 1 year (0.7795%)."
+        label="4Y Rate (%)",
+        initial=1.5068,  # 0.015068 from QuantLib book
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'})
     )
-    
     zero_rate_5 = forms.FloatField(
-        label="Zero Rate 5 (%)", 
-        initial=0.9599,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="Zero rate for 3 years (0.9599%)."
+        label="5Y Rate (%)",
+        initial=1.7583,  # 0.017583 from QuantLib book
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'})
     )
-    
     zero_rate_6 = forms.FloatField(
-        label="Zero Rate 6 (%)", 
-        initial=1.1203,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="Zero rate for 5 years (1.1203%)."
+        label="6Y Rate (%)",
+        initial=1.8998,  # 0.018998 from QuantLib book
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'})
     )
-    
     zero_rate_7 = forms.FloatField(
-        label="Zero Rate 7 (%)", 
-        initial=1.5068,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="Zero rate for 10 years (1.5068%)."
+        label="7Y Rate (%)",
+        initial=2.0080,  # 0.020080 from QuantLib book
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'})
     )
-    
     zero_rate_8 = forms.FloatField(
-        label="Zero Rate 8 (%)", 
-        initial=1.7583,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="Zero rate for 15 years (1.7583%)."
+        label="8Y Rate (%)",
+        initial=2.0080,  # Same as 7Y for simplicity
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'})
     )
-    
     zero_rate_9 = forms.FloatField(
-        label="Zero Rate 9 (%)", 
-        initial=1.8998,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="Zero rate for 20 years (1.8998%)."
+        label="9Y Rate (%)",
+        initial=2.0080,  # Same as 7Y for simplicity
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'})
     )
-    
     zero_rate_10 = forms.FloatField(
-        label="Zero Rate 10 (%)", 
-        initial=2.0080,
-        widget=forms.NumberInput(attrs={'class': 'form-control'}),
-        help_text="Zero rate for 30 years (2.0080%)."
+        label="10Y Rate (%)",
+        initial=2.0080,  # Same as 7Y for simplicity
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.0001'})
     )
