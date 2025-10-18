@@ -46,3 +46,6 @@ class SwapAnalysisResult(models.Model):
             return (self.difference_amount / self.total_par_amount) * 100
         return 0
 
+
+
+

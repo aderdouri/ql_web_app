@@ -8,3 +8,6 @@ urlpatterns = [
     path('lab/', views.par_indexed_coupons_lab_view, name='par_indexed_coupons_lab'),
 ]
 
+
+
+

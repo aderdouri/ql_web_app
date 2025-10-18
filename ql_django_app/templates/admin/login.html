@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - QuantLib Administration</title>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+    <style>
+        :root {
+            --primary-blue: #007BFF;
+            --primary-blue-hover: #0056b3;
+            --primary-blue-light: #e3f2fd;
+            --white: #FFFFFF;
+            --black: #1a1a1a;
+            --dark-gray: #2c3e50;
+            --light-gray: #f8f9fa;
+            --border-gray: #e9ecef;
+            --text-gray: #6c757d;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-lg: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-xl: 0 10px 25px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+            --border-radius-lg: 12px;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #0056b3 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Background Pattern */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        /* Login Container */
+        .login-container {
+            background: var(--white);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-xl);
+            overflow: hidden;
+            width: 100%;
+            max-width: 400px;
+            position: relative;
+            z-index: 10;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Login Header */
+        .login-header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #0056b3 100%);
+            color: var(--white);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .login-header::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid #0056b3;
+        }
+
+        .login-logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .login-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-subtitle {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        /* Login Form */
+        .login-form {
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 500;
+            color: var(--black);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--border-gray);
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            transition: var(--transition);
+            background: var(--white);
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-gray);
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-gray);
+            font-size: 1rem;
+        }
+
+        .input-group .form-control {
+            padding-left: 3rem;
+        }
+
+        /* Login Button */
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #0056b3 100%);
+            color: var(--white);
+            border: none;
+            padding: 0.875rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Error Messages */
+        .error-messages {
+            background: #f8d7da;
+            color: var(--danger);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            border: 1px solid #f5c6cb;
+        }
+
+        .error-messages ul {
+            margin: 0;
+            padding-left: 1rem;
+        }
+
+        .error-messages li {
+            margin-bottom: 0.25rem;
+        }
+
+        /* Success Messages */
+        .success-messages {
+            background: #d4edda;
+            color: var(--success);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            border: 1px solid #c3e6cb;
+        }
+
+        /* Footer */
+        .login-footer {
+            background: var(--light-gray);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            border-top: 1px solid var(--border-gray);
+        }
+
+        .login-footer a {
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .login-footer a:hover {
+            color: var(--primary-blue-hover);
+            text-decoration: underline;
+        }
+
+        /* Back to App Link */
+        .back-to-app {
+            position: absolute;
+            top: 2rem;
+            left: 2rem;
+            color: var(--white);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+            transition: var(--transition);
+            z-index: 10;
+        }
+
+        .back-to-app:hover {
+            color: var(--white);
+            text-decoration: none;
+            transform: translateX(-4px);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid var(--white);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .login-container {
+                max-width: 100%;
+            }
+            
+            .login-header {
+                padding: 1.5rem;
+            }
+            
+            .login-form {
+                padding: 1.5rem;
+            }
+            
+            .login-footer {
+                padding: 1rem 1.5rem;
+            }
+            
+            .back-to-app {
+                top: 1rem;
+                left: 1rem;
+            }
+        }
+
+        /* Security Notice */
+        .security-notice {
+            background: var(--primary-blue-light);
+            color: var(--primary-blue);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary-blue);
+            font-size: 0.875rem;
+        }
+
+        .security-notice i {
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Back to App Link -->
+    <a href="/" class="back-to-app">
+        <i class="bi bi-arrow-left"></i>
+        Back to Application
+    </a>
+
+    <!-- Login Container -->
+    <div class="login-container">
+        <!-- Header -->
+        <div class="login-header">
+            <div class="login-logo">
+                <i class="bi bi-shield-check"></i>
+            </div>
+            <h1 class="login-title">Admin Login</h1>
+            <p class="login-subtitle">QuantLib Administration Panel</p>
+        </div>
+
+        <!-- Form -->
+        <div class="login-form">
+            <!-- Security Notice -->
+            <div class="security-notice">
+                <i class="bi bi-shield-lock"></i>
+                <strong>Secure Access:</strong> This area is restricted to authorized administrators only.
+            </div>
+
+            <!-- Error Messages -->
+            {% if messages %}
+                {% for message in messages %}
+                    {% if message.tags == 'error' %}
+                        <div class="error-messages">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            {{ message }}
+                        </div>
+                    {% elif message.tags == 'success' %}
+                        <div class="success-messages">
+                            <i class="bi bi-check-circle"></i>
+                            {{ message }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+
+            <!-- Login Form -->
+            <form method="post" id="loginForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="username" class="form-label">Username</label>
+                    <div class="input-group">
+                        <i class="bi bi-person input-icon"></i>
+                        <input type="text" 
+                               id="username" 
+                               name="username" 
+                               class="form-control" 
+                               placeholder="Enter your username"
+                               required
+                               autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password</label>
+                    <div class="input-group">
+                        <i class="bi bi-lock input-icon"></i>
+                        <input type="password" 
+                               id="password" 
+                               name="password" 
+                               class="form-control" 
+                               placeholder="Enter your password"
+                               required
+                               autocomplete="current-password">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        <input type="checkbox" name="remember_me" style="margin-right: 0.5rem;">
+                        Remember me
+                    </label>
+                </div>
+
+                <button type="submit" class="login-btn" id="loginBtn">
+                    <i class="bi bi-box-arrow-in-right"></i>
+                    <span class="btn-text">Sign In</span>
+                    <div class="spinner" style="display: none;"></div>
+                </button>
+            </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="login-footer">
+            <p style="margin: 0; color: var(--text-gray); font-size: 0.875rem;">
+                <i class="bi bi-shield-check"></i>
+                Protected by Django Authentication
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Form submission with loading state
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            const btn = document.getElementById('loginBtn');
+            const btnText = btn.querySelector('.btn-text');
+            const spinner = btn.querySelector('.spinner');
+            
+            // Show loading state
+            btn.disabled = true;
+            btnText.style.display = 'none';
+            spinner.style.display = 'block';
+        });
+
+        // Auto-focus on username field
+        document.addEventListener('DOMContentLoaded', function() {
+            const usernameField = document.getElementById('username');
+            if (usernameField) {
+                usernameField.focus();
+            }
+        });
+
+        // Enter key handling
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const form = document.getElementById('loginForm');
+                if (form) {
+                    form.submit();
+                }
+            }
+        });
+
+        // Add some interactive effects
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.style.transform = 'scale(1.02)';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.style.transform = 'scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>

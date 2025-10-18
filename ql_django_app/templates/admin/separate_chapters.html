@@ -1,0 +1,276 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block title %}QuantLib Chapters - Administration{% endblock %}
+
+{% block page_title %}QuantLib Chapters{% endblock %}
+{% block page_subtitle %}Manage and monitor all QuantLib chapters and modules{% endblock %}
+
+{% block content %}
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    {% for category, stats in categories_stats.items %}
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="bi bi-book"></i>
+        </div>
+        <div class="stat-value">{{ stats.total }}</div>
+        <div class="stat-label">{{ category }}</div>
+        <div class="stat-details">
+            <span class="badge badge-success">{{ stats.active }} Active</span>
+            <span class="badge badge-secondary">{{ stats.inactive }} Inactive</span>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Chapters by Category -->
+{% for category, stats in categories_stats.items %}
+<div class="card" style="margin-bottom: 2rem;">
+    <div class="card-header">
+        <i class="bi bi-collection"></i>
+        {{ category }}
+        <span class="badge badge-primary" style="margin-left: auto;">{{ stats.total }} chapters</span>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Chapter</th>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th>URL</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for chapter in chapters_info %}
+                    {% if chapter.category == category %}
+                    <tr>
+                        <td>
+                            <span class="badge badge-info">Ch. {{ chapter.number }}</span>
+                        </td>
+                        <td>
+                            <div style="font-weight: 500; color: var(--black);">{{ chapter.name }}</div>
+                        </td>
+                        <td>
+                            {% if chapter.status == 'active' %}
+                                <span class="badge badge-success">
+                                    <i class="bi bi-check-circle"></i>
+                                    Active
+                                </span>
+                            {% else %}
+                                <span class="badge badge-secondary">
+                                    <i class="bi bi-pause-circle"></i>
+                                    Inactive
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <code style="font-size: 0.875rem; color: var(--text-gray);">{{ chapter.url }}</code>
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ chapter.url }}" class="btn btn-sm btn-outline-primary" title="View Chapter">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                                <button class="btn btn-sm btn-outline-info" onclick="toggleChapterStatus({{ chapter.number }})" title="Toggle Status">
+                                    <i class="bi bi-toggle-{% if chapter.status == 'active' %}on{% else %}off{% endif %}"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" onclick="viewChapterDetails({{ chapter.number }})" title="View Details">
+                                    <i class="bi bi-info-circle"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Quick Actions -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+        <i class="bi bi-tools"></i>
+        Quick Actions
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <button class="btn btn-success w-100" onclick="activateAllChapters()">
+                    <i class="bi bi-play-circle"></i>
+                    Activate All
+                </button>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-warning w-100" onclick="deactivateAllChapters()">
+                    <i class="bi bi-pause-circle"></i>
+                    Deactivate All
+                </button>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-info w-100" onclick="refreshChapterStatus()">
+                    <i class="bi bi-arrow-clockwise"></i>
+                    Refresh Status
+                </button>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-primary w-100" onclick="exportChapterList()">
+                    <i class="bi bi-download"></i>
+                    Export List
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chapter Details Modal -->
+<div class="modal fade" id="chapterModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="chapterModalTitle">Chapter Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="chapterModalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="chapterActionBtn">Action</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Toggle chapter status
+function toggleChapterStatus(chapterNumber) {
+    console.log('Toggling status for chapter:', chapterNumber);
+    // This would typically make an API call to toggle the status
+    alert('Toggle status for Chapter ' + chapterNumber + ' (Feature not implemented yet)');
+}
+
+// View chapter details
+function viewChapterDetails(chapterNumber) {
+    const chapter = getChapterByNumber(chapterNumber);
+    if (chapter) {
+        document.getElementById('chapterModalTitle').textContent = `Chapter ${chapter.number}: ${chapter.name}`;
+        document.getElementById('chapterModalBody').innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Basic Information</h6>
+                    <p><strong>Number:</strong> ${chapter.number}</p>
+                    <p><strong>Name:</strong> ${chapter.name}</p>
+                    <p><strong>Category:</strong> ${chapter.category}</p>
+                    <p><strong>Status:</strong> <span class="badge badge-${chapter.status === 'active' ? 'success' : 'secondary'}">${chapter.status}</span></p>
+                </div>
+                <div class="col-md-6">
+                    <h6>Technical Details</h6>
+                    <p><strong>URL:</strong> <code>${chapter.url}</code></p>
+                    <p><strong>Module:</strong> chapter${chapter.number}_${chapter.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}</p>
+                </div>
+            </div>
+        `;
+        document.getElementById('chapterActionBtn').textContent = chapter.status === 'active' ? 'Deactivate' : 'Activate';
+        document.getElementById('chapterActionBtn').onclick = () => toggleChapterStatus(chapterNumber);
+        
+        const modal = new bootstrap.Modal(document.getElementById('chapterModal'));
+        modal.show();
+    }
+}
+
+// Get chapter by number
+function getChapterByNumber(number) {
+    const chapters = {{ chapters_info|safe }};
+    return chapters.find(chapter => chapter.number === number);
+}
+
+// Quick actions
+function activateAllChapters() {
+    if (confirm('Are you sure you want to activate all chapters?')) {
+        alert('Activate all chapters (Feature not implemented yet)');
+    }
+}
+
+function deactivateAllChapters() {
+    if (confirm('Are you sure you want to deactivate all chapters?')) {
+        alert('Deactivate all chapters (Feature not implemented yet)');
+    }
+}
+
+function refreshChapterStatus() {
+    location.reload();
+}
+
+function exportChapterList() {
+    alert('Export chapter list (Feature not implemented yet)');
+}
+
+// Auto-refresh every 5 minutes
+setInterval(function() {
+    console.log('Auto-refreshing chapter status...');
+}, 300000);
+</script>
+
+<style>
+/* Additional styles for chapters page */
+.stat-details {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.stat-details .badge {
+    margin-right: 0.25rem;
+}
+
+.table code {
+    background-color: var(--light-gray);
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius);
+    font-family: 'Courier New', monospace;
+}
+
+.btn-group .btn {
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-top-left-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
+}
+
+.btn-group .btn:last-child {
+    border-top-right-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+}
+
+.modal-content {
+    border-radius: var(--border-radius-lg);
+    border: none;
+    box-shadow: var(--shadow-xl);
+}
+
+.modal-header {
+    background: var(--light-gray);
+    border-bottom: 1px solid var(--border-gray);
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-gray);
+}
+
+.btn-close:hover {
+    color: var(--black);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,200 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block title %}System Logs - QuantLib Administration{% endblock %}
+
+{% block page_title %}System Logs{% endblock %}
+{% block page_subtitle %}Monitor system activity and logs{% endblock %}
+
+{% block content %}
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="bi bi-file-text"></i>
+        </div>
+        <div class="stat-value">{{ logs|length|default:"0" }}</div>
+        <div class="stat-label">Total Logs</div>
+    </div>
+    
+    <div class="stat-card success">
+        <div class="stat-icon success">
+            <i class="bi bi-check-circle"></i>
+        </div>
+        <div class="stat-value">{{ success_count|default:"0" }}</div>
+        <div class="stat-label">Success</div>
+    </div>
+    
+    <div class="stat-card warning">
+        <div class="stat-icon warning">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div class="stat-value">{{ warning_count|default:"0" }}</div>
+        <div class="stat-label">Warnings</div>
+    </div>
+    
+    <div class="stat-card danger">
+        <div class="stat-icon danger">
+            <i class="bi bi-x-circle"></i>
+        </div>
+        <div class="stat-value">{{ error_count|default:"0" }}</div>
+        <div class="stat-label">Errors</div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="filters-form">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="search">Search</label>
+                        <input type="text" id="search" name="search" class="form-control" 
+                               placeholder="Search logs..." value="{{ user_filter }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="level">Level</label>
+                        <select id="status" name="status" class="form-control">
+                            <option value="">All Levels</option>
+                            <option value="success" {% if status_filter == 'success' %}selected{% endif %}>Success</option>
+                            <option value="warning" {% if status_filter == 'warning' %}selected{% endif %}>Warning</option>
+                            <option value="error" {% if status_filter == 'error' %}selected{% endif %}>Error</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="action">Action</label>
+                        <select id="action" name="action" class="form-control">
+                            <option value="">All Actions</option>
+                            <option value="login" {% if action_filter == 'login' %}selected{% endif %}>Login</option>
+                            <option value="calculation" {% if action_filter == 'calculation' %}selected{% endif %}>Calculation</option>
+                            <option value="user_management" {% if action_filter == 'user_management' %}selected{% endif %}>User Management</option>
+                            <option value="system" {% if action_filter == 'system' %}selected{% endif %}>System</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label>&nbsp;</label>
+                        <div>
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                            <a href="{% url 'admin_logs' %}" class="btn btn-secondary">Clear</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Logs Table -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-file-text"></i>
+        System Logs
+        <span class="badge badge-primary" style="margin-left: auto;">{{ logs|length }} logs</span>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Timestamp</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                        <th>User</th>
+                        <th>Details</th>
+                        <th>IP Address</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>
+                            <div style="font-size: 0.875rem; color: var(--black);">
+                                {{ log.timestamp }}
+                            </div>
+                        </td>
+                        <td>
+                            {% if log.status == 'error' %}
+                                <span class="badge badge-danger">
+                                    <i class="bi bi-x-circle"></i>
+                                    Error
+                                </span>
+                            {% elif log.status == 'warning' %}
+                                <span class="badge badge-warning">
+                                    <i class="bi bi-exclamation-triangle"></i>
+                                    Warning
+                                </span>
+                            {% elif log.status == 'success' %}
+                                <span class="badge badge-success">
+                                    <i class="bi bi-check-circle"></i>
+                                    Success
+                                </span>
+                            {% else %}
+                                <span class="badge badge-secondary">
+                                    <i class="bi bi-info-circle"></i>
+                                    {{ log.status|title }}
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge badge-primary">
+                                {{ log.action|title }}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                <div class="user-avatar" style="width: 24px; height: 24px; background: var(--primary-blue); color: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.75rem;">
+                                    {{ log.user|first|upper }}
+                                </div>
+                                <span style="font-size: 0.875rem; color: var(--black);">{{ log.user }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.875rem; color: var(--black); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                {{ log.details }}
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.75rem; color: var(--text-gray);">
+                                {{ log.ip_address }}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Filters Form */
+.filters-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.filters-form label {
+    font-weight: 600;
+    color: var(--black);
+    margin-bottom: 0.5rem;
+}
+
+.filters-form .form-control {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.filters-form .form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+</style>
+{% endblock %}

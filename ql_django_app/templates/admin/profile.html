@@ -1,0 +1,317 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block title %}Admin Profile - QuantLib Administration{% endblock %}
+
+{% block page_title %}Admin Profile{% endblock %}
+{% block page_subtitle %}Manage your administrator account and view activity{% endblock %}
+
+{% block content %}
+<!-- Profile Information -->
+<div class="row" style="margin-bottom: 2rem;">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-person"></i>
+                Profile Information
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label class="form-label">Username</label>
+                            <div class="form-control-plaintext" style="font-weight: 500; color: var(--black);">
+                                {{ user.username }}
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label class="form-label">Email</label>
+                            <div class="form-control-plaintext" style="color: var(--text-gray);">
+                                {{ user.email|default:"Not provided" }}
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label class="form-label">First Name</label>
+                            <div class="form-control-plaintext" style="color: var(--text-gray);">
+                                {{ user.first_name|default:"Not provided" }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label class="form-label">Last Name</label>
+                            <div class="form-control-plaintext" style="color: var(--text-gray);">
+                                {{ user.last_name|default:"Not provided" }}
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label class="form-label">Date Joined</label>
+                            <div class="form-control-plaintext" style="color: var(--text-gray);">
+                                {{ user_stats.date_joined|date:"F j, Y \a\t g:i A" }}
+                            </div>
+                        </div>
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
+                            <label class="form-label">Last Login</label>
+                            <div class="form-control-plaintext" style="color: var(--text-gray);">
+                                {{ user_stats.last_login|date:"F j, Y \a\t g:i A"|default:"Never" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: var(--white);">
+                <i class="bi bi-shield-check"></i>
+                Account Status
+            </div>
+            <div class="card-body">
+                <div class="status-item" style="margin-bottom: 1.5rem;">
+                    <div class="status-label">Super User</div>
+                    <div class="status-value">
+                        {% if user_stats.is_superuser %}
+                            <span class="badge badge-success">
+                                <i class="bi bi-check-circle"></i>
+                                Yes
+                            </span>
+                        {% else %}
+                            <span class="badge badge-info">
+                                <i class="bi bi-x-circle"></i>
+                                No
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="status-item" style="margin-bottom: 1.5rem;">
+                    <div class="status-label">Staff Member</div>
+                    <div class="status-value">
+                        {% if user_stats.is_staff %}
+                            <span class="badge badge-success">
+                                <i class="bi bi-check-circle"></i>
+                                Yes
+                            </span>
+                        {% else %}
+                            <span class="badge badge-info">
+                                <i class="bi bi-x-circle"></i>
+                                No
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="status-item">
+                    <div class="status-label">Active</div>
+                    <div class="status-value">
+                        {% if user_stats.is_active %}
+                            <span class="badge badge-success">
+                                <i class="bi bi-check-circle"></i>
+                                Yes
+                            </span>
+                        {% else %}
+                            <span class="badge badge-danger">
+                                <i class="bi bi-x-circle"></i>
+                                No
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row" style="margin-bottom: 2rem;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: var(--white);">
+                <i class="bi bi-clock-history"></i>
+                Recent Activity
+            </div>
+            <div class="card-body">
+                <div class="activity-timeline">
+                    {% for activity in recent_activity %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker">
+                            <i class="bi bi-circle-fill"></i>
+                        </div>
+                        <div class="timeline-content">
+                            <div class="timeline-title">{{ activity.action }}</div>
+                            <div class="timeline-time">
+                                <i class="bi bi-clock"></i>
+                                {{ activity.timestamp|date:"M j, Y \a\t g:i A" }}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card">
+    <div class="card-header" style="background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%); color: var(--black);">
+        <i class="bi bi-gear"></i>
+        Quick Actions
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-speedometer2"></i>
+                    Dashboard
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'admin_users' %}" class="btn btn-outline-success w-100">
+                    <i class="bi bi-people"></i>
+                    Manage Users
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'admin_logs' %}" class="btn btn-outline-info w-100">
+                    <i class="bi bi-journal-text"></i>
+                    View Logs
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'admin_logout' %}" class="btn btn-outline-danger w-100">
+                    <i class="bi bi-box-arrow-right"></i>
+                    Sign Out
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Status Items */
+.status-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--light-gray);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.status-item:hover {
+    background: var(--primary-blue-light);
+}
+
+.status-label {
+    font-weight: 500;
+    color: var(--black);
+}
+
+.status-value {
+    display: flex;
+    align-items: center;
+}
+
+/* Activity Timeline */
+.activity-timeline {
+    position: relative;
+    padding-left: 2rem;
+}
+
+.activity-timeline::before {
+    content: '';
+    position: absolute;
+    left: 0.75rem;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: var(--border-gray);
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -2rem;
+    top: 0.25rem;
+    width: 1rem;
+    height: 1rem;
+    background: var(--white);
+    border: 3px solid var(--primary-blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.5rem;
+    color: var(--primary-blue);
+}
+
+.timeline-content {
+    background: var(--light-gray);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    border-left: 3px solid var(--primary-blue);
+    flex: 1;
+    transition: var(--transition);
+}
+
+.timeline-content:hover {
+    background: var(--primary-blue-light);
+    transform: translateX(4px);
+}
+
+.timeline-title {
+    font-weight: 500;
+    color: var(--black);
+    margin-bottom: 0.25rem;
+}
+
+.timeline-time {
+    font-size: 0.875rem;
+    color: var(--text-gray);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-control-plaintext {
+    padding: 0.75rem 0;
+    border: none;
+    background: transparent;
+    font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .status-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+    
+    .timeline-item {
+        flex-direction: column;
+    }
+    
+    .timeline-marker {
+        position: static;
+        margin-bottom: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

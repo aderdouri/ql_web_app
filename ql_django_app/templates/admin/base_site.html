@@ -1,0 +1,96 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{{ title }} | QuantLib Cookbook Administration{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <i class="bi bi-book"></i> QuantLib Cookbook Administration
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}
+<div class="admin-dashboard-stats">
+    <div class="stat-card">
+        <h3>{{ total_chapters|default:0 }}</h3>
+        <p>Chapters</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ total_users|default:0 }}</h3>
+        <p>Users</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ total_quizzes|default:0 }}</h3>
+        <p>Quizzes</p>
+    </div>
+    <div class="stat-card">
+        <h3>{{ total_interactive_blocks|default:0 }}</h3>
+        <p>Interactive Blocks</p>
+    </div>
+</div>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+.admin-dashboard-stats {
+    display: flex;
+    gap: 20px;
+    margin: 20px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 15px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-width: 100px;
+}
+
+.stat-card h3 {
+    margin: 0;
+    font-size: 2em;
+    color: #007bff;
+}
+
+.stat-card p {
+    margin: 5px 0 0 0;
+    color: #666;
+    font-size: 0.9em;
+}
+
+.module h2 {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 15px;
+    margin: 0;
+    border-radius: 6px 6px 0 0;
+}
+
+.module table {
+    border-radius: 0 0 6px 6px;
+    overflow: hidden;
+}
+
+.module .addlink {
+    background: #28a745;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    text-decoration: none;
+    display: inline-block;
+    margin: 10px 0;
+}
+
+.module .addlink:hover {
+    background: #218838;
+    color: white;
+}
+</style>
+{% endblock %}
+

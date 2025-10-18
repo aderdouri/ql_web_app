@@ -1,0 +1,1122 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - QuantLib Administration{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}System overview and key metrics{% endblock %}
+
+{% block content %}
+<!-- Key Metrics Row 1 -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="bi bi-people"></i>
+        </div>
+        <div class="stat-value">{{ total_users|default:"0" }}</div>
+        <div class="stat-label">Total Users</div>
+        <div class="stat-change positive">+{{ new_users|default:"0" }} this week</div>
+    </div>
+    
+    <div class="stat-card success">
+        <div class="stat-icon success">
+            <i class="bi bi-person-check"></i>
+        </div>
+        <div class="stat-value">{{ active_users|default:"0" }}</div>
+        <div class="stat-label">Active Users</div>
+        <div class="stat-change positive">+12% from last month</div>
+    </div>
+    
+    <div class="stat-card info">
+        <div class="stat-icon info">
+            <i class="bi bi-calculator"></i>
+        </div>
+        <div class="stat-value">{{ total_calculations|default:"1,247" }}</div>
+        <div class="stat-label">Total Calculations</div>
+        <div class="stat-change positive">+89 today</div>
+    </div>
+    
+    <div class="stat-card warning">
+        <div class="stat-icon warning">
+            <i class="bi bi-shield-check"></i>
+        </div>
+        <div class="stat-value">{{ staff_users|default:"0" }}</div>
+        <div class="stat-label">Administrators</div>
+        <div class="stat-change neutral">System access</div>
+    </div>
+</div>
+
+<!-- Key Metrics Row 2 -->
+<div class="stats-grid" style="margin-bottom: 2rem;">
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="bi bi-book"></i>
+        </div>
+        <div class="stat-value">36</div>
+        <div class="stat-label">QuantLib Chapters</div>
+        <div class="stat-change positive">All active</div>
+    </div>
+    
+    <div class="stat-card success">
+        <div class="stat-icon success">
+            <i class="bi bi-graph-up-arrow"></i>
+        </div>
+        <div class="stat-value">94.2%</div>
+        <div class="stat-label">Success Rate</div>
+        <div class="stat-change positive">+2.1% improvement</div>
+    </div>
+    
+    <div class="stat-card info">
+        <div class="stat-icon info">
+            <i class="bi bi-clock"></i>
+        </div>
+        <div class="stat-value">2.3s</div>
+        <div class="stat-label">Avg Response Time</div>
+        <div class="stat-change positive">-0.5s faster</div>
+    </div>
+    
+    <div class="stat-card warning">
+        <div class="stat-icon warning">
+            <i class="bi bi-server"></i>
+        </div>
+        <div class="stat-value">98.7%</div>
+        <div class="stat-label">System Uptime</div>
+        <div class="stat-change positive">Excellent</div>
+    </div>
+</div>
+
+<!-- Charts Row 1 -->
+<div class="row" style="margin-bottom: 2rem;">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-graph-up"></i>
+                User Activity & Growth
+                <div class="chart-controls">
+                    <button class="btn btn-sm btn-outline-primary active" onclick="updateChart('monthly')">Monthly</button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="updateChart('weekly')">Weekly</button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="updateChart('daily')">Daily</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="userGrowthChart" height="350"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card chart-card-large">
+            <div class="card-header">
+                <i class="bi bi-pie-chart"></i>
+                QuantLib Chapter Usage
+            </div>
+            <div class="card-body chart-body-large">
+                <div class="chart-container">
+                    <canvas id="chapterUsageChart" height="300"></canvas>
+                </div>
+                <div class="chart-summary">
+                    <div class="summary-item">
+                        <span class="summary-label">Most Popular:</span>
+                        <span class="summary-value">Swap Analysis</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Total Usage:</span>
+                        <span class="summary-value">1,247 calculations</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-label">Success Rate:</span>
+                        <span class="summary-value success">94.2%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 2 -->
+<div class="row" style="margin-bottom: 2rem;">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-bar-chart"></i>
+                System Performance
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-speedometer2"></i>
+                Real-time Metrics
+            </div>
+            <div class="card-body">
+                <canvas id="realtimeChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Row 3 -->
+<div class="row" style="margin-bottom: 2rem;">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-cpu"></i>
+                Calculation Types Distribution
+            </div>
+            <div class="card-body">
+                <canvas id="calculationTypesChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-calendar-week"></i>
+                Weekly Activity Heatmap
+            </div>
+            <div class="card-body">
+                <canvas id="heatmapChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity & System Health -->
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history"></i>
+                Recent Activity
+            </div>
+            <div class="card-body">
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Swap analysis completed successfully</div>
+                            <div class="activity-description">User: john.doe@example.com</div>
+                            <div class="activity-time">2 minutes ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon primary">
+                            <i class="bi bi-person-plus"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">New user registered</div>
+                            <div class="activity-description">jane.smith@example.com</div>
+                            <div class="activity-time">15 minutes ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon info">
+                            <i class="bi bi-calculator"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Heston calibration completed</div>
+                            <div class="activity-description">Chapter 22 - Advanced calibration</div>
+                            <div class="activity-time">1 hour ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">High memory usage detected</div>
+                            <div class="activity-description">Memory usage: 85%</div>
+                            <div class="activity-time">2 hours ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon success">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">System backup completed</div>
+                            <div class="activity-description">Database backup successful</div>
+                            <div class="activity-time">3 hours ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-heart-pulse"></i>
+                System Health
+            </div>
+            <div class="card-body">
+                <div class="health-metrics">
+                    <div class="health-item">
+                        <div class="health-label">Database Status</div>
+                        <div class="health-value success">
+                            <i class="bi bi-check-circle"></i>
+                            Healthy
+                        </div>
+                        <div class="health-details">Response time: 12ms</div>
+                    </div>
+                    
+                    <div class="health-item">
+                        <div class="health-label">Server Load</div>
+                        <div class="health-value warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Moderate
+                        </div>
+                        <div class="health-details">CPU: 65%, Memory: 78%</div>
+                    </div>
+                    
+                    <div class="health-item">
+                        <div class="health-label">Disk Usage</div>
+                        <div class="health-value success">
+                            <i class="bi bi-check-circle"></i>
+                            Good
+                        </div>
+                        <div class="health-details">Used: 45% of 500GB</div>
+                    </div>
+                    
+                    <div class="health-item">
+                        <div class="health-label">Network</div>
+                        <div class="health-value success">
+                            <i class="bi bi-check-circle"></i>
+                            Stable
+                        </div>
+                        <div class="health-details">Latency: 8ms, Uptime: 99.9%</div>
+                    </div>
+                    
+                    <div class="health-item">
+                        <div class="health-label">Security</div>
+                        <div class="health-value success">
+                            <i class="bi bi-shield-check"></i>
+                            Secure
+                        </div>
+                        <div class="health-details">Last scan: 2 hours ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row" style="margin-top: 2rem;">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-lightning"></i>
+                Quick Actions
+            </div>
+            <div class="card-body">
+                <div class="quick-actions">
+                    <a href="{% url 'admin_users' %}" class="action-btn">
+                        <i class="bi bi-people"></i>
+                        <span>Manage Users</span>
+                    </a>
+                    <a href="{% url 'admin_calculations' %}" class="action-btn">
+                        <i class="bi bi-calculator"></i>
+                        <span>View Calculations</span>
+                    </a>
+                    <a href="{% url 'admin_notifications' %}" class="action-btn">
+                        <i class="bi bi-bell"></i>
+                        <span>Notifications</span>
+                    </a>
+                    <a href="{% url 'admin_profile' %}" class="action-btn">
+                        <i class="bi bi-person"></i>
+                        <span>Admin Profile</span>
+                    </a>
+                    <a href="/admin/logs/" class="action-btn">
+                        <i class="bi bi-file-text"></i>
+                        <span>System Logs</span>
+                    </a>
+                    <a href="/admin/backup/" class="action-btn">
+                        <i class="bi bi-download"></i>
+                        <span>Backup Data</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Chart data for different time periods
+const chartData = {
+    monthly: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        newUsers: [15, 22, 18, 25, 28, 32, 35, 30, 28, 24, 20, 18],
+        activeUsers: [45, 52, 48, 55, 58, 62, 65, 60, 58, 54, 50, 48]
+    },
+    weekly: {
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        newUsers: [8, 12, 15, 10],
+        activeUsers: [25, 30, 35, 28]
+    },
+    daily: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        newUsers: [3, 5, 4, 6, 7, 2, 1],
+        activeUsers: [15, 18, 20, 22, 25, 12, 8]
+    }
+};
+
+// Initialize charts
+let userGrowthChart, chapterUsageChart, performanceChart, realtimeChart, calculationTypesChart, heatmapChart;
+
+// User Growth Chart
+function initUserGrowthChart() {
+    const ctx = document.getElementById('userGrowthChart');
+    if (!ctx) return;
+    
+    userGrowthChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.monthly.labels,
+            datasets: [{
+                label: 'New Users',
+                data: chartData.monthly.newUsers,
+                borderColor: '#007BFF',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#007BFF',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }, {
+                label: 'Active Users',
+                data: chartData.monthly.activeUsers,
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#28a745',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: '#007BFF',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Chapter Usage Chart
+function initChapterUsageChart() {
+    const ctx = document.getElementById('chapterUsageChart');
+    if (!ctx) return;
+    
+    chapterUsageChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Swap Analysis', 'Heston Calibration', 'Yield Curve', 'Option Pricing', 'Bond Pricing', 'Other'],
+            datasets: [{
+                data: [35, 25, 20, 12, 6, 2],
+                backgroundColor: [
+                    '#007BFF',
+                    '#28a745',
+                    '#ffc107',
+                    '#dc3545',
+                    '#17a2b8',
+                    '#6c757d'
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                hoverBorderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20,
+                        font: {
+                            size: 14,
+                            weight: 'bold'
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Performance Chart
+function initPerformanceChart() {
+    const ctx = document.getElementById('performanceChart');
+    if (!ctx) return;
+    
+    performanceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['CPU Usage', 'Memory Usage', 'Disk I/O', 'Network', 'Database'],
+            datasets: [{
+                label: 'Performance (%)',
+                data: [65, 78, 45, 32, 88],
+                backgroundColor: [
+                    '#007BFF',
+                    '#28a745',
+                    '#ffc107',
+                    '#dc3545',
+                    '#17a2b8'
+                ],
+                borderWidth: 0,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6c757d',
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Real-time Chart
+function initRealtimeChart() {
+    const ctx = document.getElementById('realtimeChart');
+    if (!ctx) return;
+    
+    realtimeChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+            datasets: [{
+                label: 'Active Sessions',
+                data: [12, 8, 25, 45, 38, 22],
+                borderColor: '#007BFF',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.4,
+                fill: true
+            }, {
+                label: 'Calculations/min',
+                data: [5, 3, 15, 28, 22, 12],
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Calculation Types Chart
+function initCalculationTypesChart() {
+    const ctx = document.getElementById('calculationTypesChart');
+    if (!ctx) return;
+    
+    calculationTypesChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Swap Pricing', 'Option Greeks', 'Yield Curve', 'Bond Pricing', 'Heston Model', 'Monte Carlo'],
+            datasets: [{
+                label: 'Calculations',
+                data: [245, 189, 156, 134, 98, 76],
+                backgroundColor: [
+                    '#007BFF',
+                    '#28a745',
+                    '#ffc107',
+                    '#dc3545',
+                    '#17a2b8',
+                    '#6c757d'
+                ],
+                borderWidth: 0,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6c757d',
+                        maxRotation: 45
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Heatmap Chart
+function initHeatmapChart() {
+    const ctx = document.getElementById('heatmapChart');
+    if (!ctx) return;
+    
+    heatmapChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Activity Level',
+                data: [85, 92, 78, 95, 88, 45, 32],
+                backgroundColor: [
+                    '#28a745',
+                    '#28a745',
+                    '#ffc107',
+                    '#28a745',
+                    '#28a745',
+                    '#dc3545',
+                    '#dc3545'
+                ],
+                borderWidth: 0,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6c757d',
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Update chart function
+function updateChart(period) {
+    if (userGrowthChart) {
+        const data = chartData[period];
+        userGrowthChart.data.labels = data.labels;
+        userGrowthChart.data.datasets[0].data = data.newUsers;
+        userGrowthChart.data.datasets[1].data = data.activeUsers;
+        userGrowthChart.update();
+        
+        // Update button states
+        document.querySelectorAll('.chart-controls .btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+    }
+}
+
+// Initialize all charts when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded');
+        return;
+    }
+    
+    try {
+        initUserGrowthChart();
+        initChapterUsageChart();
+        initPerformanceChart();
+        initRealtimeChart();
+        initCalculationTypesChart();
+        initHeatmapChart();
+    } catch (error) {
+        console.error('Error initializing charts:', error);
+    }
+});
+</script>
+
+<style>
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 1.5rem;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    border: 1px solid var(--border-gray);
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.stat-icon.primary { background: var(--primary-blue); }
+.stat-icon.success { background: var(--success); }
+.stat-icon.info { background: var(--info); }
+.stat-icon.warning { background: var(--warning); }
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--black);
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--text-gray);
+    margin-bottom: 0.5rem;
+}
+
+.stat-change {
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.stat-change.positive { color: var(--success); }
+.stat-change.negative { color: var(--danger); }
+.stat-change.neutral { color: var(--text-gray); }
+
+/* Chart Controls */
+.chart-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.chart-controls .btn {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+}
+
+.chart-controls .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.chart-controls .btn.active {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+    color: white;
+}
+
+/* Chart Summary */
+.chart-summary {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.summary-item:last-child {
+    margin-bottom: 0;
+}
+
+.summary-label {
+    font-weight: 500;
+    color: var(--text-gray);
+}
+
+.summary-value {
+    font-weight: 600;
+    color: var(--black);
+}
+
+.summary-value.success {
+    color: var(--success);
+}
+
+/* Activity List */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+    border: 1px solid var(--border-gray);
+}
+
+.activity-item:hover {
+    background: var(--light-gray);
+    border-color: var(--primary-blue);
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.activity-icon.success { background: var(--success); }
+.activity-icon.primary { background: var(--primary-blue); }
+.activity-icon.info { background: var(--info); }
+.activity-icon.warning { background: var(--warning); }
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 600;
+    color: var(--black);
+    margin-bottom: 0.25rem;
+}
+
+.activity-description {
+    font-size: 0.875rem;
+    color: var(--text-gray);
+    margin-bottom: 0.25rem;
+}
+
+.activity-time {
+    font-size: 0.8rem;
+    color: var(--text-gray);
+}
+
+/* Health Metrics */
+.health-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.health-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    background: var(--light-gray);
+    border: 1px solid var(--border-gray);
+}
+
+.health-label {
+    font-weight: 500;
+    color: var(--black);
+}
+
+.health-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.health-value.success { color: var(--success); }
+.health-value.warning { color: var(--warning); }
+.health-value.danger { color: var(--danger); }
+
+.health-details {
+    font-size: 0.8rem;
+    color: var(--text-gray);
+    margin-top: 0.25rem;
+}
+
+/* Quick Actions */
+.quick-actions {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    background: white;
+    border: 1px solid var(--border-gray);
+    text-decoration: none;
+    color: var(--black);
+    transition: var(--transition);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-blue);
+    color: var(--primary-blue);
+}
+
+.action-btn i {
+    font-size: 1.5rem;
+}
+
+.action-btn span {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+/* Chapter Usage Chart - Normal Size */
+#chapterUsageChart {
+    max-height: 300px !important;
+    min-height: 250px !important;
+    width: 100% !important;
+}
+
+/* Chart Card Normal */
+.chart-card-large {
+    min-height: 400px;
+}
+
+.chart-body-large {
+    padding: 1.5rem;
+    min-height: 350px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.chart-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 250px;
+}
+
+/* Chapter Usage Chart Container */
+.card:has(#chapterUsageChart) .card-body {
+    padding: 2rem;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .quick-actions {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .chart-controls {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    #chapterUsageChart {
+        max-height: 250px !important;
+        min-height: 200px !important;
+    }
+}
+</style>
+{% endblock %}

@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "django-insecure-apy5-j2n+2h_4kt5m=^3u8q4k%_8g&*^a5wa=g2mi%$fe_wi&*"
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'testserver']
 
 # --- Application definition ---
 # On ne liste que le strict minimum pour que l'application démarre
@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'chapter15_hull_white',
     'chapter20_caps_floors',
     'chapter22_heston_calibration',
+    'notifications',
     'chapter_yield_curve',
     'chapter17_calibration',
     'chapter18_par_indexed_coupons',
@@ -66,6 +67,8 @@ INSTALLED_APPS = [
     'chapter34_treasury_futures',
     'chapter35_pricing_conventions',
     'chapter36_more_conventions',
+    
+    # QuantLib Cookbook
 ]
 
 

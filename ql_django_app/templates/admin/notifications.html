@@ -1,0 +1,501 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block title %}Notifications - QuantLib Administration{% endblock %}
+
+{% block page_title %}Notifications{% endblock %}
+{% block page_subtitle %}Manage system notifications and alerts{% endblock %}
+
+{% block content %}
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="bi bi-bell"></i>
+        </div>
+        <div class="stat-value">{{ total_notifications }}</div>
+        <div class="stat-label">Total Notifications</div>
+    </div>
+    
+    <div class="stat-card warning">
+        <div class="stat-icon warning">
+            <i class="bi bi-bell-fill"></i>
+        </div>
+        <div class="stat-value">{{ unread_count }}</div>
+        <div class="stat-label">Unread</div>
+    </div>
+    
+    <div class="stat-card danger">
+        <div class="stat-icon danger">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        <div class="stat-value">{{ critical_count }}</div>
+        <div class="stat-label">Critical</div>
+    </div>
+    
+    <div class="stat-card success">
+        <div class="stat-icon success">
+            <i class="bi bi-check-all"></i>
+        </div>
+        <div class="stat-value">
+            <button class="btn btn-success" onclick="markAllAsRead()" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                <i class="bi bi-check-all"></i>
+                Mark All Read
+            </button>
+        </div>
+        <div class="stat-label">Quick Action</div>
+    </div>
+</div>
+
+<!-- Filters Card -->
+<div class="card" style="margin-bottom: 2rem;">
+    <div class="card-header">
+        <i class="bi bi-funnel"></i>
+        Filters & Search
+    </div>
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Type</label>
+                <select name="type" class="form-control form-select">
+                    <option value="">All Types</option>
+                    {% for type_code, type_name in notification_types %}
+                    <option value="{{ type_code }}" {% if request.GET.type == type_code %}selected{% endif %}>
+                        {{ type_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Priority</label>
+                <select name="priority" class="form-control form-select">
+                    <option value="">All Priorities</option>
+                    {% for priority_code, priority_name in priority_levels %}
+                    <option value="{{ priority_code }}" {% if request.GET.priority == priority_code %}selected{% endif %}>
+                        {{ priority_name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select name="read" class="form-control form-select">
+                    <option value="">All Status</option>
+                    <option value="false" {% if request.GET.read == 'false' %}selected{% endif %}>Unread</option>
+                    <option value="true" {% if request.GET.read == 'true' %}selected{% endif %}>Read</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">&nbsp;</label>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i>
+                        Apply Filters
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Notifications List -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-list-ul"></i>
+        Notifications
+        <span class="badge badge-primary" style="margin-left: auto;">{{ notifications|length }} items</span>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        {% if notifications %}
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Title</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for notification in notifications %}
+                    <tr id="notification-{{ notification.id }}" class="{% if not notification.is_read %}table-warning{% endif %}">
+                        <td>
+                            <span class="badge badge-{% if notification.notification_type == 'error' %}danger{% elif notification.notification_type == 'warning' %}warning{% elif notification.notification_type == 'success' %}success{% else %}info{% endif %}">
+                                <i class="bi bi-{% if notification.notification_type == 'error' %}exclamation-triangle{% elif notification.notification_type == 'warning' %}exclamation-circle{% elif notification.notification_type == 'success' %}check-circle{% else %}info-circle{% endif %}"></i>
+                                {{ notification.get_notification_type_display }}
+                            </span>
+                        </td>
+                        <td>
+                            <div style="font-weight: 500; color: var(--black);">{{ notification.title }}</div>
+                            <div style="font-size: 0.875rem; color: var(--text-gray); margin-top: 0.25rem;">{{ notification.message|truncatechars:60 }}</div>
+                        </td>
+                        <td>
+                            <span class="badge badge-{% if notification.priority == 'critical' %}danger{% elif notification.priority == 'high' %}warning{% elif notification.priority == 'medium' %}primary{% else %}info{% endif %}">
+                                <i class="bi bi-{% if notification.priority == 'critical' %}exclamation-triangle{% elif notification.priority == 'high' %}arrow-up{% elif notification.priority == 'medium' %}minus{% else %}arrow-down{% endif %}"></i>
+                                {{ notification.get_priority_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if notification.is_read %}
+                                <span class="badge badge-success">
+                                    <i class="bi bi-check-circle"></i>
+                                    Read
+                                </span>
+                            {% else %}
+                                <span class="badge badge-warning">
+                                    <i class="bi bi-clock"></i>
+                                    Unread
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="font-size: 0.875rem; color: var(--black);">{{ notification.time_ago }}</div>
+                            {% if notification.created_by %}
+                            <div style="font-size: 0.75rem; color: var(--text-gray);">by {{ notification.created_by.username }}</div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                {% if not notification.is_read %}
+                                <button class="btn btn-sm btn-outline-primary" onclick="markAsRead({{ notification.id }})" title="Mark as Read">
+                                    <i class="bi bi-check"></i>
+                                </button>
+                                {% endif %}
+                                <button class="btn btn-sm btn-outline-info" onclick="viewNotification({{ notification.id }})" title="View Details">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="archiveNotification({{ notification.id }})" title="Archive">
+                                    <i class="bi bi-archive"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 3rem;">
+            <i class="bi bi-bell-slash" style="font-size: 3rem; color: var(--text-gray); margin-bottom: 1rem;"></i>
+            <h5 style="color: var(--text-gray); margin-bottom: 0.5rem;">No notifications found</h5>
+            <p style="color: var(--text-gray);">There are no notifications matching your criteria.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Test Notification Form -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header" style="background: linear-gradient(135deg, #ffc107 0%, #ff8f00 100%); color: var(--black);">
+        <i class="bi bi-tools"></i>
+        Test Notifications (Development)
+    </div>
+    <div class="card-body">
+        <form id="testNotificationForm">
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Title</label>
+                    <input type="text" name="title" class="form-control" value="Test Notification" required>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Type</label>
+                    <select name="type" class="form-control form-select">
+                        <option value="info">Information</option>
+                        <option value="success">Success</option>
+                        <option value="warning">Warning</option>
+                        <option value="error">Error</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Priority</label>
+                    <select name="priority" class="form-control form-select">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="critical">Critical</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-warning">
+                            <i class="bi bi-plus"></i>
+                            Create Test Notification
+                        </button>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Message</label>
+                    <textarea name="message" class="form-control" rows="2" placeholder="Enter notification message...">This is a test notification created for development purposes.</textarea>
+                </div>
+            </div>
+        </form>
+        
+        <!-- Quick Test Button -->
+        <div class="row mt-3">
+            <div class="col-12">
+                <button type="button" class="btn btn-info" onclick="createQuickTestNotification()">
+                    <i class="bi bi-lightning"></i>
+                    Quick Test (Simple)
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Modal -->
+<div class="modal fade" id="notificationModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationModalTitle">Notification Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="notificationModalBody">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="markReadBtn" onclick="markAsReadFromModal()">Mark as Read</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Get CSRF token
+function getCSRFToken() {
+    return document.querySelector('[name=csrfmiddlewaretoken]').value;
+}
+
+// Mark notification as read
+function markAsRead(notificationId) {
+    fetch(`/admin/api/notifications/mark-read/${notificationId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Update row styling
+            const row = document.getElementById(`notification-${notificationId}`);
+            if (row) {
+                row.classList.remove('table-warning');
+                // Update status badge
+                const statusCell = row.querySelector('td:nth-child(4)');
+                if (statusCell) {
+                    statusCell.innerHTML = '<span class="badge badge-success"><i class="bi bi-check-circle"></i> Read</span>';
+                }
+            }
+            updateNotificationCount();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Archive notification
+function archiveNotification(notificationId) {
+    if (confirm('Are you sure you want to archive this notification?')) {
+        fetch(`/admin/api/notifications/archive/${notificationId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Remove row from table
+                const row = document.getElementById(`notification-${notificationId}`);
+                if (row) {
+                    row.remove();
+                }
+                updateNotificationCount();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
+// Mark all notifications as read
+function markAllAsRead() {
+    if (confirm('Are you sure you want to mark all notifications as read?')) {
+        fetch('/admin/api/notifications/mark-all-read/', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCSRFToken(),
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+}
+
+// View notification details
+function viewNotification(notificationId) {
+    // This would typically fetch notification details via API
+    // For now, we'll show a simple alert
+    alert('View notification details for ID: ' + notificationId);
+}
+
+// Quick test notification function
+function createQuickTestNotification() {
+    console.log('Creating quick test notification...');
+    
+    const testData = {
+        title: 'Quick Test Notification',
+        message: 'This is a quick test notification created via simple button.',
+        type: 'info',
+        priority: 'medium'
+    };
+    
+    const formData = new FormData();
+    for (const [key, value] of Object.entries(testData)) {
+        formData.append(key, value);
+    }
+    
+    fetch('/admin/api/notifications/create/', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCSRFToken(),
+        },
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Quick test notification created successfully!');
+            location.reload();
+        } else {
+            alert('Error creating quick test notification: ' + (data.error || 'Unknown error'));
+        }
+    })
+    .catch(error => {
+        console.error('Quick test error:', error);
+        alert('Error creating quick test notification: ' + error.message);
+    });
+}
+
+// Test notification form
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('testNotificationForm');
+    if (form) {
+        console.log('Test notification form found');
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Test notification form submitted');
+            
+            const formData = new FormData(this);
+            console.log('Form data:', Object.fromEntries(formData));
+            
+            fetch('/admin/api/notifications/create/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Test notification created successfully!');
+                    location.reload();
+                } else {
+                    alert('Error creating notification: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error creating notification: ' + error.message);
+            });
+        });
+    } else {
+        console.error('Test notification form not found');
+    }
+});
+
+// Update notification count
+function updateNotificationCount() {
+    fetch('/admin/api/notifications/count/')
+        .then(response => response.json())
+        .then(data => {
+            const badge = document.getElementById('notification-badge');
+            if (badge) {
+                if (data.unread_count > 0) {
+                    badge.textContent = data.unread_count;
+                    badge.style.display = 'inline-flex';
+                    if (data.critical_count > 0) {
+                        badge.className = 'nav-badge danger';
+                    } else {
+                        badge.className = 'nav-badge';
+                    }
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        })
+        .catch(error => console.error('Error updating notification count:', error));
+}
+
+// Auto-refresh notification count every 30 seconds
+setInterval(updateNotificationCount, 30000);
+</script>
+
+<style>
+/* Additional styles for notifications page */
+.table-warning {
+    background-color: #fff3cd !important;
+}
+
+.btn-group .btn {
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-top-left-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
+}
+
+.btn-group .btn:last-child {
+    border-top-right-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+}
+
+.modal-content {
+    border-radius: var(--border-radius-lg);
+    border: none;
+    box-shadow: var(--shadow-xl);
+}
+
+.modal-header {
+    background: var(--light-gray);
+    border-bottom: 1px solid var(--border-gray);
+    border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--text-gray);
+}
+
+.btn-close:hover {
+    color: var(--black);
+}
+</style>
+{% endblock %}

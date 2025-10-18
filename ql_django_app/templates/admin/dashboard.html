@@ -1,0 +1,746 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - QuantLib Administration{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}System overview and key metrics{% endblock %}
+
+{% block content %}
+<!-- Key Metrics -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="bi bi-people"></i>
+        </div>
+        <div class="stat-value">{{ total_users|default:"0" }}</div>
+        <div class="stat-label">Total Users</div>
+    </div>
+    
+    <div class="stat-card success">
+        <div class="stat-icon success">
+            <i class="bi bi-person-check"></i>
+        </div>
+        <div class="stat-value">{{ active_users|default:"0" }}</div>
+        <div class="stat-label">Active Users</div>
+    </div>
+    
+    <div class="stat-card info">
+        <div class="stat-icon primary">
+            <i class="bi bi-shield-check"></i>
+        </div>
+        <div class="stat-value">{{ staff_users|default:"0" }}</div>
+        <div class="stat-label">Administrators</div>
+    </div>
+    
+    <div class="stat-card warning">
+        <div class="stat-icon warning">
+            <i class="bi bi-graph-up"></i>
+        </div>
+        <div class="stat-value">{{ new_users|default:"0" }}</div>
+        <div class="stat-label">New This Week</div>
+    </div>
+</div>
+
+<!-- Charts Row -->
+<div class="row" style="margin-bottom: 2rem;">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-graph-up"></i>
+                User Activity & Growth
+                <div class="chart-controls" style="margin-left: auto; display: flex; gap: 0.5rem;">
+                    <button class="btn btn-sm btn-outline-primary" onclick="updateChart('monthly')">Monthly</button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="updateChart('weekly')">Weekly</button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="updateChart('daily')">Daily</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <canvas id="userGrowthChart" height="350"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-pie-chart"></i>
+                QuantLib Chapter Usage
+            </div>
+            <div class="card-body">
+                <canvas id="analysisChart" height="350"></canvas>
+                <div class="chart-summary" style="margin-top: 1rem; padding: 1rem; background: var(--light-gray); border-radius: var(--border-radius);">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-weight: 500;">Total Calculations:</span>
+                        <span style="color: var(--primary-blue); font-weight: 600;">1,247</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="font-weight: 500;">Most Popular:</span>
+                        <span style="color: var(--success); font-weight: 600;">Swap Analysis</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="font-weight: 500;">Success Rate:</span>
+                        <span style="color: var(--success); font-weight: 600;">94.2%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Additional Charts Row -->
+<div class="row" style="margin-bottom: 2rem;">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-bar-chart"></i>
+                System Performance
+            </div>
+            <div class="card-body">
+                <canvas id="performanceChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-speedometer2"></i>
+                Real-time Metrics
+            </div>
+            <div class="card-body">
+                <canvas id="realtimeChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity & System Health -->
+<div class="row">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history"></i>
+                Recent Activity
+            </div>
+            <div class="card-body">
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon success">
+                            <i class="bi bi-person-plus"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">New user registered</div>
+                            <div class="activity-time">2 minutes ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon info">
+                            <i class="bi bi-calculator"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">Swap analysis completed</div>
+                            <div class="activity-time">15 minutes ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">System warning detected</div>
+                            <div class="activity-time">1 hour ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon primary">
+                            <i class="bi bi-bell"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">New notification created</div>
+                            <div class="activity-time">2 hours ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-heart-pulse"></i>
+                System Health
+            </div>
+            <div class="card-body">
+                <div class="health-metrics">
+                    <div class="health-item">
+                        <div class="health-label">Database Status</div>
+                        <div class="health-value success">
+                            <i class="bi bi-check-circle"></i>
+                            Healthy
+                        </div>
+                    </div>
+                    
+                    <div class="health-item">
+                        <div class="health-label">Server Load</div>
+                        <div class="health-value warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            Moderate
+                        </div>
+                    </div>
+                    
+                    <div class="health-item">
+                        <div class="health-label">Memory Usage</div>
+                        <div class="health-value success">
+                            <i class="bi bi-check-circle"></i>
+                            65%
+                        </div>
+                    </div>
+                    
+                    <div class="health-item">
+                        <div class="health-label">Disk Space</div>
+                        <div class="health-value info">
+                            <i class="bi bi-info-circle"></i>
+                            78%
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card" style="margin-top: 2rem;">
+    <div class="card-header">
+        <i class="bi bi-lightning"></i>
+        Quick Actions
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <a href="{% url 'admin_users' %}" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-people"></i>
+                    Manage Users
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'admin_notifications' %}" class="btn btn-outline-info w-100">
+                    <i class="bi bi-bell"></i>
+                    View Notifications
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'admin_logs' %}" class="btn btn-outline-warning w-100">
+                    <i class="bi bi-clock-history"></i>
+                    System Logs
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'admin_profile' %}" class="btn btn-outline-success w-100">
+                    <i class="bi bi-person-circle"></i>
+                    Admin Profile
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Chart data for different time periods
+const chartData = {
+    monthly: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+        newUsers: [15, 22, 18, 25, 28, 32, 35, 30, 28, 24, 20, 18],
+        activeUsers: [45, 52, 48, 55, 58, 62, 65, 60, 58, 54, 50, 48]
+    },
+    weekly: {
+        labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+        newUsers: [8, 12, 15, 10],
+        activeUsers: [25, 30, 35, 28]
+    },
+    daily: {
+        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+        newUsers: [3, 5, 4, 6, 7, 2, 1],
+        activeUsers: [15, 18, 20, 22, 25, 12, 8]
+    }
+};
+
+// Initialize charts
+let userGrowthChart, analysisChart, performanceChart, realtimeChart;
+
+// User Growth Chart
+function initUserGrowthChart() {
+    const ctx = document.getElementById('userGrowthChart').getContext('2d');
+    userGrowthChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: chartData.monthly.labels,
+            datasets: [{
+                label: 'New Users',
+                data: chartData.monthly.newUsers,
+                borderColor: '#007BFF',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#007BFF',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }, {
+                label: 'Active Users',
+                data: chartData.monthly.activeUsers,
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#28a745',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 20
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: '#007BFF',
+                    borderWidth: 1
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Analysis Types Chart
+function initAnalysisChart() {
+    const ctx = document.getElementById('analysisChart').getContext('2d');
+    analysisChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Swap Analysis', 'Heston Calibration', 'Yield Curve', 'Option Pricing', 'Bond Pricing', 'Other'],
+            datasets: [{
+                data: [35, 25, 20, 12, 6, 2],
+                backgroundColor: [
+                    '#007BFF',
+                    '#28a745',
+                    '#ffc107',
+                    '#dc3545',
+                    '#17a2b8',
+                    '#6c757d'
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                hoverBorderWidth: 3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15,
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Performance Chart
+function initPerformanceChart() {
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    performanceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['CPU Usage', 'Memory Usage', 'Disk I/O', 'Network', 'Database'],
+            datasets: [{
+                label: 'Performance (%)',
+                data: [65, 78, 45, 32, 88],
+                backgroundColor: [
+                    '#007BFF',
+                    '#28a745',
+                    '#ffc107',
+                    '#dc3545',
+                    '#17a2b8'
+                ],
+                borderWidth: 0,
+                borderRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6c757d',
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Real-time Chart
+function initRealtimeChart() {
+    const ctx = document.getElementById('realtimeChart').getContext('2d');
+    realtimeChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'],
+            datasets: [{
+                label: 'Active Sessions',
+                data: [12, 8, 25, 45, 38, 22],
+                borderColor: '#007BFF',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.4,
+                fill: true
+            }, {
+                label: 'Calculations/min',
+                data: [5, 3, 15, 28, 22, 12],
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                    labels: {
+                        usePointStyle: true,
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                },
+                x: {
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#6c757d'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Update chart function
+function updateChart(period) {
+    if (userGrowthChart) {
+        const data = chartData[period];
+        userGrowthChart.data.labels = data.labels;
+        userGrowthChart.data.datasets[0].data = data.newUsers;
+        userGrowthChart.data.datasets[1].data = data.activeUsers;
+        userGrowthChart.update();
+    }
+}
+
+// Initialize all charts when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if Chart.js is loaded
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded');
+        return;
+    }
+    
+    try {
+        initUserGrowthChart();
+        initAnalysisChart();
+        initPerformanceChart();
+        initRealtimeChart();
+    } catch (error) {
+        console.error('Error initializing charts:', error);
+    }
+});
+</script>
+
+<style>
+/* Chart Controls */
+.chart-controls {
+    display: flex;
+    gap: 0.5rem;
+    margin-left: auto;
+}
+
+.chart-controls .btn {
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+}
+
+.chart-controls .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.chart-controls .btn.active {
+    background-color: var(--primary-blue);
+    border-color: var(--primary-blue);
+    color: white;
+}
+
+/* Chart Summary */
+.chart-summary {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.chart-summary div {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.chart-summary div:last-child {
+    margin-bottom: 0;
+}
+
+/* Chart Cards */
+.card .card-body canvas {
+    border-radius: var(--border-radius);
+    background: #ffffff;
+}
+
+/* Chart Headers */
+.card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-bottom: 2px solid #e9ecef;
+}
+
+.card-header i {
+    margin-right: 0.5rem;
+    color: var(--primary-blue);
+}
+
+/* Activity List Styles */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.activity-item:hover {
+    background: var(--light-gray);
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.125rem;
+    color: var(--white);
+}
+
+.activity-icon.success {
+    background: var(--success);
+}
+
+.activity-icon.info {
+    background: var(--info);
+}
+
+.activity-icon.warning {
+    background: var(--warning);
+}
+
+.activity-icon.primary {
+    background: var(--primary-blue);
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 500;
+    color: var(--black);
+    margin-bottom: 0.25rem;
+}
+
+.activity-time {
+    font-size: 0.875rem;
+    color: var(--text-gray);
+}
+
+/* Health Metrics Styles */
+.health-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.health-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: var(--light-gray);
+    border-radius: var(--border-radius);
+}
+
+.health-label {
+    font-weight: 500;
+    color: var(--black);
+}
+
+.health-value {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+}
+
+.health-value.success {
+    color: var(--success);
+}
+
+.health-value.warning {
+    color: var(--warning);
+}
+
+.health-value.info {
+    color: var(--info);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .activity-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .health-item {
+        flex-direction: column;
+        text-align: center;
+        gap: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

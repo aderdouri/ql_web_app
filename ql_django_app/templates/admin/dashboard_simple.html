@@ -1,0 +1,238 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - QuantLib Administration{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}System overview and key metrics{% endblock %}
+
+{% block content %}
+<!-- Key Metrics -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="bi bi-people"></i>
+        </div>
+        <div class="stat-value">{{ total_users|default:"0" }}</div>
+        <div class="stat-label">Total Users</div>
+    </div>
+    
+    <div class="stat-card success">
+        <div class="stat-icon success">
+            <i class="bi bi-person-check"></i>
+        </div>
+        <div class="stat-value">{{ active_users|default:"0" }}</div>
+        <div class="stat-label">Active Users</div>
+    </div>
+    
+    <div class="stat-card info">
+        <div class="stat-icon primary">
+            <i class="bi bi-shield-check"></i>
+        </div>
+        <div class="stat-value">{{ staff_users|default:"0" }}</div>
+        <div class="stat-label">Administrators</div>
+    </div>
+    
+    <div class="stat-card warning">
+        <div class="stat-icon warning">
+            <i class="bi bi-graph-up"></i>
+        </div>
+        <div class="stat-value">{{ new_users|default:"0" }}</div>
+        <div class="stat-label">New This Week</div>
+    </div>
+</div>
+
+<!-- Simple Charts Row -->
+<div class="row" style="margin-bottom: 2rem;">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-graph-up"></i>
+                User Activity
+            </div>
+            <div class="card-body">
+                <canvas id="userChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-pie-chart"></i>
+                System Status
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <i class="bi bi-clock-history"></i>
+                Recent Activity
+            </div>
+            <div class="card-body">
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">System backup completed</div>
+                            <div class="activity-time">2 hours ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon primary">
+                            <i class="bi bi-person-plus"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">New user registered</div>
+                            <div class="activity-time">4 hours ago</div>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon warning">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">High memory usage detected</div>
+                            <div class="activity-time">6 hours ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Simple User Chart
+    const userCtx = document.getElementById('userChart');
+    if (userCtx) {
+        new Chart(userCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Users',
+                    data: [12, 19, 3, 5, 2, 3],
+                    borderColor: '#007BFF',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    // Simple Status Chart
+    const statusCtx = document.getElementById('statusChart');
+    if (statusCtx) {
+        new Chart(statusCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Active', 'Inactive', 'Pending'],
+                datasets: [{
+                    data: [70, 20, 10],
+                    backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+});
+</script>
+
+<style>
+/* Activity List Styles */
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.activity-item:hover {
+    background: var(--light-gray);
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.activity-icon.success {
+    background: var(--success);
+}
+
+.activity-icon.primary {
+    background: var(--primary-blue);
+}
+
+.activity-icon.warning {
+    background: var(--warning);
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-title {
+    font-weight: 500;
+    color: var(--black);
+    margin-bottom: 0.25rem;
+}
+
+.activity-time {
+    font-size: 0.875rem;
+    color: var(--text-gray);
+}
+</style>
+{% endblock %}

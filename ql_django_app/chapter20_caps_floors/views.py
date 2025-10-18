@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 import json
 from .forms import CapFloorForm
-from . import working_services as services
+from . import services
 
 def caps_floors_description_view(request):
     """Description page for caps and floors chapter"""
@@ -19,100 +19,55 @@ def caps_floors_lab_view(request):
     results = None
     
     if form.is_valid():
-        # Use all form data - now fully dynamic
-        params = form.cleaned_data
+        # Use form data directly - now all fields match
+        params = form.cleaned_data.copy()
         
-        # Validate dates to prevent negative time errors
-        evaluation_date = params.get('evaluation_date')
-        fixing_date = params.get('fixing_date')
+        # Convert percentage fields to decimal
+        params['strike_rate'] = params['strike_rate'] / 100.0
+        params['fixing_rate'] = params['fixing_rate'] / 100.0
+        params['constant_volatility'] = params['constant_volatility'] / 100.0
+        params['surface_strike_1'] = params['surface_strike_1'] / 100.0
+        params['surface_strike_2'] = params['surface_strike_2'] / 100.0
+        params['surface_strike_3'] = params['surface_strike_3'] / 100.0
         
-        if fixing_date and evaluation_date and fixing_date >= evaluation_date:
-            # Fix the fixing date to be before evaluation date
-            from datetime import timedelta
-            params['fixing_date'] = evaluation_date - timedelta(days=2)
-        
-        # Ensure fixing date is a business day (not weekend)
-        if fixing_date:
-            from datetime import timedelta
-            while fixing_date.weekday() >= 5:  # Saturday = 5, Sunday = 6
-                fixing_date = fixing_date - timedelta(days=1)
-            params['fixing_date'] = fixing_date
-        
-        # Convert pricing method to lowercase for service compatibility
-        if params.get('pricing_method') == 'Constant Volatility':
-            params['pricing_method'] = 'constant'
-        elif params.get('pricing_method') == 'Volatility Surface':
-            params['pricing_method'] = 'surface'
+        # Convert zero rates to decimal
+        for i in range(1, 11):
+            params[f'zero_rate_{i}'] = params[f'zero_rate_{i}'] / 100.0
         
         # Calculate results with form data
-        try:
-            results = services.calculate_caps_floors_metrics(**params)
-        except Exception as e:
-            results = {
-                'error': True,
-                'error_message': f"Calculation error: {str(e)}",
-                'pricing_method': params.get('pricing_method', 'Unknown'),
-                'strike_rate': params.get('strike_rate', 0),
-                'notional': params.get('notional', 0),
-                'start_date': params.get('start_date'),
-                'end_date': params.get('end_date'),
-            }
+        results = services.calculate_caps_floors_metrics(**params)
     else:
-        # Create a clean form for GET or invalid POST
-        if not form.is_bound:  # Only calculate default results on initial GET
-            from datetime import date, timedelta
-            
-            # Helper function to get initial value, handling both values and callables
-            def get_initial_value(field):
-                initial = field.initial
-                if callable(initial):
-                    return initial()
-                return initial
-            
-            params = {
-                'evaluation_date': get_initial_value(form.fields['evaluation_date']),
-                'notional': get_initial_value(form.fields['notional']),
-                'start_date': get_initial_value(form.fields['start_date']),
-                'end_date': get_initial_value(form.fields['end_date']),
-                'strike_rate': get_initial_value(form.fields['strike_rate']),
-                'fixing_date': get_initial_value(form.fields['fixing_date']),
-                'fixing_rate': get_initial_value(form.fields['fixing_rate']),
-                'pricing_method': get_initial_value(form.fields['pricing_method']),
-                'constant_volatility': get_initial_value(form.fields['constant_volatility']),
-                'surface_strike_1': get_initial_value(form.fields['surface_strike_1']),
-                'surface_strike_2': get_initial_value(form.fields['surface_strike_2']),
-                'surface_strike_3': get_initial_value(form.fields['surface_strike_3']),
-                'zero_rate_1': get_initial_value(form.fields['zero_rate_1']),
-                'zero_rate_2': get_initial_value(form.fields['zero_rate_2']),
-                'zero_rate_3': get_initial_value(form.fields['zero_rate_3']),
-                'zero_rate_4': get_initial_value(form.fields['zero_rate_4']),
-                'zero_rate_5': get_initial_value(form.fields['zero_rate_5']),
-                'zero_rate_6': get_initial_value(form.fields['zero_rate_6']),
-                'zero_rate_7': get_initial_value(form.fields['zero_rate_7']),
-                'zero_rate_8': get_initial_value(form.fields['zero_rate_8']),
-                'zero_rate_9': get_initial_value(form.fields['zero_rate_9']),
-                'zero_rate_10': get_initial_value(form.fields['zero_rate_10']),
-            }
-            
-            # Convert pricing method to lowercase for service compatibility
-            if params.get('pricing_method') == 'Constant Volatility':
-                params['pricing_method'] = 'constant'
-            elif params.get('pricing_method') == 'Volatility Surface':
-                params['pricing_method'] = 'surface'
-            
-            # Calculate results with default data
-            try:
-                results = services.calculate_caps_floors_metrics(**params)
-            except Exception as e:
-                results = {
-                    'error': True,
-                    'error_message': f"Default calculation error: {str(e)}",
-                    'pricing_method': 'Constant Volatility',
-                    'strike_rate': 4.0,
-                    'notional': 1000000,
-                    'start_date': date.today() + timedelta(days=30),
-                    'end_date': date.today() + timedelta(days=365*5),
-                }
+        form = CapFloorForm() # Create a clean form for GET or invalid POST
+        from datetime import date
+        
+        # Helper function to get initial value, handling both values and callables
+        def get_initial_value(field):
+            initial = field.initial
+            if callable(initial):
+                return initial()
+            return initial
+        
+        # Get initial values for all fields
+        params = {}
+        for field_name, field in form.fields.items():
+            initial_value = get_initial_value(field)
+            params[field_name] = initial_value
+        
+        # Convert percentage fields to decimal
+        percentage_fields = ['strike_rate', 'fixing_rate', 'constant_volatility', 
+                           'surface_strike_1', 'surface_strike_2', 'surface_strike_3']
+        for field in percentage_fields:
+            if field in params:
+                params[field] = params[field] / 100.0
+        
+        # Convert zero rates to decimal
+        for i in range(1, 11):
+            field_name = f'zero_rate_{i}'
+            if field_name in params:
+                params[field_name] = params[field_name] / 100.0
+        
+        # Calculate results with default data
+        results = services.calculate_caps_floors_metrics(**params)
     
     # Convert volatility surface data to JSON for JavaScript
     if results and 'volatility_surface_data' in results:

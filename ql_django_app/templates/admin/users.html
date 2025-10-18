@@ -1,0 +1,421 @@
+{% extends 'admin/admin_base.html' %}
+{% load static %}
+
+{% block title %}User Management - QuantLib Administration{% endblock %}
+
+{% block page_title %}User Management{% endblock %}
+{% block page_subtitle %}Manage system users and permissions{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="bi bi-people"></i>
+        </div>
+        <div class="stat-value">{{ total_users|default:"0" }}</div>
+        <div class="stat-label">Total Users</div>
+    </div>
+    
+    <div class="stat-card success">
+        <div class="stat-icon success">
+            <i class="bi bi-person-check"></i>
+        </div>
+        <div class="stat-value">{{ active_users|default:"0" }}</div>
+        <div class="stat-label">Active Users</div>
+    </div>
+    
+    <div class="stat-card info">
+        <div class="stat-icon primary">
+            <i class="bi bi-shield-check"></i>
+        </div>
+        <div class="stat-value">{{ staff_users|default:"0" }}</div>
+        <div class="stat-label">Administrators</div>
+    </div>
+    
+    <div class="stat-card warning">
+        <div class="stat-icon warning">
+            <i class="bi bi-graph-up"></i>
+        </div>
+        <div class="stat-value">{{ new_users|default:"0" }}</div>
+        <div class="stat-label">New This Week</div>
+    </div>
+</div>
+
+<!-- Filters Section -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+        <i class="bi bi-funnel"></i>
+        Filters
+    </div>
+    <div class="card-body">
+        <form method="GET" class="filters-form">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label for="search" class="form-label">Search</label>
+                        <input type="text" class="form-control" id="search" name="search" 
+                               value="{{ search_query }}" placeholder="Search by username or email...">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-control" id="role" name="role">
+                            <option value="">All Roles</option>
+                            <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Administrator</option>
+                            <option value="analyst" {% if role_filter == 'analyst' %}selected{% endif %}>Analyst</option>
+                            <option value="actuary" {% if role_filter == 'actuary' %}selected{% endif %}>Actuary</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label for="status" class="form-label">Status</label>
+                        <select class="form-control" id="status" name="status">
+                            <option value="">All Status</option>
+                            <option value="active" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                            <option value="inactive" {% if status_filter == 'inactive' %}selected{% endif %}>Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i> Filter
+                            </button>
+                            <a href="{% url 'admin_users' %}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x"></i> Clear
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-people"></i>
+        Users
+        <span class="badge badge-primary" style="margin-left: auto;">{{ users|length }} users</span>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Role</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                <div class="user-avatar" style="width: 32px; height: 32px; background: var(--primary-blue); color: var(--white); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.875rem;">
+                                    {{ user.username|first|upper }}
+                                </div>
+                                <div>
+                                    <div style="font-weight: 500; color: var(--black);">{{ user.username }}</div>
+                                    <div style="font-size: 0.75rem; color: var(--text-gray);">ID: {{ user.id }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="color: var(--black);">{{ user.email|default:"Not provided" }}</div>
+                        </td>
+                        <td>
+                            {% if user.is_active %}
+                                <span class="badge badge-success">
+                                    <i class="bi bi-check-circle"></i>
+                                    Active
+                                </span>
+                            {% else %}
+                                <span class="badge badge-danger">
+                                    <i class="bi bi-x-circle"></i>
+                                    Inactive
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.is_superuser %}
+                                <span class="badge badge-danger">
+                                    <i class="bi bi-shield-fill"></i>
+                                    Superuser
+                                </span>
+                            {% elif user.is_staff %}
+                                <span class="badge badge-warning">
+                                    <i class="bi bi-shield"></i>
+                                    Staff
+                                </span>
+                            {% else %}
+                                <span class="badge badge-info">
+                                    <i class="bi bi-person"></i>
+                                    User
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div style="font-size: 0.875rem; color: var(--black);">
+                                {{ user.last_login|date:"M j, Y"|default:"Never" }}
+                            </div>
+                            {% if user.last_login %}
+                            <div style="font-size: 0.75rem; color: var(--text-gray);">
+                                {{ user.last_login|timesince }} ago
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-outline-primary" onclick="viewUser({{ user.id }})" title="View Details">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-{% if user.is_active %}warning{% else %}success{% endif %}" 
+                                        onclick="toggleUserStatus({{ user.id }})" 
+                                        title="{% if user.is_active %}Deactivate{% else %}Activate{% endif %}">
+                                    <i class="bi bi-{% if user.is_active %}pause{% else %}play{% endif %}"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteUser({{ user.id }})" title="Delete User">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- User Details Modal -->
+<div class="modal fade" id="userDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">User Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="userDetailsContent">
+                <!-- Content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+// View user details
+function viewUser(userId) {
+    // Load user details via AJAX
+    fetch(`/admin/users/${userId}/details/`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            document.getElementById('userDetailsContent').innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Basic Information</h6>
+                        <p><strong>Username:</strong> ${data.username}</p>
+                        <p><strong>Email:</strong> ${data.email || 'Not provided'}</p>
+                        <p><strong>First Name:</strong> ${data.first_name || 'Not provided'}</p>
+                        <p><strong>Last Name:</strong> ${data.last_name || 'Not provided'}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Account Status</h6>
+                        <p><strong>Status:</strong> <span class="badge ${data.is_active ? 'badge-success' : 'badge-danger'}">${data.is_active ? 'Active' : 'Inactive'}</span></p>
+                        <p><strong>Role:</strong> <span class="badge ${data.role_class}">${data.role}</span></p>
+                        <p><strong>Joined:</strong> ${data.date_joined}</p>
+                        <p><strong>Last Login:</strong> ${data.last_login || 'Never'}</p>
+                    </div>
+                </div>
+            `;
+            new bootstrap.Modal(document.getElementById('userDetailsModal')).show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading user details: ' + error.message);
+        });
+}
+
+// Toggle user status
+function toggleUserStatus(userId) {
+    if (confirm('Are you sure you want to change this user\'s status?')) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfToken) {
+            alert('CSRF token not found. Please refresh the page.');
+            return;
+        }
+        
+        fetch(`/admin/toggle-user/${userId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken.value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error updating user status: ' + error.message);
+        });
+    }
+}
+
+// Delete user (actually deactivates)
+function deleteUser(userId) {
+    if (confirm('Are you sure you want to deactivate this user?\n\nThis will disable their account but preserve their data.')) {
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (!csrfToken) {
+            alert('CSRF token not found. Please refresh the page.');
+            return;
+        }
+        
+        fetch(`/admin/delete-user/${userId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken.value,
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('User deactivated successfully');
+                location.reload();
+            } else {
+                alert('Error: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error deactivating user: ' + error.message);
+        });
+    }
+}
+</script>
+
+<style>
+/* Filters Form */
+.filters-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.filters-form .form-label {
+    font-weight: 500;
+    color: var(--black);
+    margin-bottom: 0.5rem;
+}
+
+.filters-form .form-control {
+    border: 1px solid var(--border-gray);
+    border-radius: var(--border-radius);
+    padding: 0.5rem 0.75rem;
+    transition: var(--transition);
+}
+
+.filters-form .form-control:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.filters-form .btn {
+    border-radius: var(--border-radius);
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.filters-form .btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+/* Table Actions */
+.btn-group .btn {
+    border-radius: 0;
+    margin: 0 1px;
+}
+
+.btn-group .btn:first-child {
+    border-top-left-radius: var(--border-radius);
+    border-bottom-left-radius: var(--border-radius);
+}
+
+.btn-group .btn:last-child {
+    border-top-right-radius: var(--border-radius);
+    border-bottom-right-radius: var(--border-radius);
+}
+
+/* Modal Styles */
+.modal {
+    display: none !important;
+}
+
+.modal.show {
+    display: block !important;
+}
+
+.modal-content {
+    border-radius: var(--border-radius-lg);
+    border: none;
+    box-shadow: var(--shadow-xl);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--border-gray);
+    background: var(--light-gray);
+}
+
+.modal-footer {
+    border-top: 1px solid var(--border-gray);
+    background: var(--light-gray);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .filters-form .row {
+        flex-direction: column;
+    }
+    
+    .filters-form .col-md-2 {
+        margin-top: 1rem;
+    }
+}
+</style>
+{% endblock %}

@@ -68,3 +68,6 @@ class SwapAnalysisTestCase(TestCase):
         self.assertEqual(result.notional, 1000000)
         self.assertTrue(result.has_significant_difference)
 
+
+
+
