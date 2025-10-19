@@ -15,17 +15,13 @@ def curve_lab_view(request):
     if form.is_valid():
         evaluation_date = form.cleaned_data['evaluation_date']
         market_data = form.get_market_data()
-        curve_type = form.cleaned_data['curve_type']
         day_count = form.cleaned_data['day_count']
-        calendar = form.cleaned_data['calendar']
         
         try:
             results = services.build_term_structures_with_reference_dates(
                 evaluation_date=evaluation_date,
                 market_data=market_data,
-                curve_type=curve_type,
-                day_count=day_count,
-                calendar=calendar
+                day_count=day_count
             )
         except Exception as e:
             print(f"Error building term structures: {e}")
@@ -51,16 +47,12 @@ def calculate_term_structures_api(request):
         if form.is_valid():
             evaluation_date = form.cleaned_data['evaluation_date']
             market_data = form.get_market_data()
-            curve_type = form.cleaned_data['curve_type']
             day_count = form.cleaned_data['day_count']
-            calendar = form.cleaned_data['calendar']
             
             result = services.build_term_structures_with_reference_dates(
                 evaluation_date=evaluation_date,
                 market_data=market_data,
-                curve_type=curve_type,
-                day_count=day_count,
-                calendar=calendar
+                day_count=day_count
             )
             
             if result:
@@ -75,6 +67,7 @@ def calculate_term_structures_api(request):
                 })
         else:
             print(f"Form validation errors: {form.errors}")
+            print(f"Form data received: {data}")
             return JsonResponse({
                 'success': False,
                 'error': 'Invalid form data',

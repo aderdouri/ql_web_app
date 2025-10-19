@@ -27,3 +27,9 @@ class SwapAnalysisResultAdmin(admin.ModelAdmin):
 
 
 
+
+
+
+
+
+

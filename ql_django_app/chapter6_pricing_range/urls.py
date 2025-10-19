@@ -1,9 +1,8 @@
 from django.urls import path
-from . import views
+from .views import price_history_lab_view
 
-app_name = 'chapter6_pricing_range'
+app_name = 'pricing_over_range'
 
 urlpatterns = [
-    path('', views.pricing_range_lab_view, name='pricing_range_lab'),
-    path('api/calculate/', views.calculate_pricing_range_api, name='calculate_pricing_range_api'),
+    path('lab/', price_history_lab_view, name='lab'),
 ]

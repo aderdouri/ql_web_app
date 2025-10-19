@@ -23,3 +23,4 @@ class NotificationAdmin(admin.ModelAdmin):
             'fields': ('created_at', 'updated_at', 'expires_at')
         }),
     )
+

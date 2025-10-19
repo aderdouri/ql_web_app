@@ -8,6 +8,7 @@ from . import services
 
 def random_numbers_view(request):
     """Main view for Chapter 7: Random Numbers and Dimensionality"""
+    print("🎯 VUE RANDOM_NUMBERS_VIEW APPELÉE !")  # Test pour voir si la vue est appelée
     form = RandomNumbersForm()
     results = None
     
@@ -53,7 +54,7 @@ def random_numbers_view(request):
     context = {
         'form': form,
         'results': results,
-        'lab_title': 'Chapter 7: A note on random numbers and dimensionality',
+        'lab_title': 'Chapter 7: Random Numbers Laboratory',
         'lab_icon': 'bi-dice-6',
         'lab_description': 'Explore different random number generators and their impact on Monte Carlo simulations.'
     }
@@ -64,32 +65,48 @@ def random_numbers_view(request):
 def calculate_random_numbers_api(request):
     """API endpoint for AJAX calculations"""
     try:
+        print("🔍 API Request received")
+        
         # Handle both JSON and form data
         if request.content_type == 'application/json':
             data = json.loads(request.body)
+            print("📝 JSON data received")
         else:
             # Handle form data
             data = request.POST
+            print("📝 Form data received")
+        
+        print(f"📊 Data: {data}")
         
         form = RandomNumbersForm(data)
+        print(f"✅ Form created, valid: {form.is_valid()}")
         
         if form.is_valid():
             rng_params = form.get_rng_parameters()
             option_params = form.get_option_parameters()
             
+            print(f"🎯 RNG params: {rng_params}")
+            print(f"🎯 Option params: {option_params}")
+            
+            print("🚀 Starting calculations...")
             results = services.calculate_all_results(rng_params, option_params)
+            print("✅ Calculations completed")
             
             return JsonResponse({
                 'success': True,
                 'data': results
             })
         else:
+            print(f"❌ Form errors: {form.errors}")
             return JsonResponse({
                 'success': False,
                 'errors': form.errors
             })
             
     except Exception as e:
+        print(f"💥 API Error: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return JsonResponse({
             'success': False,
             'error': str(e)

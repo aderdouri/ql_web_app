@@ -246,7 +246,12 @@ let hasBaseline = false;
 
 // Initialize chart
 function initializeChart() {
-    const ctx = document.getElementById('optionChart').getContext('2d');
+    const canvas = document.getElementById('optionChart');
+    if (!canvas) {
+        console.error('Chart canvas not found');
+        return;
+    }
+    const ctx = canvas.getContext('2d');
     optionChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -297,23 +302,30 @@ function initializeChart() {
 
 // Show/hide advanced parameters based on pricing engine
 function toggleAdvancedParams() {
-    const engine = document.getElementById('id_pricing_engine').value;
+    const engineSelect = document.getElementById('id_pricing_engine');
     const advancedParamsSection = document.getElementById('advancedParamsSection');
     const hestonParams = document.getElementById('hestonParams');
     const monteCarloParams = document.getElementById('monteCarloParams');
     
+    if (!engineSelect) {
+        console.error('Pricing engine select not found');
+        return;
+    }
+    
+    const engine = engineSelect.value;
+    
     // Hide all advanced parameters first
-    hestonParams.style.display = 'none';
-    monteCarloParams.style.display = 'none';
-    advancedParamsSection.style.display = 'none';
+    if (hestonParams) hestonParams.style.display = 'none';
+    if (monteCarloParams) monteCarloParams.style.display = 'none';
+    if (advancedParamsSection) advancedParamsSection.style.display = 'none';
     
     // Show relevant parameters based on engine
     if (engine === 'heston') {
-        advancedParamsSection.style.display = 'block';
-        hestonParams.style.display = 'block';
+        if (advancedParamsSection) advancedParamsSection.style.display = 'block';
+        if (hestonParams) hestonParams.style.display = 'block';
     } else if (engine === 'monte_carlo') {
-        advancedParamsSection.style.display = 'block';
-        monteCarloParams.style.display = 'block';
+        if (advancedParamsSection) advancedParamsSection.style.display = 'block';
+        if (monteCarloParams) monteCarloParams.style.display = 'block';
     }
 }
 
@@ -493,56 +505,62 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeChart();
     
     // Form submission
-    document.getElementById('optionPricingForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        const data = Object.fromEntries(formData.entries());
-        
-        const result = await calculateOptionPrice(data);
-        displayResults(result);
-        
-        if (result.success) {
-            updateChart(data);
-        }
-    });
+    const optionPricingForm = document.getElementById('optionPricingForm');
+    if (optionPricingForm) {
+        optionPricingForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData.entries());
+            
+            const result = await calculateOptionPrice(data);
+            displayResults(result);
+            
+            if (result.success) {
+                updateChart(data);
+            }
+        });
+    } else {
+        console.error('Option pricing form not found');
+    }
     
     // Pricing engine change
-    document.getElementById('id_pricing_engine').addEventListener('change', toggleAdvancedParams);
+    const pricingEngineSelect = document.getElementById('id_pricing_engine');
+    if (pricingEngineSelect) {
+        pricingEngineSelect.addEventListener('change', toggleAdvancedParams);
+    } else {
+        console.error('Pricing engine select not found');
+    }
     
     
     // Chart update button
-    document.getElementById('updateChart').addEventListener('click', function() {
-        const formData = new FormData(document.getElementById('optionPricingForm'));
-        const data = Object.fromEntries(formData.entries());
-        updateChart(data);
-    });
+    const updateChartBtn = document.getElementById('updateChart');
+    if (updateChartBtn) {
+        updateChartBtn.addEventListener('click', function() {
+            const form = document.getElementById('optionPricingForm');
+            if (form) {
+                const formData = new FormData(form);
+                const data = Object.fromEntries(formData.entries());
+                updateChart(data);
+            } else {
+                console.error('Form not found for chart update');
+            }
+        });
+    } else {
+        console.error('Update chart button not found');
+    }
     
     // Clear chart button
-    document.getElementById('clearChart').addEventListener('click', function() {
-        clearChart();
-    });
-    
-    // Compare engines button
-    document.getElementById('compareEnginesBtn').addEventListener('click', async function() {
-        const formData = new FormData(document.getElementById('optionPricingForm'));
-        const data = Object.fromEntries(formData.entries());
-        
-        const result = await fetch('{% url "chapter2_instruments:compare_engines_api" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
-            },
-            body: JSON.stringify(data)
+    const clearChartBtn = document.getElementById('clearChart');
+    if (clearChartBtn) {
+        clearChartBtn.addEventListener('click', function() {
+            clearChart();
         });
-        
-        const comparisonResult = await result.json();
-        if (comparisonResult.success) {
-            displayResults(comparisonResult);
-            updateChart(data);
-        }
-    });
+    } else {
+        console.error('Clear chart button not found');
+    }
+    
+    // Note: Compare engines functionality removed as the button doesn't exist in the template
 });
 </script>
 {% endblock %}

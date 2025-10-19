@@ -49,3 +49,9 @@ class SwapAnalysisResult(models.Model):
 
 
 
+
+
+
+
+
+

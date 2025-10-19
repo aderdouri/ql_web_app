@@ -1,201 +1,181 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends "basics/chapter_base.html" %}
 
-{% block title %}{{ chapter_title }}{% endblock %}
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
 
-{% block page_content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h1 class="mb-0"><i class="{{ chapter_icon }} me-2"></i>{{ chapter_title }}</h1>
-                </div>
-                <div class="card-body">
-                    <p class="lead">{{ chapter_description }}</p>
-                    
-                    <!-- Chapter Overview -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h2><i class="bi bi-book me-2"></i>Chapter Overview</h2>
-                            <p>This chapter explores the fundamental concepts of random number generation and dimensionality in quantitative finance. 
-                            We'll examine different types of random number generators and their impact on Monte Carlo simulations.</p>
-                        </div>
+{% block styles %}
+<style>
+/* Harmoniser avec le chapitre 6 - utiliser les tailles standard */
+.launch-btn {
+    padding: 1rem 2rem !important;
+    font-size: 1.2rem !important;
+    font-weight: 600 !important;
+    min-width: 300px !important;
+}
+</style>
+{% endblock %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter explores the fundamental concepts of random number generation and its critical role in Monte Carlo simulations for quantitative finance. Learn about different types of random number generators, their properties, and how dimensionality affects Monte Carlo accuracy.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Random number generators</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Sobol sequences</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Monte Carlo dimensionality</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Correlated simulations</li>
+                        </ul>
                     </div>
-                    
-                    <!-- Key Concepts -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h3><i class="bi bi-lightbulb me-2"></i>Key Concepts</h3>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="card mb-3">
-                                        <div class="card-header bg-info text-white">
-                                            <h5><i class="bi bi-dice-6 me-2"></i>Random Number Generators</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <ul class="list-unstyled">
-                                                <li><strong>Mersenne Twister:</strong> High-quality pseudo-random number generator</li>
-                                                <li><strong>Sobol Sequences:</strong> Low-discrepancy quasi-random sequences</li>
-                                                <li><strong>Inverse Cumulative Normal:</strong> Transforms uniform to normal distribution</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card mb-3">
-                                        <div class="card-header bg-success text-white">
-                                            <h5><i class="bi bi-graph-up me-2"></i>Monte Carlo Applications</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <ul class="list-unstyled">
-                                                <li><strong>Option Pricing:</strong> European options with different RNGs</li>
-                                                <li><strong>Correlated Assets:</strong> Multi-dimensional simulations</li>
-                                                <li><strong>Convergence Analysis:</strong> Comparing RNG performance</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Key Concepts:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i>Pseudo-random vs quasi-random</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i>Low-discrepancy sequences</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i>Dimensionality requirements</li>
+                            <li><i class="bi bi-arrow-right text-primary me-2"></i>Convergence properties</li>
+                        </ul>
                     </div>
-                    
-                    <!-- Mathematical Background -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h3><i class="bi bi-calculator me-2"></i>Mathematical Background</h3>
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5>Unit Square Coverage</h5>
-                                    <p>The goal is to generate points within a (0,1) × (0,1) unit square. For a 2-dimensional problem, 
-                                    pseudo-random numbers can be generated individually and then paired.</p>
-                                    
-                                    <h5>Sobol Sequences</h5>
-                                    <p>Sobol sequences are low-discrepancy sequences that provide more uniform coverage than pseudo-random numbers. 
-                                    Even coverage is only obtained for a number of samples of the form n = 2^i - 1 for some i.</p>
-                                    
-                                    <h5>Dimensionality in Monte Carlo</h5>
-                                    <p>The QuantLib Monte Carlo framework checks the dimensionality of random number generators. 
-                                    For a simulation with 3 factors over 4 time steps, we need 3 × 4 = 12 random numbers.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Interactive Lab -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h3><i class="bi bi-flask me-2"></i>Interactive Lab</h3>
-                            <div class="card">
-                                <div class="card-body">
-                                    <p>The interactive lab allows you to:</p>
-                                    <ul>
-                                        <li>Generate random numbers using different RNGs</li>
-                                        <li>Visualize unit square coverage patterns</li>
-                                        <li>Explore Sobol sequence progression in 1D and 2D</li>
-                                        <li>Simulate correlated stock paths</li>
-                                        <li>Compare option pricing methods (Black-Scholes vs Monte Carlo)</li>
-                                    </ul>
-                                    <div class="text-center">
-                                        <a href="{% url 'basics:random_numbers_lab' %}" class="btn btn-primary btn-lg">
-                                            <i class="bi bi-flask me-2"></i>Go to Interactive Lab
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Code Examples -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h3><i class="bi bi-code-slash me-2"></i>Code Examples</h3>
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>QuantLib Setup</h5>
-                                </div>
-                                <div class="card-body">
-                                    <pre><code>import QuantLib as ql
-import matplotlib.pyplot as plt
-
-# Setup QuantLib
-today = ql.Date(27, ql.January, 2018)
-ql.Settings.instance().evaluationDate = today
-
-# Helper function for unit square plots
-def set_unit_square(ax):
-    ax.axis('scaled')
-    ax.set_xlim([0,1])
-    ax.set_ylim([0,1])</code></pre>
-                                </div>
-                            </div>
-                            
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Random Number Generation</h5>
-                                </div>
-                                <div class="card-body">
-                                    <pre><code># Mersenne Twister (pseudo-random)
-rng = ql.MersenneTwisterUniformRng(42)
-xs = []
-ys = []
-for i in range(2847):
-    xs.append(rng.next().value())
-    ys.append(rng.next().value())
-
-# Sobol sequence (quasi-random)
-rng = ql.SobolRsg(2)
-xs = []
-ys = []
-for i in range(2047):
-    x, y = rng.nextSequence().value()
-    xs.append(x)
-    ys.append(y)</code></pre>
-                                </div>
-                            </div>
-                            
-                            <div class="card">
-                                <div class="card-header">
-                                    <h5>Correlated Stock Simulation</h5>
-                                </div>
-                                <div class="card-body">
-                                    <pre><code># Create correlated processes
-processes = [
-    ql.BlackScholesProcess(ql.QuoteHandle(ql.SimpleQuote(S)), risk_free, vol_curve)
-    for S, sigma in [(100, 0.20), (80, 0.25), (110, 0.18)]
-]
-
-# Correlation matrix
-rho = [[1.0, 0.6, 0.8],
-       [0.6, 1.0, 0.4],
-       [0.8, 0.4, 1.0]]
-
-process = ql.StochasticProcessArray(processes, rho)</code></pre>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- References -->
-                    <div class="row">
-                        <div class="col-12">
-                            <h3><i class="bi bi-bookmark me-2"></i>References</h3>
-                            <div class="card">
-                                <div class="card-body">
-                                    <ul>
-                                        <li>QuantLib Documentation: <a href="https://www.quantlib.org/" target="_blank">https://www.quantlib.org/</a></li>
-                                        <li>Implementing QuantLib: <a href="https://leanpub.com/implementingquantlib" target="_blank">https://leanpub.com/implementingquantlib</a></li>
-                                        <li>Sobol Sequences: Low-discrepancy sequences for Monte Carlo methods</li>
-                                        <li>Monte Carlo Methods in Finance: Option pricing and risk management</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Use the interactive lab to explore different random number generators, visualize their coverage patterns, and understand how dimensionality affects Monte Carlo simulations. Experiment with Sobol sequences, correlated stock simulations, and option pricing methods.
+                </p>
+                <div class="text-center">
+                    <a href="/chapter7-random/" class="btn btn-primary btn-lg launch-btn">
+                        <i class="bi bi-play-circle me-2"></i>Launch Random Numbers Laboratory
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Concepts -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="fw-bold text-dark mb-4">
+            <i class="bi bi-lightbulb me-2"></i>Key Concepts
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Random Number Generators -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-dice-6 text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Random Number Generators</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Different types of random number generators have different properties and applications in quantitative finance.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Mersenne Twister (pseudo-random)</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Sobol sequences (quasi-random)</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Inverse cumulative normal</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dimensionality -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-grid-3x3 text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Dimensionality</h5>
+                </div>
+                <p class="card-text text-muted">
+                    The correct dimensionality is crucial for Monte Carlo simulations to ensure proper correlation and convergence.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Factors × Time steps</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Correlation requirements</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Convergence properties</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Laboratory Features -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Laboratory Features
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <h5 class="fw-bold text-dark">Random Numbers</h5>
+                        <p class="text-muted">Generate and compare different RNG methods with visual analysis.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Mersenne Twister</li>
+                            <li>• Sobol sequences</li>
+                            <li>• Statistical properties</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h5 class="fw-bold text-dark">Coverage Analysis</h5>
+                        <p class="text-muted">Visualize how different methods fill the unit square space.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Unit square plots</li>
+                            <li>• Coverage patterns</li>
+                            <li>• Discrepancy analysis</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h5 class="fw-bold text-dark">Sobol Progressions</h5>
+                        <p class="text-muted">Explore how Sobol sequences build up systematically over time.</p>
+                        <ul class="list-unstyled small">
+                            <li>• 1D progressions</li>
+                            <li>• 2D progressions</li>
+                            <li>• Systematic coverage</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-3">
+                        <h5 class="fw-bold text-dark">Correlated Simulations</h5>
+                        <p class="text-muted">Simulate correlated stock prices with proper dimensionality.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Multi-asset paths</li>
+                            <li>• Correlation matrices</li>
+                            <li>• Option pricing</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

@@ -1,10 +1,13 @@
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 from django.shortcuts import redirect
+from django.http import HttpResponse
 from . import views as home_views
 from . import separate_admin_views
 
 urlpatterns = [
+    # Favicon route to prevent 404 errors
+    path('favicon.ico', lambda request: HttpResponse(status=204), name='favicon'),
     path('', home_views.home, name='home'),
 
     # On ne garde QUE les catégories qui existent et sont configurées

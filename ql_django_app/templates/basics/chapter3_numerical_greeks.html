@@ -64,116 +64,96 @@
     </div>
 </div>
 
-<!-- Learning Modules -->
-<div class="row mb-5">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title fw-bold mb-0">
-                    <i class="bi bi-book me-2"></i>Learning Modules
-                </h3>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary">
-                                    <i class="bi bi-calculator me-2"></i>Greeks Calculation Methods
-                                </h5>
-                                <p class="card-text">
-                                    Learn different numerical methods for calculating option sensitivities. 
-                                    Understand finite difference approximations and their accuracy.
-                                </p>
-                                <ul class="list-unstyled">
-                                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Forward difference</li>
-                                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Backward difference</li>
-                                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Central difference</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-4">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary">
-                                    <i class="bi bi-graph-up me-2"></i>Mathematical Background
-                                </h5>
-                                <p class="card-text">
-                                    Understand the mathematical foundations of Greeks calculation. 
-                                    Learn about partial derivatives and their financial interpretation.
-                                </p>
-                                <ul class="list-unstyled">
-                                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Partial derivatives</li>
-                                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Numerical stability</li>
-                                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Step size optimization</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Key Concepts -->
 <div class="row mb-5">
     <div class="col-12">
+        <h3 class="fw-bold text-dark mb-4">
+            <i class="bi bi-lightbulb me-2"></i>Key Concepts
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Numerical Greeks -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calculator text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Numerical Greeks</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Greeks measure the sensitivity of option prices to various market parameters. 
+                    Numerical methods provide accurate calculations for complex instruments.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Delta - Price sensitivity</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Gamma - Delta sensitivity</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Vega - Volatility sensitivity</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Risk Management -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-shield-check text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Risk Management</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Greeks are essential tools for risk management in options trading. 
+                    They help traders understand and hedge their positions effectively.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Portfolio hedging</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Risk assessment</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Position monitoring</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Greeks Methods -->
+<div class="row mt-4">
+    <div class="col-12">
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title fw-bold mb-0">
-                    <i class="bi bi-lightbulb me-2"></i>Key Concepts
+                    <i class="bi bi-graph-up me-2"></i>Greeks Calculation Methods
                 </h3>
             </div>
             <div class="card-body">
                 <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <div class="text-center">
-                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="bi bi-graph-up fs-4"></i>
-                            </div>
-                            <h5 class="fw-bold">Delta (Δ)</h5>
-                            <p class="text-muted small">Measures price sensitivity to underlying asset movements</p>
-                        </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Forward Difference</h5>
+                        <p class="text-muted">Calculate Greeks using forward finite difference approximation.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Simple implementation</li>
+                            <li>• First-order accuracy</li>
+                            <li>• Suitable for most cases</li>
+                        </ul>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="text-center">
-                            <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="bi bi-graph-up-arrow fs-4"></i>
-                            </div>
-                            <h5 class="fw-bold">Gamma (Γ)</h5>
-                            <p class="text-muted small">Measures the rate of change of Delta</p>
-                        </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Central Difference</h5>
+                        <p class="text-muted">More accurate method using central finite difference approximation.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Higher accuracy</li>
+                            <li>• Second-order accuracy</li>
+                            <li>• Better for sensitive calculations</li>
+                        </ul>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="text-center">
-                            <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="bi bi-speedometer2 fs-4"></i>
-                            </div>
-                            <h5 class="fw-bold">Vega (ν)</h5>
-                            <p class="text-muted small">Measures sensitivity to volatility changes</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <div class="text-center">
-                            <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="bi bi-percent fs-4"></i>
-                            </div>
-                            <h5 class="fw-bold">Rho (ρ)</h5>
-                            <p class="text-muted small">Measures sensitivity to interest rate changes</p>
-                        </div>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="text-center">
-                            <div class="bg-secondary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <i class="bi bi-clock fs-4"></i>
-                            </div>
-                            <h5 class="fw-bold">Theta (Θ)</h5>
-                            <p class="text-muted small">Measures time decay of option value</p>
-                        </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Numerical Stability</h5>
+                        <p class="text-muted">Optimize step sizes for numerical stability and accuracy.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Adaptive step sizes</li>
+                            <li>• Error minimization</li>
+                            <li>• Robust calculations</li>
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -181,37 +161,4 @@
     </div>
 </div>
 
-<!-- Code Examples -->
-<div class="row mb-5">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title fw-bold mb-0">
-                    <i class="bi bi-code-slash me-2"></i>Code Examples
-                </h3>
-            </div>
-            <div class="card-body">
-                <p class="card-text mb-4">
-                    Here are some key code snippets for calculating numerical Greeks in QuantLib:
-                </p>
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6 class="fw-bold text-primary">Delta Calculation</h6>
-                        <pre class="bg-light p-3 rounded"><code># Forward difference for Delta
-h = 0.01
-price_up = option.NPV(spot + h)
-price_down = option.NPV(spot - h)
-delta = (price_up - price_down) / (2 * h)</code></pre>
-                    </div>
-                    <div class="col-md-6">
-                        <h6 class="fw-bold text-primary">Gamma Calculation</h6>
-                        <pre class="bg-light p-3 rounded"><code># Second derivative for Gamma
-price_center = option.NPV(spot)
-gamma = (price_up - 2*price_center + price_down) / (h * h)</code></pre>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}

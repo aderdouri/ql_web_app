@@ -52,16 +52,18 @@ def chapter6_pricing_range(request):
     context = {
         'chapter_title': 'Chapter 6: Pricing Over Time',
         'chapter_icon': 'bi-calendar-range',
-        'chapter_description': 'Learn to price instruments over a range of days and time periods for historical analysis and risk monitoring.'
+        'chapter_description': 'Learn to price instruments over a range of days and time periods for historical analysis and risk monitoring.',
+        'page_title': 'Chapter 6: Pricing Over Time',
+        'breadcrumb_title': 'Pricing Over Time'
     }
     return render(request, 'basics/chapter6_pricing_range.html', context)
 
 def chapter7_random(request):
-    """Chapter 7: Random Numbers dedicated page"""
-    context = {
-        'chapter_title': 'Chapter 7: Random Numbers',
-        'chapter_icon': 'bi-shuffle',
-        'chapter_description': 'Master random number generation for Monte Carlo simulations and advanced numerical methods in quantitative finance.'
-    }
-    return render(request, 'basics/chapter7_random.html', context)
+    """Chapter 7: Random Numbers description page - Display description first"""
+    print("📖 AFFICHAGE PAGE DESCRIPTION CHAPITRE 7")
+    return render(request, 'basics/chapter7_random.html', {
+        'chapter_title': 'Chapter 7: Random Numbers and Dimensionality',
+        'chapter_icon': 'bi-dice-6',
+        'chapter_description': 'Explore different random number generators and their impact on Monte Carlo simulations.'
+    })
 

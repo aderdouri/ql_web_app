@@ -36,7 +36,7 @@ class RandomNumbersForm(forms.Form):
     num_simulations = forms.IntegerField(
         label='Number of Simulations',
         initial=10000,
-        min_value=100,
+        min_value=10,
         max_value=1000000,
         widget=forms.NumberInput(attrs={
             'class': 'form-control',

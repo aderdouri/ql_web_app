@@ -62,15 +62,34 @@
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        if (typeof Chart === 'undefined') { return; }
+        if (typeof Chart === 'undefined') { 
+            console.error('Chart.js not loaded');
+            return; 
+        }
 
         let chart;
         let liveDataset = { label: 'Courbe Actuelle', borderColor: 'rgb(0, 123, 255)', tension: 0.1, pointRadius: 0, borderWidth: 2 };
         let snapshotDataset = null;
         let chartLabels = [];
         const form = document.getElementById('pricerForm');
-        const ctx = document.getElementById('optionValueChart').getContext('2d');
+        const canvas = document.getElementById('optionValueChart');
         const errorContainer = document.getElementById('error-message-container');
+        
+        // Check if all required elements exist
+        if (!form) {
+            console.error('Form element not found');
+            return;
+        }
+        if (!canvas) {
+            console.error('Canvas element not found');
+            return;
+        }
+        if (!errorContainer) {
+            console.error('Error container element not found');
+            return;
+        }
+        
+        const ctx = canvas.getContext('2d');
 
         function renderChart() {
             const datasets = [liveDataset];
@@ -107,25 +126,43 @@
             });
         }
 
-        document.getElementById('snapshotBtn').addEventListener('click', function() {
-            snapshotDataset = { ...liveDataset, label: `Snapshot (${document.getElementById('id_evaluation_date').value})`, data: [...liveDataset.data], borderColor: 'rgba(255, 99, 132, 0.6)', borderDash: [5, 5] };
-            renderChart();
-        });
+        const snapshotBtn = document.getElementById('snapshotBtn');
+        if (snapshotBtn) {
+            snapshotBtn.addEventListener('click', function() {
+                const evaluationDateInput = document.getElementById('id_evaluation_date');
+                const dateValue = evaluationDateInput ? evaluationDateInput.value : 'Unknown';
+                snapshotDataset = { ...liveDataset, label: `Snapshot (${dateValue})`, data: [...liveDataset.data], borderColor: 'rgba(255, 99, 132, 0.6)', borderDash: [5, 5] };
+                renderChart();
+            });
+        } else {
+            console.error('Snapshot button not found');
+        }
         
         // =====================================================================================
         // LA LIGNE LA PLUS IMPORTANTE : On n'écoute que l'événement 'change'.
         // Cela se déclenche quand on quitte un champ, pas à chaque touche. C'est plus efficace.
         // =====================================================================================
-        form.addEventListener('change', updateResults);
+        if (form) {
+            form.addEventListener('change', updateResults);
+        } else {
+            console.error('Form element not found for event listener');
+        }
         
         try {
-            const initialData = JSON.parse(document.getElementById('chart-initial-data').textContent);
-            if (initialData && initialData.x_values && initialData.x_values.length > 0) {
-                chartLabels = initialData.x_values.map(x => x.toFixed(2));
-                liveDataset.data = initialData.y_values;
-                renderChart();
+            const chartDataElement = document.getElementById('chart-initial-data');
+            if (chartDataElement) {
+                const initialData = JSON.parse(chartDataElement.textContent);
+                if (initialData && initialData.x_values && initialData.x_values.length > 0) {
+                    chartLabels = initialData.x_values.map(x => x.toFixed(2));
+                    liveDataset.data = initialData.y_values;
+                    renderChart();
+                }
+            } else {
+                console.log('No initial chart data found');
             }
-        } catch (e) { console.error("Erreur lors de l'initialisation du graphique:", e); }
+        } catch (e) { 
+            console.error("Erreur lors de l'initialisation du graphique:", e); 
+        }
     });
 </script>
 {% endblock %}

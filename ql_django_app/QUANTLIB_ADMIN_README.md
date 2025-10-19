@@ -203,3 +203,9 @@ L'interface utilise Bootstrap 5 avec un thème personnalisé :
 
 Cette interface d'administration fournit une solution complète pour gérer une plateforme d'apprentissage interactive basée sur QuantLib, avec toutes les fonctionnalités nécessaires pour créer, organiser et suivre le contenu éducatif.
 
+
+
+
+
+
+

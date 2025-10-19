@@ -1,0 +1,748 @@
+{% extends "basics/chapter_base.html" %}
+
+{% block title %}Chapter 6 - Pricing Over a Range of Days{% endblock %}
+
+{% block chapter_navigation %}
+<!-- Remove Available Chapters section for this page -->
+{% endblock %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        .page-wrapper { display: flex; flex-wrap: wrap; gap: 2rem; }
+        .controls { flex: 1; min-width: 350px; background-color: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); align-self: flex-start; }
+        .results-area { flex: 2; min-width: 400px; }
+        h2, h3 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: bold; color: #555; font-size: 0.9rem; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .form-group .help-text { font-size: 0.8rem; color: #666; margin-top: 0.25rem; font-style: italic; }
+        .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .result-box { background-color: white; border: 1px solid #e0e0e0; padding: 1rem; border-radius: 8px; text-align: center; }
+        .result-box h4 { margin: 0 0 0.5rem 0; color: var(--primary-blue); font-size: 1rem; }
+        .result-box p { font-size: 1.2rem; font-weight: bold; margin: 0; color: #333; }
+        #calculateBtn { width: 100%; padding: 10px; margin-top: 10px; background-color: var(--primary-blue); color: white; border: none; cursor: pointer; border-radius: 4px; font-size: 1rem; }
+        .chart-container { background-color: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        #error-message-container { margin-bottom: 1rem; }
+        .output-section { background-color: white; padding: 1rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 1rem; }
+        .output-section h3 { color: var(--primary-blue); border-bottom: 2px solid var(--primary-blue); }
+        .table { margin-bottom: 0; }
+        .table th { background-color: #f8f9fa; font-weight: 600; }
+        .alert { border-radius: 8px; }
+        .alert-danger { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .alert-info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        .chart-container { height: 500px; }
+        
+        /* Compact table styles */
+        .compact-table {
+            font-size: 0.85rem;
+        }
+        .compact-table th,
+        .compact-table td {
+            padding: 0.3rem 0.5rem;
+            border: none;
+        }
+        .compact-table thead th {
+            background-color: #f8f9fa;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .compact-table tbody tr {
+            border-bottom: 1px solid #dee2e6;
+        }
+        .compact-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+    </style>
+{% endblock %}
+
+{% block chapter_content %}
+
+<!-- Form Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-gear me-2"></i>Parameters
+                </h3>
+            </div>
+            <div class="card-body">
+                <form id="priceHistoryForm" method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.start_date.label_tag }}
+                                {{ form.start_date }}
+                                <div class="help-text">Start date for the simulation period</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.end_date.label_tag }}
+                                {{ form.end_date }}
+                                <div class="help-text">End date for the simulation period</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.simulation_method.label_tag }}
+                                {{ form.simulation_method }}
+                                <div class="help-text">Method for curve simulation</div>
+                                <div class="method-info mt-2">
+                                    <div id="methodInfo_rebuild_curve" class="alert alert-light" style="display: none;">
+                                        <h6><i class="bi bi-arrow-clockwise me-2"></i>Rebuild Curve Method</h6>
+                                        <p class="mb-1"><strong>How it works:</strong> Recreates the entire yield curve for each date</p>
+                                        <p class="mb-1"><strong>Pros:</strong> Simple, fast, reliable</p>
+                                        <p class="mb-0"><strong>Best for:</strong> Basic simulations, education</p>
+                                    </div>
+                                    <div id="methodInfo_update_quotes" class="alert alert-light" style="display: none;">
+                                        <h6><i class="bi bi-arrow-up-circle me-2"></i>Update Quotes Method</h6>
+                                        <p class="mb-1"><strong>How it works:</strong> Updates market quotes and lets curve recalculate</p>
+                                        <p class="mb-1"><strong>Pros:</strong> Realistic, sophisticated, market-like</p>
+                                        <p class="mb-0"><strong>Best for:</strong> Advanced simulations, real market conditions</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.noise_level.label_tag }}
+                                {{ form.noise_level }}
+                                <div class="help-text">{{ form.noise_level.help_text }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-grid">
+                                <button type="submit" id="calculateBtn" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-calculator me-2"></i>Run Simulation
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Results Section -->
+<div class="row mb-5" id="results-section" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Analysis Results
+                </h3>
+            </div>
+            <div class="card-body">
+                <div id="error-message-container" class="alert alert-danger" style="display: none;"></div>
+        
+                <!-- Chart Section -->
+                <div class="chart-container mb-5">
+                    <h3>Bond Price History Visualization</h3>
+                    <div style="height: 400px; position: relative; width: 100%;">
+                        <canvas id="priceHistoryChart" width="800" height="400"></canvas>
+                    </div>
+                </div>
+
+                <!-- Price Statistics -->
+                <div class="results-grid">
+                    <div class="result-box">
+                        <h4>First Price</h4>
+                        <p id="firstPrice">-</p>
+                        <small class="text-muted" id="firstPrice_explanation">Initial bond price</small>
+                        <div class="explanation-detail mt-2" id="firstPrice_detail">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                This is the bond's clean price at the start of the simulation period. 
+                                It represents the market value excluding accrued interest.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="result-box">
+                        <h4>Last Price</h4>
+                        <p id="lastPrice">-</p>
+                        <small class="text-muted" id="lastPrice_explanation">Final bond price</small>
+                        <div class="explanation-detail mt-2" id="lastPrice_detail">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                The bond's clean price at the end of the simulation period. 
+                                Compare with the first price to see overall performance.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="result-box">
+                        <h4>Min Price</h4>
+                        <p id="minPrice">-</p>
+                        <small class="text-muted" id="minPrice_explanation">Lowest price reached</small>
+                        <div class="explanation-detail mt-2" id="minPrice_detail">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                The lowest price during the simulation period. 
+                                This indicates the maximum potential loss if you had to sell at the worst time.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="result-box">
+                        <h4>Max Price</h4>
+                        <p id="maxPrice">-</p>
+                        <small class="text-muted" id="maxPrice_explanation">Highest price reached</small>
+                        <div class="explanation-detail mt-2" id="maxPrice_detail">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                The highest price during the simulation period. 
+                                This shows the maximum potential gain if you sold at the best time.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- Simulation Details -->
+                <div class="results-grid">
+                    <div class="result-box">
+                        <h4>Average Price</h4>
+                        <p id="avgPrice">-</p>
+                        <small class="text-muted" id="avgPrice_explanation">Mean price over period</small>
+                        <div class="explanation-detail mt-2" id="avgPrice_detail">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                The arithmetic mean of all prices during the period. 
+                                This gives you the typical price level around which the bond traded.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="result-box">
+                        <h4>Total Points</h4>
+                        <p id="totalPoints">-</p>
+                        <small class="text-muted" id="totalPoints_explanation">Number of data points</small>
+                        <div class="explanation-detail mt-2" id="totalPoints_detail">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                The number of business days in the simulation period. 
+                                More points mean more detailed price history and better statistical reliability.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="result-box">
+                        <h4>Price Change</h4>
+                        <p id="priceChange">-</p>
+                        <small class="text-muted" id="priceChange_explanation">Total price change</small>
+                        <div class="explanation-detail mt-2" id="priceChange_detail">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                The absolute and percentage change from first to last price. 
+                                Positive values indicate price appreciation, negative values indicate depreciation.
+                            </small>
+                        </div>
+                    </div>
+                    <div class="result-box">
+                        <h4>Volatility</h4>
+                        <p id="volatility">-</p>
+                        <small class="text-muted" id="volatility_explanation">Price volatility measure</small>
+                        <div class="explanation-detail mt-2" id="volatility_detail">
+                            <small class="text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Standard deviation of price changes. 
+                                Higher values indicate more price fluctuation and risk. 
+                                Lower values suggest more stable pricing behavior.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+        
+                <!-- Sample Data Table -->
+                <div class="output-section">
+                    <h3>Bond Price History</h3>
+                    <div id="sampleDataTable">
+                        <p class="text-muted">No data available. Run simulation to see results.</p>
+                    </div>
+                </div>
+        
+                <!-- Method Explanation -->
+                <div class="output-section">
+                    <h3>Simulation Method</h3>
+                    <div id="methodExplanation" class="alert alert-info">
+                        <h6><i class="bi bi-gear me-2"></i><span id="methodName">-</span></h6>
+                        <p id="methodDescription" class="mb-0">-</p>
+                    </div>
+                </div>
+        
+                <!-- Dynamic Explanations -->
+                <div class="output-section">
+                    <h3>Analysis & Explanations</h3>
+                    <div id="dynamic_explanations">
+                        <div class="alert alert-info">
+                            <h6><i class="bi bi-lightbulb me-2"></i>Understanding the Results:</h6>
+                            <ul class="mb-0">
+                                <li><strong>Price History:</strong> Shows how bond prices evolve over time</li>
+                                <li><strong>Volatility:</strong> Measures price stability and risk</li>
+                                <li><strong>Price Change:</strong> Indicates overall price direction</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% if results_json %}
+    {{ results_json|json_script:"history-data" }}
+{% else %}
+    <script id="history-data" type="application/json">{}</script>
+{% endif %}
+{% endblock chapter_content %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script>
+    let chartInstance = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Page loaded, checking for data...');
+        
+        // Simple function to check for data and initialize chart
+        function checkAndInitialize() {
+            const dataElement = document.getElementById('history-data');
+            if (!dataElement) {
+                console.log('No data element found');
+                return false;
+            }
+            
+            const content = dataElement.textContent || dataElement.innerHTML || '';
+            console.log('Data content length:', content.length);
+            
+            if (content && content.trim() !== '' && content !== '{}' && content.length > 10) {
+                console.log('Data found, initializing chart...');
+                initializeChart(content);
+                return true;
+            } else {
+                console.log('No data available');
+                return false;
+            }
+        }
+        
+        // Function to initialize chart
+        function initializeChart(dataContent) {
+            try {
+                let data = JSON.parse(dataContent);
+                
+                // Check if data is double-encoded (string instead of object)
+                if (typeof data === 'string') {
+                        data = JSON.parse(data);
+                }
+                
+                // Check for errors
+                if (data && data.error) {
+                    showError(data.error);
+                    return;
+                }
+                
+                // Get price history data
+                let priceHistoryData;
+                if (data && data.price_history) {
+                    priceHistoryData = data.price_history;
+                } else {
+                    console.error('No price_history data found');
+                    return;
+                }
+                
+                if (!priceHistoryData.dates || !priceHistoryData.prices) {
+                    console.error('Invalid price history data structure');
+                    return;
+                }
+                
+                // Create chart
+                const ctx = document.getElementById('priceHistoryChart');
+                if (!ctx) {
+                    console.error('Chart canvas not found');
+                    return;
+                }
+                
+                // Destroy existing chart
+                if (chartInstance) {
+                    chartInstance.destroy();
+                }
+                
+                chartInstance = new Chart(ctx.getContext('2d'), {
+                    type: 'line',
+                    data: {
+                        labels: priceHistoryData.dates,
+                        datasets: [{
+                            label: 'Bond Clean Price',
+                            data: priceHistoryData.prices,
+                            borderColor: 'rgb(54, 162, 235)',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { 
+                                title: { display: true, text: 'Date' } 
+                            },
+                            y: { 
+                                title: { display: true, text: 'Price' } 
+                            }
+                        }
+                    }
+                });
+                
+                // Display results
+                displayResults(priceHistoryData);
+                
+                // Show results section
+                const resultsSection = document.getElementById('results-section');
+                if (resultsSection) {
+                    resultsSection.style.display = 'block';
+                }
+                
+                console.log('Chart initialized successfully!');
+                
+            } catch (e) {
+                console.error('Error initializing chart:', e);
+            }
+        }
+        
+        // Function to show error
+        function showError(errorMessage) {
+                        const errorContainer = document.getElementById('error-message-container');
+                        if (errorContainer) {
+                            errorContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        <h6>Simulation Error:</h6>
+                        <p class="mb-0">${errorMessage}</p>
+                                </div>
+                            `;
+                            errorContainer.style.display = 'block';
+                        }
+                        
+            const resultsSection = document.getElementById('results-section');
+            if (resultsSection) {
+                resultsSection.style.display = 'block';
+            }
+        }
+        
+        // Function to display results
+    function displayResults(priceHistory) {
+        const dates = priceHistory.dates;
+        const prices = priceHistory.prices;
+        
+        // Calculate statistics
+        const firstPrice = prices[0];
+        const lastPrice = prices[prices.length - 1];
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+        const avgPrice = prices.reduce((sum, price) => sum + price, 0) / prices.length;
+        
+            // Calculate volatility
+        const variance = prices.reduce((sum, price) => sum + Math.pow(price - avgPrice, 2), 0) / prices.length;
+        const volatility = Math.sqrt(variance);
+        
+        // Calculate price change
+        const priceChange = lastPrice - firstPrice;
+        const priceChangePercent = ((priceChange / firstPrice) * 100);
+        
+            // Update statistics
+            document.getElementById('firstPrice').textContent = firstPrice.toFixed(4);
+            document.getElementById('lastPrice').textContent = lastPrice.toFixed(4);
+            document.getElementById('minPrice').textContent = minPrice.toFixed(4);
+            document.getElementById('maxPrice').textContent = maxPrice.toFixed(4);
+            document.getElementById('avgPrice').textContent = avgPrice.toFixed(4);
+            document.getElementById('totalPoints').textContent = prices.length;
+            document.getElementById('priceChange').textContent = `${priceChange.toFixed(4)} (${priceChangePercent.toFixed(2)}%)`;
+            document.getElementById('volatility').textContent = volatility.toFixed(4);
+            
+            // Update explanations
+            updateDynamicExplanations(priceHistory, firstPrice, lastPrice, minPrice, maxPrice, avgPrice, priceChange, priceChangePercent, volatility);
+            
+            // Update method explanation
+            updateMethodExplanation();
+            
+            // Explanations are now always visible
+            
+            // Create data table
+        const sampleDataTable = document.getElementById('sampleDataTable');
+        if (sampleDataTable) {
+            let tableHTML = `
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table compact-table">
+                        <thead style="position: sticky; top: 0; background-color: #f8f9fa; z-index: 10;">
+                            <tr>
+                                    <th class="text-start">Date</th>
+                                <th class="text-end">Price</th>
+                                <th class="text-end">Change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            for (let i = 0; i < dates.length; i++) {
+                let changeText = '-';
+                let changeClass = '';
+                
+                if (i > 0) {
+                    const change = prices[i] - prices[i-1];
+                    changeText = change.toFixed(6);
+                    if (change > 0) {
+                        changeClass = 'text-success';
+                    } else if (change < 0) {
+                        changeClass = 'text-danger';
+                    } else {
+                        changeClass = 'text-muted';
+                    }
+                }
+                
+                tableHTML += `<tr>
+                        <td class="text-start">${dates[i]}</td>
+                    <td class="text-end">${prices[i].toFixed(6)}</td>
+                    <td class="text-end ${changeClass}">${changeText}</td>
+                </tr>`;
+            }
+            
+            tableHTML += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            sampleDataTable.innerHTML = tableHTML;
+            }
+        }
+        
+        // Function to update dynamic explanations
+        function updateDynamicExplanations(priceHistory, firstPrice, lastPrice, minPrice, maxPrice, avgPrice, priceChange, priceChangePercent, volatility) {
+            const explanations = document.getElementById('dynamic_explanations');
+            if (!explanations) return;
+            
+            // Find min and max dates
+            const minIndex = priceHistory.prices.indexOf(minPrice);
+            const maxIndex = priceHistory.prices.indexOf(maxPrice);
+            const minDate = priceHistory.dates[minIndex];
+            const maxDate = priceHistory.dates[maxIndex];
+            
+            // Calculate period length
+            const startDate = new Date(priceHistory.dates[0]);
+            const endDate = new Date(priceHistory.dates[priceHistory.dates.length - 1]);
+            const daysDiff = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
+            
+            // Update individual result explanations
+            updateIndividualExplanations(priceHistory, firstPrice, lastPrice, minPrice, maxPrice, avgPrice, priceChange, priceChangePercent, volatility, minDate, maxDate, daysDiff);
+            
+            // Generate dynamic explanations
+            let explanationHTML = `
+                <div class="alert alert-info">
+                    <h6><i class="bi bi-lightbulb me-2"></i>Understanding the Results:</h6>
+                    <ul class="mb-0">
+                        <li><strong>Price History:</strong> Shows how bond prices evolve over ${daysDiff} days</li>
+                        <li><strong>Volatility:</strong> ${getVolatilityExplanation(volatility)}</li>
+                        <li><strong>Price Change:</strong> ${getPriceChangeExplanation(priceChange, priceChangePercent)}</li>
+                        <li><strong>Price Range:</strong> From ${minPrice.toFixed(4)} (${minDate}) to ${maxPrice.toFixed(4)} (${maxDate})</li>
+                        <li><strong>Average Performance:</strong> ${avgPrice.toFixed(4)} over the period</li>
+                    </ul>
+                </div>
+            `;
+            
+            explanations.innerHTML = explanationHTML;
+        }
+        
+        // Function to update individual result explanations
+        function updateIndividualExplanations(priceHistory, firstPrice, lastPrice, minPrice, maxPrice, avgPrice, priceChange, priceChangePercent, volatility, minDate, maxDate, daysDiff) {
+            // Update first price explanation
+            const firstPriceDetail = document.getElementById('firstPrice_detail');
+            if (firstPriceDetail) {
+                firstPriceDetail.innerHTML = `
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        This is the bond's clean price at the start of the simulation period (${priceHistory.dates[0]}). 
+                        It represents the market value excluding accrued interest. 
+                        <strong>Current value: ${firstPrice.toFixed(4)}</strong>
+                    </small>
+                `;
+            }
+            
+            // Update last price explanation
+            const lastPriceDetail = document.getElementById('lastPrice_detail');
+            if (lastPriceDetail) {
+                const performance = priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral';
+                lastPriceDetail.innerHTML = `
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        The bond's clean price at the end of the simulation period (${priceHistory.dates[priceHistory.dates.length - 1]}). 
+                        <strong>Current value: ${lastPrice.toFixed(4)}</strong> - This shows ${performance} performance over the period.
+                    </small>
+                `;
+            }
+            
+            // Update min price explanation
+            const minPriceDetail = document.getElementById('minPrice_detail');
+            if (minPriceDetail) {
+                minPriceDetail.innerHTML = `
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        The lowest price during the simulation period occurred on ${minDate}. 
+                        <strong>Value: ${minPrice.toFixed(4)}</strong> - This indicates the maximum potential loss if you had to sell at the worst time.
+                    </small>
+                `;
+            }
+            
+            // Update max price explanation
+            const maxPriceDetail = document.getElementById('maxPrice_detail');
+            if (maxPriceDetail) {
+                maxPriceDetail.innerHTML = `
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        The highest price during the simulation period occurred on ${maxDate}. 
+                        <strong>Value: ${maxPrice.toFixed(4)}</strong> - This shows the maximum potential gain if you sold at the best time.
+                    </small>
+                `;
+            }
+            
+            // Update average price explanation
+            const avgPriceDetail = document.getElementById('avgPrice_detail');
+            if (avgPriceDetail) {
+                avgPriceDetail.innerHTML = `
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        The arithmetic mean of all ${priceHistory.prices.length} prices during the ${daysDiff}-day period. 
+                        <strong>Value: ${avgPrice.toFixed(4)}</strong> - This gives you the typical price level around which the bond traded.
+                    </small>
+                `;
+            }
+            
+            // Update total points explanation
+            const totalPointsDetail = document.getElementById('totalPoints_detail');
+            if (totalPointsDetail) {
+                totalPointsDetail.innerHTML = `
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        The number of business days in the simulation period. 
+                        <strong>Value: ${priceHistory.prices.length} points</strong> - More points mean more detailed price history and better statistical reliability.
+                    </small>
+                `;
+            }
+            
+            // Update price change explanation
+            const priceChangeDetail = document.getElementById('priceChange_detail');
+            if (priceChangeDetail) {
+                const changeType = priceChange > 0 ? 'appreciation' : priceChange < 0 ? 'depreciation' : 'no change';
+                priceChangeDetail.innerHTML = `
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        The absolute and percentage change from first to last price. 
+                        <strong>Change: ${priceChange.toFixed(4)} (${priceChangePercent.toFixed(2)}%)</strong> - This indicates ${changeType} over the period.
+                    </small>
+                `;
+            }
+            
+            // Update volatility explanation
+            const volatilityDetail = document.getElementById('volatility_detail');
+            if (volatilityDetail) {
+                const volatilityLevel = volatility < 0.1 ? 'very low' : volatility < 0.5 ? 'low' : volatility < 1.0 ? 'moderate' : 'high';
+                volatilityDetail.innerHTML = `
+                    <small class="text-muted">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Standard deviation of price changes. 
+                        <strong>Value: ${volatility.toFixed(4)}</strong> - This indicates ${volatilityLevel} volatility, meaning ${getVolatilityExplanation(volatility).toLowerCase()}.
+                    </small>
+                `;
+            }
+        }
+        
+        // Function to get volatility explanation
+        function getVolatilityExplanation(volatility) {
+            if (volatility < 0.1) {
+                return "Very low volatility - bond shows stable pricing behavior";
+            } else if (volatility < 0.5) {
+                return "Low volatility - bond shows moderate price stability";
+            } else if (volatility < 1.0) {
+                return "Moderate volatility - bond shows some price fluctuation";
+            } else {
+                return "High volatility - bond shows significant price fluctuation and risk";
+            }
+        }
+        
+        // Function to get price change explanation
+        function getPriceChangeExplanation(priceChange, priceChangePercent) {
+            if (priceChange > 0) {
+                return `Bond gained ${priceChange.toFixed(4)} (${priceChangePercent.toFixed(2)}%) - positive performance`;
+            } else if (priceChange < 0) {
+                return `Bond lost ${Math.abs(priceChange).toFixed(4)} (${Math.abs(priceChangePercent).toFixed(2)}%) - negative performance`;
+            } else {
+                return "Bond maintained its value - neutral performance";
+            }
+        }
+        
+        // Function to update method explanation
+        function updateMethodExplanation() {
+            const methodSelect = document.querySelector('select[name="simulation_method"]');
+            const methodName = document.getElementById('methodName');
+            const methodDescription = document.getElementById('methodDescription');
+            
+            if (!methodSelect || !methodName || !methodDescription) return;
+            
+            const selectedMethod = methodSelect.value;
+            
+            if (selectedMethod === 'rebuild_curve') {
+                methodName.textContent = 'Rebuild Curve Method';
+                methodDescription.textContent = 'This method recreates the entire yield curve for each date. It\'s simple, fast, and reliable. The curve is built from scratch using current market rates, making it ideal for basic simulations and educational purposes.';
+            } else if (selectedMethod === 'update_quotes') {
+                methodName.textContent = 'Update Quotes Method';
+                methodDescription.textContent = 'This method updates market quotes and lets the curve recalculate automatically. It uses complex yield curve structures with OIS rates and credit spreads, making it more realistic for actual market conditions. It\'s slower but more sophisticated.';
+            }
+        }
+        
+        // Add event listener for method changes
+        const methodSelect = document.querySelector('select[name="simulation_method"]');
+        if (methodSelect) {
+            methodSelect.addEventListener('change', function() {
+                updateMethodExplanation();
+                updateMethodInfo();
+            });
+        }
+        
+        // Function to update method info display
+        function updateMethodInfo() {
+            const methodSelect = document.querySelector('select[name="simulation_method"]');
+            if (!methodSelect) return;
+            
+            const selectedMethod = methodSelect.value;
+            
+            // Hide all method info
+            document.querySelectorAll('[id^="methodInfo_"]').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Show selected method info
+            const selectedInfo = document.getElementById(`methodInfo_${selectedMethod}`);
+            if (selectedInfo) {
+                selectedInfo.style.display = 'block';
+            }
+        }
+        
+        
+        // Initialize method info on page load
+        updateMethodInfo();
+        
+        // Check for data immediately and with delays
+        checkAndInitialize();
+        setTimeout(checkAndInitialize, 100);
+        setTimeout(checkAndInitialize, 1000);
+        setTimeout(checkAndInitialize, 3000);
+    });
+</script>
+{% endblock scripts %}

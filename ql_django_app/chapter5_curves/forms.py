@@ -4,23 +4,11 @@ import json
 class TermStructureForm(forms.Form):
     """Form for Term Structures and their Reference Dates - Essential fields only"""
     
-    CURVE_TYPE_CHOICES = [
-        ('both', 'Both Curve Types'),
-        ('piecewise', 'Relative Date Curve'),
-        ('forward', 'Fixed Date Curve'),
-    ]
-    
     DAY_COUNT_CHOICES = [
         ('Actual360', 'Actual/360 (Standard)'),
         ('Actual365', 'Actual/365 (Full Year)'),
         ('Thirty360', '30/360 (30-Day Month)'),
         ('ActualActual', 'Actual/Actual (Precise)'),
-    ]
-    
-    CALENDAR_CHOICES = [
-        ('TARGET', 'TARGET (Europe)'),
-        ('UnitedStates', 'United States'),
-        ('UnitedKingdom', 'United Kingdom'),
     ]
     
     # Essential fields only
@@ -34,16 +22,6 @@ class TermStructureForm(forms.Form):
         })
     )
     
-    curve_type = forms.ChoiceField(
-        label='Curve Type',
-        choices=CURVE_TYPE_CHOICES,
-        initial='both',
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-            'title': 'Choose the type of curve to build'
-        })
-    )
-    
     day_count = forms.ChoiceField(
         label='Day Count Convention',
         choices=DAY_COUNT_CHOICES,
@@ -51,16 +29,6 @@ class TermStructureForm(forms.Form):
         widget=forms.Select(attrs={
             'class': 'form-control',
             'title': 'Method for calculating days between two dates'
-        })
-    )
-    
-    calendar = forms.ChoiceField(
-        label='Calendar',
-        choices=CALENDAR_CHOICES,
-        initial='TARGET',
-        widget=forms.Select(attrs={
-            'class': 'form-control',
-            'title': 'Calendar to determine business days'
         })
     )
     

@@ -106,3 +106,4 @@ class Notification(models.Model):
         """Désarchive la notification"""
         self.is_archived = False
         self.save()
+

@@ -1,4 +1,4 @@
-{% extends "basics/base.html" %}
+{% extends "basics/lab_base.html" %}
 
 {% block title %}Chapter 5 - Term Structures and Reference Dates{% endblock %}
 
@@ -34,130 +34,146 @@
     </style>
 {% endblock %}
 
-{% block sub_page_content %}
-<!-- Chapter Header -->
+{% block lab_content %}
+<!-- Form Section -->
 <div class="row mb-5">
     <div class="col-12">
-        <div class="card bg-primary text-white">
-            <div class="card-body py-4">
-                <div class="row align-items-center">
-                    <div class="col-md-8">
-                        <h1 class="card-title fw-bold mb-3">
-                            <i class="bi bi-graph-up me-3"></i>Chapter 5: Term Structures and Reference Dates - Interactive Lab
-                        </h1>
-                        <p class="card-text lead mb-0">Interactive laboratory for building term structures with different reference dates using QuantLib.</p>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-gear me-2"></i>Parameters
+                </h3>
+            </div>
+            <div class="card-body">
+                <form id="termStructureForm" method="post" action="{% url 'chapter5_curves:curve_lab' %}">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.evaluation_date.label_tag }}
+                                {{ form.evaluation_date }}
+                                <div class="help-text">Reference date for all calculations</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.day_count.label_tag }}
+                                {{ form.day_count }}
+                                <div class="help-text">Method for calculating days between two dates</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-4 text-md-end">
-                        <a href="{% url 'basics:home' %}" class="btn btn-light btn-lg">
-                            <i class="bi bi-arrow-left me-2"></i>Back to Chapters
-                        </a>
+                    
+                    <h4 class="fw-bold text-primary mb-3">Market Data (Swap Rates)</h4>
+                    <div class="row">
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                {{ form.tenor_2y.label_tag }}
+                                {{ form.tenor_2y }}
+                                <div class="help-text">Swap rate for 2 years</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                {{ form.tenor_3y.label_tag }}
+                                {{ form.tenor_3y }}
+                                <div class="help-text">Swap rate for 3 years</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                {{ form.tenor_5y.label_tag }}
+                                {{ form.tenor_5y }}
+                                <div class="help-text">Swap rate for 5 years</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                {{ form.tenor_10y.label_tag }}
+                                {{ form.tenor_10y }}
+                                <div class="help-text">Swap rate for 10 years</div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="form-group">
+                                {{ form.tenor_15y.label_tag }}
+                                {{ form.tenor_15y }}
+                                <div class="help-text">Swap rate for 15 years</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-grid">
+                                <button type="button" id="calculateBtn" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-calculator me-2"></i>Calculate Term Structure
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-<div class="page-wrapper">
-    <div class="controls">
-        <h2>Parameters</h2>
-        <form id="termStructureForm" method="post" action="{% url 'chapter5_curves:curve_lab' %}">
-            {% csrf_token %}
-            
-            <div class="form-group">
-                {{ form.evaluation_date.label_tag }}
-                {{ form.evaluation_date }}
-                <div class="help-text">Reference date for all calculations</div>
+<!-- Results Section -->
+<div class="row mb-5" id="results-section" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Analysis Results
+                </h3>
             </div>
-            
-            <div class="form-group">
-                {{ form.curve_type.label_tag }}
-                {{ form.curve_type }}
-                <div class="help-text">Choose the type of curve to build</div>
-            </div>
-            
-            <div class="form-group">
-                {{ form.day_count.label_tag }}
-                {{ form.day_count }}
-                <div class="help-text">Method for calculating days between two dates</div>
-            </div>
-            
-            <div class="form-group">
-                {{ form.calendar.label_tag }}
-                {{ form.calendar }}
-                <div class="help-text">Calendar to determine business days</div>
-            </div>
-            
-            <h3>Market Data (Swap Rates)</h3>
-            <div class="form-group">
-                {{ form.tenor_2y.label_tag }}
-                {{ form.tenor_2y }}
-                <div class="help-text">Swap rate for 2 years</div>
-            </div>
-            <div class="form-group">
-                {{ form.tenor_3y.label_tag }}
-                {{ form.tenor_3y }}
-                <div class="help-text">Swap rate for 3 years</div>
-            </div>
-            <div class="form-group">
-                {{ form.tenor_5y.label_tag }}
-                {{ form.tenor_5y }}
-                <div class="help-text">Swap rate for 5 years</div>
-            </div>
-            <div class="form-group">
-                {{ form.tenor_10y.label_tag }}
-                {{ form.tenor_10y }}
-                <div class="help-text">Swap rate for 10 years</div>
-            </div>
-            <div class="form-group">
-                {{ form.tenor_15y.label_tag }}
-                {{ form.tenor_15y }}
-                <div class="help-text">Swap rate for 15 years</div>
-            </div>
-            
-        </form>
-        <button type="button" id="calculateBtn">Calculate Term Structure</button>
-    </div>
-
-    <div class="results-area">
-        <h2>Analysis Results</h2>
-        <div id="error-message-container" class="alert alert-danger" style="display: none;"></div>
+            <div class="card-body">
+                <div id="error-message-container" class="alert alert-danger" style="display: none;"></div>
         
-        <!-- Chart Section -->
-        <div class="chart-container">
-            <h3>Yield Curve Visualization</h3>
-            <canvas id="curveChart" width="400" height="200"></canvas>
-        </div>
+                   <!-- Chart Section -->
+                   <div class="chart-container mb-5">
+                       <h3>Yield Curve Visualization</h3>
+                       <div style="height: 400px; position: relative; width: 100%;">
+                           <canvas id="curveChart" width="800" height="400"></canvas>
+                       </div>
+                   </div>
 
-        <!-- Zero Rate Calculations -->
-        <div class="results-grid">
-            <div class="result-box">
-                <h4>Relative Curve (5Y)</h4>
-                <p id="curve1_5y">-</p>
-            </div>
-            <div class="result-box">
-                <h4>Fixed Curve (5Y)</h4>
-                <p id="curve2_5y">-</p>
-            </div>
-            <div class="result-box">
-                <h4>Relative Curve (Sept 7, 2019)</h4>
-                <p id="curve1_date">-</p>
-            </div>
-            <div class="result-box">
-                <h4>Fixed Curve (Sept 7, 2019)</h4>
-                <p id="curve2_date">-</p>
-            </div>
-        </div>
+                   <!-- Zero Rate Calculations -->
+                   <div class="results-grid">
+                       <div class="result-box">
+                           <h4>Relative Curve (5Y)</h4>
+                           <p id="curve1_5y">-</p>
+                           <small class="text-muted" id="curve1_5y_explanation">Rate from relative date curve</small>
+                       </div>
+                       <div class="result-box">
+                           <h4>Fixed Curve (5Y)</h4>
+                           <p id="curve2_5y">-</p>
+                           <small class="text-muted" id="curve2_5y_explanation">Rate from fixed date curve</small>
+                       </div>
+                       <div class="result-box">
+                           <h4>Relative Curve (Sept 7, 2019)</h4>
+                           <p id="curve1_date">-</p>
+                           <small class="text-muted" id="curve1_date_explanation">Rate for specific date</small>
+                       </div>
+                       <div class="result-box">
+                           <h4>Fixed Curve (Sept 7, 2019)</h4>
+                           <p id="curve2_date">-</p>
+                           <small class="text-muted" id="curve2_date_explanation">Rate for specific date</small>
+                       </div>
+                   </div>
         
         <!-- Curve Ranges -->
         <div class="results-grid">
             <div class="result-box">
                 <h4>Relative Date Curve Range</h4>
                 <p id="curve1_range">-</p>
+                <small class="text-muted" id="curve1_range_explanation">Date range for relative curve</small>
             </div>
             <div class="result-box">
                 <h4>Fixed Date Curve Range</h4>
                 <p id="curve2_range">-</p>
+                <small class="text-muted" id="curve2_range_explanation">Date range for fixed curve</small>
             </div>
         </div>
         
@@ -169,39 +185,38 @@
             </div>
         </div>
         
-        <!-- System Notifications -->
-        <div class="output-section">
-            <h3>System Notifications</h3>
-            <div id="observer_notifications">
-                <p class="text-muted">No notifications available. Modify parameters to see notifications.</p>
+                   <!-- Dynamic Explanations -->
+                   <div class="output-section">
+                       <h3>Analysis & Explanations</h3>
+                       <div id="dynamic_explanations">
+                           <div class="alert alert-info">
+                               <h6><i class="bi bi-lightbulb me-2"></i>Understanding the Results:</h6>
+                               <ul class="mb-0">
+                                   <li><strong>Relative Date Curve:</strong> Updates when evaluation date changes</li>
+                                   <li><strong>Fixed Date Curve:</strong> Uses fixed dates from original curve construction</li>
+                                   <li><strong>Day Count Convention:</strong> Affects how days between dates are calculated</li>
+                               </ul>
+                           </div>
+                           <div id="rate_comparison" class="mt-3">
+                               <h6>Rate Comparison Analysis:</h6>
+                               <p id="rate_analysis" class="text-muted">Click "Calculate" to see rate analysis</p>
+                           </div>
+                       </div>
+                   </div>
+                   
+                   <!-- System Notifications -->
+                   <div class="output-section">
+                       <h3>System Notifications</h3>
+                       <div id="observer_notifications">
+                           <p class="text-muted">No notifications available. Modify parameters to see notifications.</p>
+                       </div>
+                   </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Continue Learning Section - Bottom -->
-<div class="row mt-3">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-body text-center">
-                <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <a href="{% url 'basics:home' %}" class="btn btn-outline-primary btn-lg w-100">
-                            <i class="bi bi-list me-2"></i>View All Chapters
-                        </a>
-                    </div>
-                    <div class="col-md-6">
-                        <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
-                            <i class="bi bi-house me-2"></i>Back to Home
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock sub_page_content %}
+{% endblock lab_content %}
 
 {% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -246,10 +261,12 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(result => {
             console.log('API result:', result);
             if (result.success) {
+                console.log('Plot data received:', result.data.plot_data);
                 updateChart(result.data.plot_data);
                 updateResultsDisplay(result.data);
                 hideError();
             } else {
+                console.error('API error:', result.error);
                 showError(result.error || 'An error occurred');
             }
         })
@@ -260,21 +277,52 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Event for calculate button
-    calculateBtn.addEventListener('click', updateResults);
-    
-    // Automatic update on form changes (like Chapter 2)
-    form.addEventListener('change', updateResults);
-    form.addEventListener('input', updateResults);
-    
-    // Automatic initialization on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        // Wait a short delay to ensure all elements are loaded
-        setTimeout(updateResults, 500);
+    calculateBtn.addEventListener('click', function() {
+        updateResults();
+        showResultsSections();
     });
+    
+    // Remove automatic updates - only update when calculate button is clicked
+    
+    // Initialize default values for display
+    function initializeDefaultValues() {
+        // Set default values for result boxes
+        document.getElementById('curve1_5y').textContent = '0.0000%';
+        document.getElementById('curve2_5y').textContent = '0.0000%';
+        document.getElementById('curve1_date').textContent = '0.0000%';
+        document.getElementById('curve2_date').textContent = '0.0000%';
+        document.getElementById('curve1_range').textContent = 'No data';
+        document.getElementById('curve2_range').textContent = 'No data';
+        
+        // Set default notifications
+        document.getElementById('observer_notifications').innerHTML = '<p class="text-muted">Click "Calculate Term Structure" to see results.</p>';
+    }
+    
+    // Function to show hidden results sections
+    function showResultsSections() {
+        const resultsSection = document.getElementById('results-section');
+        if (resultsSection) {
+            resultsSection.style.display = 'block';
+        }
+    }
+
+    // Initialize default values
+    initializeDefaultValues();
+    
+    // Remove automatic initialization - only calculate when user clicks button
 
     function updateChart(plotData) {
         console.log("Updating chart with data:", plotData);
         const ctx = document.getElementById('curveChart').getContext('2d');
+
+        // Show updating indicator
+        const chartContainer = document.querySelector('.chart-container');
+        if (chartContainer) {
+            const updatingMsg = document.createElement('div');
+            updatingMsg.id = 'updating-msg';
+            updatingMsg.innerHTML = '<div class="alert alert-info"><i class="bi bi-arrow-clockwise me-2"></i>Updating chart...</div>';
+            chartContainer.insertBefore(updatingMsg, chartContainer.firstChild);
+        }
 
         if (chart) {
             chart.destroy();
@@ -297,15 +345,27 @@ document.addEventListener('DOMContentLoaded', function() {
                         yAxisKey: 'y'
                     },
                     borderColor: 'var(--primary-blue)',
+                    backgroundColor: 'rgba(0, 123, 255, 0.1)',
                     fill: false,
                     tension: 0.1,
                     pointRadius: 0,
-                    pointHoverRadius: 3
+                    pointHoverRadius: 3,
+                    borderWidth: 2
                 }]
             },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
+                   options: {
+                       responsive: true,
+                       maintainAspectRatio: false,
+                       layout: {
+                           padding: {
+                               bottom: 20,
+                               top: 10
+                           }
+                       },
+                       animation: {
+                           duration: 1000,
+                           easing: 'easeInOutQuart'
+                       },
                 scales: {
                     x: {
                         type: 'linear',
@@ -357,6 +417,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
         });
+        
+        // Remove updating indicator after chart is created
+        setTimeout(() => {
+            const updatingMsg = document.getElementById('updating-msg');
+            if (updatingMsg) {
+                updatingMsg.remove();
+            }
+        }, 100);
     }
     
     function updateResultsDisplay(data) {
@@ -365,16 +433,23 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log("Zero rates:", data.zero_rates);
             if (data.zero_rates.curve1_5y) {
                 document.getElementById('curve1_5y').textContent = data.zero_rates.curve1_5y.toFixed(4) + '%';
+                updateRateExplanation('curve1_5y', data.zero_rates.curve1_5y, '5-year relative date curve');
             }
             if (data.zero_rates.curve2_5y) {
                 document.getElementById('curve2_5y').textContent = data.zero_rates.curve2_5y.toFixed(4) + '%';
+                updateRateExplanation('curve2_5y', data.zero_rates.curve2_5y, '5-year fixed date curve');
             }
             if (data.zero_rates.curve1_date) {
                 document.getElementById('curve1_date').textContent = data.zero_rates.curve1_date.toFixed(4) + '%';
+                updateRateExplanation('curve1_date', data.zero_rates.curve1_date, 'September 7, 2019 relative date curve');
             }
             if (data.zero_rates.curve2_date) {
                 document.getElementById('curve2_date').textContent = data.zero_rates.curve2_date.toFixed(4) + '%';
+                updateRateExplanation('curve2_date', data.zero_rates.curve2_date, 'September 7, 2019 fixed date curve');
             }
+            
+            // Generate dynamic rate analysis
+            generateRateAnalysis(data.zero_rates);
         }
         
         // Update curve ranges
@@ -382,9 +457,11 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log("Curve ranges:", data.curve_ranges);
             if (data.curve_ranges.curve1) {
                 document.getElementById('curve1_range').textContent = data.curve_ranges.curve1;
+                updateRangeExplanation('curve1_range', data.curve_ranges.curve1, 'relative date curve');
             }
             if (data.curve_ranges.curve2) {
                 document.getElementById('curve2_range').textContent = data.curve_ranges.curve2;
+                updateRangeExplanation('curve2_range', data.curve_ranges.curve2, 'fixed date curve');
             }
         }
         
@@ -426,6 +503,84 @@ document.addEventListener('DOMContentLoaded', function() {
     function showError(message) {
         errorContainer.textContent = message;
         errorContainer.style.display = 'block';
+    }
+    
+    // Dynamic explanation functions
+    function updateRateExplanation(elementId, rate, description) {
+        const explanationElement = document.getElementById(elementId + '_explanation');
+        if (explanationElement) {
+            let explanation = description;
+            if (rate < 0.5) {
+                explanation += ' - Very low rate environment';
+            } else if (rate < 1.0) {
+                explanation += ' - Low interest rate environment';
+            } else if (rate < 2.0) {
+                explanation += ' - Moderate interest rate environment';
+            } else {
+                explanation += ' - Higher interest rate environment';
+            }
+            explanationElement.textContent = explanation;
+        }
+    }
+    
+    function updateRangeExplanation(elementId, range, description) {
+        const explanationElement = document.getElementById(elementId + '_explanation');
+        if (explanationElement) {
+            let explanation = description;
+            if (range.includes('2014') && range.includes('2029')) {
+                explanation += ' - 15-year maturity range';
+            } else if (range.includes('2014') && range.includes('2024')) {
+                explanation += ' - 10-year maturity range';
+            } else {
+                explanation += ' - Custom maturity range';
+            }
+            explanationElement.textContent = explanation;
+        }
+    }
+    
+    function generateRateAnalysis(zeroRates) {
+        const analysisElement = document.getElementById('rate_analysis');
+        if (!analysisElement) return;
+        
+        let analysis = '';
+        
+        // Compare 5Y rates
+        if (zeroRates.curve1_5y && zeroRates.curve2_5y) {
+            const diff = Math.abs(zeroRates.curve1_5y - zeroRates.curve2_5y);
+            if (diff < 0.001) {
+                analysis += '<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i><strong>Identical 5Y Rates:</strong> Both curves show the same 5-year rate, indicating consistent curve construction.</div>';
+            } else {
+                analysis += `<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i><strong>Rate Difference:</strong> 5Y rates differ by ${diff.toFixed(4)}% between relative and fixed date curves.</div>`;
+            }
+        }
+        
+        // Compare date-specific rates
+        if (zeroRates.curve1_date && zeroRates.curve2_date) {
+            const dateDiff = Math.abs(zeroRates.curve1_date - zeroRates.curve2_date);
+            if (dateDiff < 0.001) {
+                analysis += '<div class="alert alert-info"><i class="bi bi-info-circle me-2"></i><strong>Consistent Date Rates:</strong> Both curves show identical rates for September 7, 2019.</div>';
+            } else {
+                analysis += `<div class="alert alert-secondary"><i class="bi bi-graph-up me-2"></i><strong>Date Rate Variation:</strong> Rates for September 7, 2019 differ by ${dateDiff.toFixed(4)}% between curve types.</div>`;
+            }
+        }
+        
+        // Overall curve analysis
+        if (zeroRates.curve1_5y && zeroRates.curve1_date) {
+            const curveSlope = zeroRates.curve1_date - zeroRates.curve1_5y;
+            if (curveSlope > 0) {
+                analysis += '<div class="alert alert-primary"><i class="bi bi-arrow-up me-2"></i><strong>Upward Sloping Curve:</strong> The yield curve shows an upward slope, typical in normal market conditions.</div>';
+            } else if (curveSlope < 0) {
+                analysis += '<div class="alert alert-danger"><i class="bi bi-arrow-down me-2"></i><strong>Inverted Curve:</strong> The yield curve is inverted, which can indicate economic uncertainty.</div>';
+            } else {
+                analysis += '<div class="alert alert-secondary"><i class="bi bi-dash me-2"></i><strong>Flat Curve:</strong> The yield curve is relatively flat across these maturities.</div>';
+            }
+        }
+        
+        if (analysis === '') {
+            analysis = '<div class="alert alert-light"><i class="bi bi-lightbulb me-2"></i>Modify parameters to see detailed rate analysis.</div>';
+        }
+        
+        analysisElement.innerHTML = analysis;
     }
 });
 </script>

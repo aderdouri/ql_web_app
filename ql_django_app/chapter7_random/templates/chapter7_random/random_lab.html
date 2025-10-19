@@ -1,179 +1,1169 @@
-{% extends "basics/base.html" %}
-{% block title %}Chapter 7 - Random Numbers - {{ block.super }}{% endblock %}
-{% block sub_page_content %}
-    <h3>Chapter 7: A note on random numbers and dimensionality</h3>
-    <hr>
-    <p class="lead">This chapter covers the different types of random number generators available in QuantLib, crucial for Monte Carlo simulations.</p>
-    
-    <!-- Form Section -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="bi bi-sliders me-2"></i>Parameters</h4>
-                </div>
-                <div class="card-body">
-                    <form id="randomForm" method="post">
-                        {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h5>Random Number Generator</h5>
-                                <div class="mb-3">
-                                    {{ form.rng_type.label_tag }}
-                                    {{ form.rng_type }}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.seed.label_tag }}
-                                    {{ form.seed }}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.num_simulations.label_tag }}
-                                    {{ form.num_simulations }}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.dimensionality.label_tag }}
-                                    {{ form.dimensionality }}
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <h5>Option Parameters</h5>
-                                <div class="mb-3">
-                                    {{ form.maturity.label_tag }}
-                                    {{ form.maturity }}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.strike.label_tag }}
-                                    {{ form.strike }}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.spot.label_tag }}
-                                    {{ form.spot }}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.volatility.label_tag }}
-                                    {{ form.volatility }}
-                                </div>
-                                <div class="mb-3">
-                                    {{ form.risk_free_rate.label_tag }}
-                                    {{ form.risk_free_rate }}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-center">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="bi bi-calculator me-2"></i>Calculate
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+{% extends "basics/lab_base.html" %}
+{% load static %}
 
-    <!-- Results Section -->
-    {% if results %}
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="bi bi-list-ul me-2"></i>Generated Random Numbers</h4>
-                </div>
-                <div class="card-body">
-                    <div class="code-block">
-                        {% if results.random_numbers %}
-                            {% for num in results.random_numbers %}
-                                {{ num }}{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-                        {% else %}
-                            No random numbers generated
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Option Pricing Results -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">
-                    <h4><i class="bi bi-currency-dollar me-2"></i>Option Pricing Results</h4>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Method</th>
-                                    <th>Price</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><strong>Black-Scholes (Analytical)</strong></td>
-                                    <td><strong>{{ results.black_scholes_price|floatformat:4 }}</strong></td>
-                                </tr>
-                                <tr>
-                                    <td>Monte Carlo (Mersenne Twister)</td>
-                                    <td>{{ results.monte_carlo_price_rng|floatformat:4 }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Monte Carlo (Sobol)</td>
-                                    <td>{{ results.monte_carlo_price_sobol|floatformat:4 }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    {% endif %}
+{% block title %}Chapter 7 - Random Numbers{% endblock %}
 
+{% block chapter_navigation %}
+<!-- Remove Available Chapters section for this page -->
+{% endblock %}
+
+{% block styles %}
+    {{ block.super }}
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .code-block {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
+        /* Harmoniser avec le chapitre 6 - utiliser les tailles standard */
+        /* AUGMENTER L'ESPACEMENT VERTICAL DE LA PAGE */
+        .container.py-5 {
+            padding-top: 5rem !important;
+            padding-bottom: 5rem !important;
+        }
+        
+        /* AUGMENTER L'ESPACEMENT ENTRE LES SECTIONS */
+        .row.mb-5 {
+            margin-bottom: 4rem !important;
+        }
+        
+        .row.mb-4 {
+            margin-bottom: 3rem !important;
+        }
+        /* Professional Chapter 7 Random Numbers Styling */
+        .page-wrapper { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 2rem; 
+            margin-top: 2rem;
+        }
+        
+        .controls { 
+            flex: 1; 
+            min-width: 350px; 
+            background: var(--white);
+            padding: 2rem; 
+            border-radius: 0.75rem; 
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-gray);
+            align-self: flex-start; 
+        }
+        
+        /* Results area styles removed - now inline with form */
+        
+        .controls h2, .controls h3 { 
+            color: var(--primary-blue); 
+            border-bottom: 2px solid var(--light-blue); 
+            padding-bottom: 0.5rem; 
+            margin-bottom: 1.5rem; 
+            font-weight: 700;
+        }
+        
+        .form-group { 
+            margin-bottom: 1.5rem; 
+        }
+        
+        .form-group label { 
+            display: block; 
+            margin-bottom: 0.5rem; 
+            font-weight: 600; 
+            color: var(--slate); 
+            font-size: 0.9rem; 
+        }
+        
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 0.75rem; 
+            border: 1px solid var(--border-gray); 
+            border-radius: 0.5rem; 
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+            outline: none;
+        }
+        
+        .form-group .help-text { 
+            font-size: 0.8rem; 
+            color: var(--gray); 
+            margin-top: 0.25rem; 
+            font-style: italic; 
+        }
+        
+        .results-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 1rem; 
+            margin-bottom: 2rem; 
+        }
+        
+        .result-box { 
+            background: var(--white);
+            border: 1px solid var(--border-gray); 
+            padding: 1.5rem; 
+            border-radius: 0.75rem; 
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s ease;
+        }
+        
+        .result-box:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-blue);
+        }
+        
+        /* Random Numbers Display Styles */
+        .random-numbers-info {
+            background: var(--light-blue);
+            border: 1px solid var(--border-gray);
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+        
+        .numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .number-item {
+            background: var(--white);
+            border: 1px solid var(--border-gray);
+            border-radius: 0.25rem;
+            padding: 0.5rem 0.25rem;
+            text-align: center;
             font-family: 'Courier New', monospace;
-            font-size: 14px;
+            font-size: 0.8rem;
+            color: var(--slate);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .number-item:hover {
+            background: var(--light-blue);
+            border-color: var(--primary-blue);
+            transform: scale(1.05);
+        }
+        
+        .result-box h4 { 
+            margin: 0 0 0.5rem 0; 
+            color: var(--primary-blue); 
+            font-size: 1rem; 
+            font-weight: 600;
+        }
+        
+        .result-box p { 
+            font-size: 1.2rem; 
+            font-weight: 700; 
+            margin: 0; 
+            color: var(--black); 
+        }
+        
+        #calculateBtn { 
+            width: 100%; 
+            padding: 0.75rem 1.5rem; 
+            margin-top: 1rem; 
+            background: var(--primary-blue); 
+            color: var(--white); 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 0.5rem; 
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        #calculateBtn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .chart-container { 
+            background: var(--white);
+            padding: 1.5rem; 
+            border-radius: 0.75rem; 
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-gray);
+            height: 500px;
+        }
+        
+        #error-message-container { 
+            margin-bottom: 1rem; 
+        }
+        
+        .output-section { 
+            background: var(--white);
+            padding: 1.5rem; 
+            border-radius: 0.75rem; 
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-gray);
+            margin-bottom: 1.5rem; 
+        }
+        
+        .output-section h3 { 
+            color: var(--primary-blue); 
+            border-bottom: 2px solid var(--primary-blue); 
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .table { 
+            margin-bottom: 0; 
+        }
+        
+        .table th { 
+            background-color: var(--light-gray); 
+            font-weight: 600; 
+            color: var(--slate);
+        }
+        
+        .alert { 
+            border-radius: 0.5rem; 
+        }
+        
+        .alert-danger { 
+            background-color: #fef2f2; 
+            border-color: var(--danger-red); 
+            color: var(--danger-red); 
+        }
+        
+        .alert-info { 
+            background-color: var(--light-blue); 
+            border-color: var(--primary-blue); 
+            color: var(--primary-blue); 
+        }
+
+        /* Compact table styles */
+        .compact-table {
+            font-size: 0.85rem;
+        }
+        .compact-table th,
+        .compact-table td {
+            padding: 0.3rem 0.5rem;
+            border: none;
+        }
+        .compact-table thead th {
+            background-color: var(--light-gray);
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--slate);
+        }
+        .compact-table tbody tr {
+            border-bottom: 1px solid var(--border-gray);
+        }
+        .compact-table tbody tr:hover {
+            background-color: var(--light-gray);
+        }
+
+        .code-block {
+            background: var(--light-gray);
+            border: 1px solid var(--border-gray);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            color: var(--slate);
+        }
+        
+        /* Professional loading states */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* Sobol progression grids - like the book */
+        .sobol-1d-grid, .sobol-2d-grid {
+            background: var(--white);
+            border-radius: 0.75rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-gray);
+            padding: 1rem;
+        }
+        
+        .sobol-mini-chart {
+            background: var(--white);
+            border: 1px solid var(--border-gray);
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            height: 120px;
+            position: relative;
+        }
+        
+        .sobol-mini-chart canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .sobol-mini-chart .chart-title {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        /* Grid layouts */
+        .sobol-1d-grid .col-3 {
+            flex: 0 0 25%;
+            max-width: 25%;
+        }
+        
+        .sobol-2d-grid .col-4 {
+            flex: 0 0 33.333333%;
+            max-width: 33.333333%;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .page-wrapper {
+                flex-direction: column;
+            }
+            
+            .controls {
+                min-width: 100%;
+            }
+            
+            .sobol-1d-grid .col-3,
+            .sobol-2d-grid .col-4 {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .sobol-1d-grid .col-3,
+            .sobol-2d-grid .col-4 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
         }
     </style>
+{% endblock %}
 
-    <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('randomForm');
-        
-        // Handle form submission
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const formData = new FormData(form);
-            
-            fetch('{% url "chapter7_random:calculate_api" %}', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+{% block lab_content %}
+<!-- Form Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-gear me-2"></i>Input Parameters
+                </h3>
+            </div>
+            <div class="card-body">
+        <form id="randomForm" method="post">
+            {% csrf_token %}
+
+                    <!-- Random Number Generator Parameters Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="fw-bold text-primary mb-3"><i class="bi bi-dice-6 me-2"></i>Random Number Generator Parameters</h5>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <label for="rng_type" class="form-label fw-semibold">Random Number Generator</label>
+                            <select id="rng_type" name="rng_type" class="form-select">
+                                <option value="Mersenne Twister">Mersenne Twister</option>
+                                <option value="Sobol">Sobol Sequences</option>
+                                <option value="Inverse Cumulative Normal">Inverse Cumulative Normal</option>
+                </select>
+                            <div class="form-text small">Choose the type of random number generator</div>
+                            
+                            <!-- Dynamic explanations for RNG types -->
+                            <div class="rng-info mt-2">
+            <div id="rngInfo_Mersenne Twister" class="alert alert-light" style="display: none;">
+                <h6><i class="bi bi-shuffle me-2"></i>Mersenne Twister</h6>
+                <p class="mb-1"><strong>Type:</strong> Pseudo-random number generator</p>
+                <p class="mb-1"><strong>Characteristics:</strong> Fast, widely used, good statistical properties</p>
+                <p class="mb-0"><strong>Best for:</strong> General Monte Carlo simulations, when speed is important</p>
+            </div>
+            <div id="rngInfo_Sobol" class="alert alert-light" style="display: none;">
+                <h6><i class="bi bi-grid-3x3 me-2"></i>Sobol Sequences</h6>
+                <p class="mb-1"><strong>Type:</strong> Quasi-random (low-discrepancy) sequence</p>
+                <p class="mb-1"><strong>Characteristics:</strong> Better coverage, faster convergence</p>
+                <p class="mb-0"><strong>Best for:</strong> High-dimensional problems, when accuracy is critical</p>
+            </div>
+            <div id="rngInfo_Inverse Cumulative Normal" class="alert alert-light" style="display: none;">
+                <h6><i class="bi bi-graph-up me-2"></i>Inverse Cumulative Normal</h6>
+                <p class="mb-1"><strong>Type:</strong> Transformed random numbers</p>
+                <p class="mb-1"><strong>Characteristics:</strong> Directly generates normal distribution</p>
+                <p class="mb-0"><strong>Best for:</strong> Financial modeling, when normal distribution is needed</p>
+            </div>
+                            </div>
+            </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <label for="seed" class="form-label fw-semibold">Random Seed</label>
+                <input type="number" id="seed" name="seed" value="42" class="form-control">
+                            <div class="form-text small">Seed for reproducible results</div>
+            </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <label for="num_simulations" class="form-label fw-semibold">Number of Simulations</label>
+                <input type="number" id="num_simulations" name="num_simulations" value="10000" class="form-control">
+                            <div class="form-text small">Number of Monte Carlo simulations</div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <label for="dimensionality" class="form-label fw-semibold">Dimensionality</label>
+                            <input type="number" id="dimensionality" name="dimensionality" value="2" class="form-control">
+                            <div class="form-text small">Number of dimensions (1D, 2D, etc.)</div>
+                        </div>
+            </div>
+
+                    <!-- Option Parameters Section -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5 class="fw-bold text-primary mb-3"><i class="bi bi-currency-dollar me-2"></i>Option Parameters</h5>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <label for="maturity" class="form-label fw-semibold">Maturity (years)</label>
+                            <input type="number" id="maturity" name="maturity" value="1.0" step="0.1" class="form-control">
+                            <div class="form-text small">Option maturity in years</div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <label for="strike" class="form-label fw-semibold">Strike Price</label>
+                            <input type="number" id="strike" name="strike" value="100.0" step="0.1" class="form-control">
+                            <div class="form-text small">Option strike price</div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <label for="spot" class="form-label fw-semibold">Spot Price</label>
+                            <input type="number" id="spot" name="spot" value="100.0" step="0.1" class="form-control">
+                            <div class="form-text small">Current spot price</div>
+                        </div>
+                        <div class="col-lg-3 col-md-6 mb-3">
+                            <label for="volatility" class="form-label fw-semibold">Volatility</label>
+                            <input type="number" id="volatility" name="volatility" value="0.2" step="0.01" class="form-control">
+                            <div class="form-text small">Annual volatility (0.2 = 20%)</div>
+                        </div>
+                        <div class="col-lg-6 col-md-6 mb-3">
+                            <label for="risk_free_rate" class="form-label fw-semibold">Risk-Free Rate</label>
+                            <input type="number" id="risk_free_rate" name="risk_free_rate" value="0.05" step="0.001" class="form-control">
+                            <div class="form-text small">Risk-free interest rate (0.05 = 5%)</div>
+                        </div>
+            </div>
+
+                    <div class="text-center">
+                        <button type="submit" id="calculateBtn" class="btn btn-primary btn-lg">
+                            <i class="bi bi-calculator me-2"></i>Calculate Results
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+            </div>
+
+<!-- Results Section -->
+<div id="error-message-container" class="mt-4"></div>
+<div id="results-container" style="display: none;" class="mt-4">
+    <!-- Generated Random Numbers -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-list-ul me-2"></i>Generated Random Numbers
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div id="random-numbers-output"></div>
+                    <div id="random-numbers-explanation" class="mt-3" style="display: none;">
+                        <div class="alert alert-light">
+                            <h6><i class="bi bi-info-circle me-2"></i>About These Numbers</h6>
+                            <p class="mb-1" id="rng-explanation-text"></p>
+                            <p class="mb-0"><strong>Quality Check:</strong> <span id="quality-indicator"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+
+    <!-- Unit Square Coverage Chart -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Unit Square Coverage
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 400px;">
+                        <canvas id="unitSquareChart"></canvas>
+                    </div>
+                    <div id="unit-square-explanation" class="mt-3" style="display: none;">
+                        <div class="alert alert-info">
+                            <h6><i class="bi bi-check-circle me-2"></i>Coverage Analysis</h6>
+                            <p class="mb-1"><strong>What you see:</strong> <span id="coverage-description"></span></p>
+                            <p class="mb-0"><strong>Quality:</strong> <span id="coverage-quality"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+
+    <!-- Sobol 1D Progression - Grid 4x4 like the book -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-graph-up-arrow me-2"></i>Sobol 1D Sequence Progression
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="sobol-1d-grid">
+                        <div class="row g-2" id="sobol1dGrid">
+                            <!-- 16 small charts will be inserted here -->
+                        </div>
+                    </div>
+                    <div id="sobol-1d-explanation" class="mt-3" style="display: none;">
+                        <div class="alert alert-light">
+                            <h6><i class="bi bi-lightbulb me-2"></i>Sobol 1D Sequence Analysis</h6>
+                            <p class="mb-1"><strong>What you see:</strong> <span id="sobol-1d-description"></span></p>
+                            <p class="mb-0"><strong>Key Insight:</strong> <span id="sobol-1d-insight"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+
+    <!-- Sobol 2D Progression - Grid 3x4 like the book -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-diagram-3 me-2"></i>Sobol 2D Sequence Progression
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="sobol-2d-grid">
+                        <div class="row g-2" id="sobol2dGrid">
+                            <!-- 12 small charts will be inserted here -->
+                        </div>
+                    </div>
+                    <div id="sobol-2d-explanation" class="mt-3" style="display: none;">
+                        <div class="alert alert-light">
+                            <h6><i class="bi bi-exclamation-triangle me-2"></i>Sobol 2D Sequence Analysis</h6>
+                            <p class="mb-1"><strong>What you see:</strong> <span id="sobol-2d-description"></span></p>
+                            <p class="mb-0"><strong>Key Insight:</strong> <span id="sobol-2d-insight"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Correlated Stocks Simulation -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-bar-chart me-2"></i>Correlated Stocks Simulation
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container" style="height: 400px;">
+                        <canvas id="correlatedStocksChart"></canvas>
+                    </div>
+                    <div id="correlated-stocks-explanation" class="mt-3" style="display: none;">
+                        <div class="alert alert-danger">
+                            <h6><i class="bi bi-graph-up me-2"></i>Correlated Stocks Analysis</h6>
+                            <p class="mb-1"><strong>What you see:</strong> <span id="stocks-description"></span></p>
+                            <p class="mb-0"><strong>Financial Insight:</strong> <span id="stocks-insight"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            </div>
+
+    <!-- Option Pricing Results -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title fw-bold mb-0">
+                        <i class="bi bi-currency-dollar me-2"></i>Option Pricing Results
+                    </h3>
+                </div>
+                <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Price</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pricing-results">
+                        </tbody>
+                    </table>
+                    </div>
+                    <div id="pricing-explanation" class="mt-3" style="display: none;">
+                        <div class="alert alert-info">
+                            <h6><i class="bi bi-calculator me-2"></i>Pricing Analysis</h6>
+                            <p class="mb-1"><strong>What you see:</strong> <span id="pricing-description"></span></p>
+                            <p class="mb-0"><strong>Method Comparison:</strong> <span id="pricing-comparison"></span></p>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('randomForm');
+    const resultsContainer = document.getElementById('results-container');
+    const errorContainer = document.getElementById('error-message-container');
+
+    // Dynamic explanations for RNG types
+    const rngSelect = document.getElementById('rng_type');
+    const rngInfoDivs = document.querySelectorAll('[id^="rngInfo_"]');
+    
+    function showRngInfo(selectedType) {
+        // Hide all info divs
+        rngInfoDivs.forEach(div => div.style.display = 'none');
+        // Show the selected one
+        const selectedDiv = document.getElementById(`rngInfo_${selectedType}`);
+        if (selectedDiv) {
+            selectedDiv.style.display = 'block';
+        }
+    }
+    
+    // Show initial explanation
+    showRngInfo(rngSelect.value);
+    
+    // Update explanation when RNG type changes
+    rngSelect.addEventListener('change', function() {
+        showRngInfo(this.value);
+    });
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Clear previous results and errors
+        resultsContainer.style.display = 'none';
+        errorContainer.innerHTML = '';
+
+        // Show loading state
+        const submitBtn = document.getElementById('calculateBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Calculating...';
+        submitBtn.disabled = true;
+
+        const formData = new FormData(form);
+
+        fetch('{% url "chapter7_random:calculate_api" %}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => {
+            console.log('Response status:', response.status);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+                displayResults(data.data);
+                resultsContainer.style.display = 'block';
+            } else {
+                // Handle different types of error responses
+                let errorMessage = 'An error occurred during calculation';
+                if (data.error) {
+                    errorMessage = typeof data.error === 'string' ? data.error : JSON.stringify(data.error);
+                } else if (data.errors) {
+                    errorMessage = typeof data.errors === 'string' ? data.errors : JSON.stringify(data.errors);
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update results display
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.error);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred while processing the request.');
-            });
+                showError(errorMessage);
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+            showError(`Request failed: ${error.message}`);
+        })
+        .finally(() => {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
         });
     });
-    </script>
+
+    // Store chart instances globally
+    let unitSquareChartInstance = null;
+    let sobol1dChartInstance = null;
+    let sobol2dChartInstance = null;
+    let correlatedStocksChartInstance = null;
+
+    function displayResults(data) {
+        // Validate data
+        if (!data) {
+            showError('No data received from server');
+            return;
+        }
+
+        // Display random numbers with better formatting
+        const randomNumbersOutput = document.getElementById('random-numbers-output');
+        
+        // Debug: Log the data structure
+        console.log('Random numbers data:', data.random_numbers);
+        console.log('First few numbers:', data.random_numbers ? data.random_numbers.slice(0, 5) : 'No data');
+        
+        if (data.random_numbers && data.random_numbers.length > 0) {
+            // Validate that all numbers are valid
+            const validNumbers = data.random_numbers.filter(num => 
+                typeof num === 'number' && !isNaN(num) && isFinite(num)
+            );
+            
+            if (validNumbers.length === 0) {
+                randomNumbersOutput.innerHTML = '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>No valid random numbers generated</div>';
+                return;
+            }
+            
+            const totalNumbers = validNumbers.length;
+            const displayNumbers = validNumbers.slice(0, 20);
+            const hasMore = totalNumbers > 20;
+            
+            randomNumbersOutput.innerHTML = `
+                <div class="random-numbers-info mb-3">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <strong>Total Generated:</strong> ${totalNumbers.toLocaleString()} numbers
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Range:</strong> [0, 1)
+                        </div>
+                    </div>
+                </div>
+                <div class="random-numbers-display">
+                    <h6>First 20 Numbers:</h6>
+                    <div class="numbers-grid">
+                        ${displayNumbers.map((num, index) => {
+                            const numValue = typeof num === 'number' ? num : parseFloat(num) || 0;
+                            return `<span class="number-item" title="Position ${index + 1}: ${numValue.toFixed(6)}">${numValue.toFixed(4)}</span>`;
+                        }).join('')}
+                    </div>
+                    ${hasMore ? `<div class="text-muted mt-2"><i class="bi bi-three-dots"></i> ... and ${(totalNumbers - 20).toLocaleString()} more numbers</div>` : ''}
+                </div>
+            `;
+        } else {
+            randomNumbersOutput.innerHTML = '<div class="alert alert-warning"><i class="bi bi-exclamation-triangle me-2"></i>No random numbers generated</div>';
+        }
+        
+        // Show dynamic explanation for random numbers
+        const explanationDiv = document.getElementById('random-numbers-explanation');
+        const explanationText = document.getElementById('rng-explanation-text');
+        const qualityIndicator = document.getElementById('quality-indicator');
+        
+        if (data.random_numbers && data.random_numbers.length > 0) {
+            const rngType = document.getElementById('rng_type').value;
+            let explanation = '';
+            let quality = '';
+            
+            switch(rngType) {
+                case 'Mersenne Twister':
+                    explanation = 'These are pseudo-random numbers generated using the Mersenne Twister algorithm. They provide good statistical properties and are widely used in Monte Carlo simulations.';
+                    quality = 'High quality pseudo-random sequence';
+                    break;
+                case 'Sobol':
+                    explanation = 'These are Sobol quasi-random numbers (low-discrepancy sequence). They provide better coverage of the space and faster convergence than pseudo-random numbers.';
+                    quality = 'Superior coverage with quasi-random properties';
+                    break;
+                case 'Inverse Cumulative Normal':
+                    explanation = 'These numbers are transformed using the inverse cumulative normal distribution. They directly follow a normal distribution, ideal for financial modeling.';
+                    quality = 'Normal distribution ready for financial applications';
+                    break;
+            }
+            
+            explanationText.textContent = explanation;
+            qualityIndicator.textContent = quality;
+            explanationDiv.style.display = 'block';
+        } else {
+            explanationDiv.style.display = 'none';
+        }
+
+        // Destroy existing charts before creating new ones
+        destroyExistingCharts();
+
+        // Create Unit Square Chart
+        if (data.unit_square_data) {
+            createUnitSquareChart(data.unit_square_data);
+            
+            // Show dynamic explanation for unit square coverage
+            const coverageExplanation = document.getElementById('unit-square-explanation');
+            const coverageDescription = document.getElementById('coverage-description');
+            const coverageQuality = document.getElementById('coverage-quality');
+            
+            const dimensionality = document.getElementById('dimensionality').value;
+            const rngType = document.getElementById('rng_type').value;
+            
+            let description = '';
+            let quality = '';
+            
+            if (dimensionality == 1) {
+                description = 'Points plotted on a line (1D space). Each point represents a random number between 0 and 1.';
+                quality = 'Good distribution along the line';
+            } else if (dimensionality == 2) {
+                description = 'Points plotted in a 2D unit square. Each point has (x,y) coordinates from random number pairs.';
+                if (rngType === 'Sobol') {
+                    quality = 'Excellent quasi-random coverage with low discrepancy';
+                } else {
+                    quality = 'Good pseudo-random coverage';
+                }
+            } else {
+                description = `Points in ${dimensionality}D space projected to 2D. Shows the first two dimensions of ${dimensionality}-dimensional random vectors.`;
+                quality = 'Multi-dimensional projection showing coverage patterns';
+            }
+            
+            coverageDescription.textContent = description;
+            coverageQuality.textContent = quality;
+            coverageExplanation.style.display = 'block';
+        }
+
+        // Create Sobol 1D Chart
+        if (data.sobol_1d_data) {
+            createSobol1dChart(data.sobol_1d_data);
+            
+            // Show explanation for Sobol 1D
+            const sobol1dExplanation = document.getElementById('sobol-1d-explanation');
+            const sobol1dDescription = document.getElementById('sobol-1d-description');
+            const sobol1dInsight = document.getElementById('sobol-1d-insight');
+            
+            sobol1dDescription.textContent = 'Progression of Sobol 1D sequence showing how points are added systematically. Each mini-chart shows the sequence after adding n points.';
+            sobol1dInsight.textContent = 'Notice how Sobol sequences fill space more evenly than random points, leading to faster convergence in Monte Carlo simulations.';
+            sobol1dExplanation.style.display = 'block';
+        }
+
+        // Create Sobol 2D Chart
+        if (data.sobol_2d_data) {
+            createSobol2dChart(data.sobol_2d_data);
+            
+            // Show explanation for Sobol 2D
+            const sobol2dExplanation = document.getElementById('sobol-2d-explanation');
+            const sobol2dDescription = document.getElementById('sobol-2d-description');
+            const sobol2dInsight = document.getElementById('sobol-2d-insight');
+            
+            sobol2dDescription.textContent = 'Progression of Sobol 2D sequence showing systematic coverage of the unit square. Each mini-chart shows the sequence after adding n points.';
+            sobol2dInsight.textContent = 'Sobol 2D sequences provide excellent coverage with low discrepancy, making them ideal for high-dimensional Monte Carlo problems.';
+            sobol2dExplanation.style.display = 'block';
+        }
+
+        // Create Correlated Stocks Chart
+        if (data.correlated_stocks_data) {
+            createCorrelatedStocksChart(data.correlated_stocks_data);
+            
+            // Show explanation for Correlated Stocks
+            const stocksExplanation = document.getElementById('correlated-stocks-explanation');
+            const stocksDescription = document.getElementById('stocks-description');
+            const stocksInsight = document.getElementById('stocks-insight');
+            
+            stocksDescription.textContent = 'Simulation of three correlated stocks following Black-Scholes processes with correlation matrix. Shows realistic stock price evolution over time.';
+            stocksInsight.textContent = 'This demonstrates the importance of correct dimensionality in Monte Carlo simulations - wrong dimensionality leads to incorrect correlations.';
+            stocksExplanation.style.display = 'block';
+        }
+
+        // Display pricing results
+        const pricingResults = document.getElementById('pricing-results');
+        pricingResults.innerHTML = `
+            <tr>
+                <td><strong>Black-Scholes (Analytical)</strong></td>
+                <td><strong class="text-primary">${data.black_scholes_price ? data.black_scholes_price.toFixed(4) : 'N/A'}</strong></td>
+            </tr>
+            <tr>
+                <td>Monte Carlo (Mersenne Twister)</td>
+                <td class="text-primary">${data.monte_carlo_price_rng ? data.monte_carlo_price_rng.toFixed(4) : 'N/A'}</td>
+            </tr>
+            <tr>
+                <td>Monte Carlo (Sobol)</td>
+                <td class="text-primary">${data.monte_carlo_price_sobol ? data.monte_carlo_price_sobol.toFixed(4) : 'N/A'}</td>
+            </tr>
+        `;
+        
+        // Show explanation for pricing results
+        const pricingExplanation = document.getElementById('pricing-explanation');
+        const pricingDescription = document.getElementById('pricing-description');
+        const pricingComparison = document.getElementById('pricing-comparison');
+        
+        const bsPrice = data.black_scholes_price;
+        const mcRngPrice = data.monte_carlo_price_rng;
+        const mcSobolPrice = data.monte_carlo_price_sobol;
+        
+        let description = 'Comparison of analytical Black-Scholes pricing with Monte Carlo methods using different random number generators.';
+        let comparison = '';
+        
+        if (bsPrice && mcRngPrice && mcSobolPrice) {
+            const rngError = Math.abs(bsPrice - mcRngPrice) / bsPrice * 100;
+            const sobolError = Math.abs(bsPrice - mcSobolPrice) / bsPrice * 100;
+            
+            if (sobolError < rngError) {
+                comparison = `Sobol sequences show better accuracy (${sobolError.toFixed(2)}% error vs ${rngError.toFixed(2)}% for Mersenne Twister), demonstrating the advantage of quasi-random methods.`;
+            } else {
+                comparison = `Both methods show similar accuracy, with Mersenne Twister at ${rngError.toFixed(2)}% error and Sobol at ${sobolError.toFixed(2)}% error.`;
+            }
+        } else {
+            comparison = 'Monte Carlo methods provide numerical approximation to the analytical Black-Scholes formula, with Sobol sequences typically offering faster convergence.';
+        }
+        
+        pricingDescription.textContent = description;
+        pricingComparison.textContent = comparison;
+        pricingExplanation.style.display = 'block';
+    }
+
+    // Function to destroy existing charts
+    function destroyExistingCharts() {
+        if (unitSquareChartInstance) {
+            unitSquareChartInstance.destroy();
+            unitSquareChartInstance = null;
+        }
+        if (sobol1dChartInstance) {
+            sobol1dChartInstance.destroy();
+            sobol1dChartInstance = null;
+        }
+        if (sobol2dChartInstance) {
+            sobol2dChartInstance.destroy();
+            sobol2dChartInstance = null;
+        }
+        if (correlatedStocksChartInstance) {
+            correlatedStocksChartInstance.destroy();
+            correlatedStocksChartInstance = null;
+        }
+    }
+
+    // Chart creation functions
+    function createUnitSquareChart(data) {
+        const ctx = document.getElementById('unitSquareChart').getContext('2d');
+        unitSquareChartInstance = new Chart(ctx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'Random Points',
+                    data: data.data,
+                    backgroundColor: 'rgba(13, 110, 253, 0.6)',
+                    borderColor: 'rgba(13, 110, 253, 1)',
+                    pointRadius: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        min: 0,
+                        max: 1,
+                        title: {
+                            display: true,
+                            text: 'X'
+                        }
+                    },
+                    y: {
+                        min: 0,
+                        max: 1,
+                        title: {
+                            display: true,
+                            text: 'Y'
+                        }
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: data.title
+                    }
+                }
+            }
+        });
+    }
+
+    function createSobol1dChart(data) {
+        const gridContainer = document.getElementById('sobol1dGrid');
+        gridContainer.innerHTML = ''; // Clear existing content
+        
+        // Create 16 mini charts in a 4x4 grid like the book
+        data.progression.forEach((item, index) => {
+            const col = document.createElement('div');
+            col.className = 'col-3';
+            
+            const miniChartDiv = document.createElement('div');
+            miniChartDiv.className = 'sobol-mini-chart';
+            
+            const title = document.createElement('div');
+            title.className = 'chart-title';
+            title.textContent = `n = ${item.n}`;
+            
+            const canvas = document.createElement('canvas');
+            canvas.id = `sobol1d-${index}`;
+            
+            miniChartDiv.appendChild(title);
+            miniChartDiv.appendChild(canvas);
+            col.appendChild(miniChartDiv);
+            gridContainer.appendChild(col);
+            
+            // Create individual chart
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        data: item.points,
+                        backgroundColor: 'rgba(13, 110, 253, 0.8)',
+                        borderColor: 'rgba(13, 110, 253, 1)',
+                        pointRadius: 2,
+                        showLine: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            min: 0, 
+                            max: 1,
+                            display: false
+                        },
+                        y: { 
+                            min: -0.1, 
+                            max: 0.1,
+                            display: false
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    }
+                }
+            });
+        });
+    }
+
+    function createSobol2dChart(data) {
+        const gridContainer = document.getElementById('sobol2dGrid');
+        gridContainer.innerHTML = ''; // Clear existing content
+        
+        // Create 12 mini charts in a 3x4 grid like the book
+        data.progression.forEach((item, index) => {
+            const col = document.createElement('div');
+            col.className = 'col-4';
+            
+            const miniChartDiv = document.createElement('div');
+            miniChartDiv.className = 'sobol-mini-chart';
+            
+            const title = document.createElement('div');
+            title.className = 'chart-title';
+            title.textContent = `n = ${item.n}`;
+            
+            const canvas = document.createElement('canvas');
+            canvas.id = `sobol2d-${index}`;
+            
+            miniChartDiv.appendChild(title);
+            miniChartDiv.appendChild(canvas);
+            col.appendChild(miniChartDiv);
+            gridContainer.appendChild(col);
+            
+            // Create individual chart
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        data: item.points,
+                        backgroundColor: 'rgba(13, 110, 253, 0.8)',
+                        borderColor: 'rgba(13, 110, 253, 1)',
+                        pointRadius: 1.5,
+                        showLine: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { 
+                            min: 0, 
+                            max: 1,
+                            display: false
+                        },
+                        y: { 
+                            min: 0, 
+                            max: 1,
+                            display: false
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false }
+                    }
+                }
+            });
+        });
+    }
+
+    function createCorrelatedStocksChart(data) {
+        const ctx = document.getElementById('correlatedStocksChart').getContext('2d');
+        
+        // Format des données selon le code fourni
+        const colors = ['#1f77b4', '#ff7f0e', '#2ca02c'];
+        const datasets = data.paths.map((path, i) => ({
+            label: `Stock ${i + 1}`,
+            data: path, // Le backend envoie déjà le bon format
+            borderColor: colors[i],
+            fill: false,
+            tension: 0.1,
+            pointRadius: 3
+        }));
+        
+        correlatedStocksChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.time_grid.map(t => t.toFixed(2)), // Les labels pour l'axe X
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { 
+                        title: { display: true, text: 'Time (Years)' } 
+                    },
+                    y: { 
+                        title: { display: true, text: 'Stock Price' } 
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: data.title || 'Correlated Stocks Simulation'
+                    }
+                }
+            }
+        });
+    }
+
+    function showError(message) {
+        errorContainer.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-triangle me-2"></i>${message}
+            </div>
+        `;
+    }
+});
+</script>
+
 {% endblock %}

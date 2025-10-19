@@ -7,3 +7,9 @@ class ChapterParIndexedCouponsConfig(AppConfig):
 
 
 
+
+
+
+
+
+

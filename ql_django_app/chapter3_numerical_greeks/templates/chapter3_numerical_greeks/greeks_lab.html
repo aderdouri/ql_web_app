@@ -2,13 +2,14 @@
 {% load static %}
 
 {% block chapter_content %}
-                    
-                    <!-- Form Section -->
+<!-- Form Section -->
                     <div class="row mb-4">
                         <div class="col-12">
                             <div class="card">
-                                <div class="card-header bg-info text-white">
-                                    <h3><i class="bi bi-gear me-2"></i>Input Parameters</h3>
+                                <div class="card-header">
+                                    <h3 class="card-title fw-bold mb-0">
+                                        <i class="bi bi-gear me-2"></i>Input Parameters
+                                    </h3>
                                 </div>
                                 <div class="card-body p-4">
                                     <form id="greeksForm" method="post">
@@ -17,7 +18,7 @@
                                         <!-- Barrier Option Parameters Section -->
                                         <div class="row mb-4">
                                             <div class="col-12">
-                                                <h5 class="text-primary mb-3"><i class="bi bi-shield me-2"></i>Barrier Option Parameters</h5>
+                                                <h5 class="fw-bold text-primary mb-3"><i class="bi bi-shield me-2"></i>Barrier Option Parameters</h5>
                                             </div>
                                             <div class="col-lg-4 col-md-6 mb-3">
                                                 <label for="barrier_type" class="form-label fw-semibold">Barrier Type</label>
@@ -44,7 +45,7 @@
                                         <!-- Option Parameters Section -->
                                         <div class="row mb-4">
                                             <div class="col-12">
-                                                <h5 class="text-primary mb-3"><i class="bi bi-currency-dollar me-2"></i>Option Parameters</h5>
+                                                <h5 class="fw-bold text-primary mb-3"><i class="bi bi-currency-dollar me-2"></i>Option Parameters</h5>
                                             </div>
                                             <div class="col-lg-4 col-md-6 mb-3">
                                                 <label for="option_type" class="form-label fw-semibold">Option Type</label>
@@ -69,7 +70,7 @@
                                         <!-- Market Data Section -->
                                         <div class="row mb-4">
                                             <div class="col-12">
-                                                <h5 class="text-primary mb-3"><i class="bi bi-graph-up me-2"></i>Market Data</h5>
+                                                <h5 class="fw-bold text-primary mb-3"><i class="bi bi-graph-up me-2"></i>Market Data</h5>
                                             </div>
                                             <div class="col-lg-4 col-md-6 mb-3">
                                                 <label for="risk_free_rate" class="form-label fw-semibold">Risk-free Rate (r)</label>
@@ -91,7 +92,7 @@
                                         <!-- Time Parameters Section -->
                                         <div class="row mb-4">
                                             <div class="col-12">
-                                                <h5 class="text-primary mb-3"><i class="bi bi-calendar me-2"></i>Time Parameters</h5>
+                                                <h5 class="fw-bold text-primary mb-3"><i class="bi bi-calendar me-2"></i>Time Parameters</h5>
                                             </div>
                                             <div class="col-lg-6 col-md-6 mb-3">
                                                 <label for="maturity_date" class="form-label fw-semibold">Maturity Date</label>
@@ -100,32 +101,32 @@
                                             </div>
                                         </div>
                                         
-                                        <!-- Numerical Parameters Section -->
+                                        <!-- Calculation Accuracy Section -->
                                         <div class="row mb-4">
                                             <div class="col-12">
-                                                <h5 class="text-primary mb-3"><i class="bi bi-calculator me-2"></i>Numerical Parameters</h5>
+                                                <h5 class="fw-bold text-primary mb-3"><i class="bi bi-calculator me-2"></i>Calculation Accuracy Settings</h5>
                                             </div>
                                             <div class="col-lg-4 col-md-6 mb-3">
-                                                <label for="h_underlying" class="form-label fw-semibold">Perturbation h for Underlying</label>
+                                                <label for="h_underlying" class="form-label fw-semibold">Price Step Size</label>
                                                 <input type="number" id="h_underlying" name="h_underlying" value="0.01" step="0.001" class="form-control">
-                                                <div class="form-text small">Step size for Delta and Gamma calculations. Smaller values give more accurate results but may cause numerical issues.</div>
+                                                <div class="form-text small">Small change in stock price to calculate Delta and Gamma. Default: 0.01 (1 cent). Smaller = more accurate but slower.</div>
                                             </div>
                                             <div class="col-lg-4 col-md-6 mb-3">
-                                                <label for="h_rate" class="form-label fw-semibold">Perturbation h for Rate</label>
+                                                <label for="h_rate" class="form-label fw-semibold">Interest Rate Step Size</label>
                                                 <input type="number" id="h_rate" name="h_rate" value="0.0001" step="0.00001" class="form-control">
-                                                <div class="form-text small">Step size for Rho calculation. Use small values (0.0001) for interest rate sensitivity.</div>
+                                                <div class="form-text small">Small change in interest rate to calculate Rho. Default: 0.0001 (0.01%). Very small values needed for accuracy.</div>
                                             </div>
                                             <div class="col-lg-4 col-md-6 mb-3">
-                                                <label for="h_volatility" class="form-label fw-semibold">Perturbation h for Volatility</label>
+                                                <label for="h_volatility" class="form-label fw-semibold">Volatility Step Size</label>
                                                 <input type="number" id="h_volatility" name="h_volatility" value="0.0001" step="0.00001" class="form-control">
-                                                <div class="form-text small">Step size for Vega calculation. Use small values (0.0001) for volatility sensitivity.</div>
+                                                <div class="form-text small">Small change in volatility to calculate Vega. Default: 0.0001 (0.01%). Very small values needed for accuracy.</div>
                                             </div>
                                         </div>
                                         
                                         <!-- Submit Button -->
-                                        <div class="row">
-                                            <div class="col-12">
-                                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <div class="row mt-4">
+                                            <div class="col-12 text-center">
+                                                <button type="submit" class="btn btn-primary btn-lg">
                                                     <i class="bi bi-calculator me-2"></i>Calculate Greeks
                                                 </button>
                                             </div>
@@ -140,8 +141,10 @@
                     <div class="row mb-4">
                         <div class="col-12">
                             <div class="card">
-                                <div class="card-header bg-success text-white">
-                                    <h3><i class="bi bi-graph-up me-2"></i>Results</h3>
+                                <div class="card-header">
+                                    <h3 class="card-title fw-bold mb-0">
+                                        <i class="bi bi-graph-up me-2"></i>Results
+                                    </h3>
                                 </div>
                                 <div class="card-body">
                                     <div id="error-message" class="alert alert-danger" style="display: none;"></div>
@@ -155,15 +158,15 @@
                                     <!-- Calculation Metrics -->
                                     <div id="intermediate-calculations" style="display: none;">
                                         <div class="card mb-4">
-                                            <div class="card-header bg-dark text-white">
-                                                <h5 class="mb-0"><i class="bi bi-calculator me-2"></i>Intermediate Calculations</h5>
+                                            <div class="card-header">
+                                                <h5 class="card-title fw-bold mb-0"><i class="bi bi-calculator me-2"></i>Intermediate Calculations</h5>
                                             </div>
                                             <div class="card-body">
                                                 <div class="row">
                                                     <div class="col-md-4 mb-3">
-                                                        <div class="card border-secondary h-100">
-                                                            <div class="card-header bg-secondary text-white text-center">
-                                                                <h6 class="mb-0">NPV Base</h6>
+                                                        <div class="card h-100">
+                                                            <div class="card-header text-center">
+                                                                <h6 class="card-title fw-bold mb-0">NPV Base</h6>
                                                             </div>
                                                             <div class="card-body text-center">
                                                                 <h4 class="text-dark fw-bold mb-2" id="p0-value">-</h4>
@@ -176,9 +179,9 @@
                                                     </div>
                                                     
                                                     <div class="col-md-4 mb-3">
-                                                        <div class="card border-secondary h-100">
-                                                            <div class="card-header bg-secondary text-white text-center">
-                                                                <h6 class="mb-0">Prix +h</h6>
+                                                        <div class="card h-100">
+                                                            <div class="card-header text-center">
+                                                                <h6 class="card-title fw-bold mb-0">Prix +h</h6>
                                                             </div>
                                                             <div class="card-body text-center">
                                                                 <h4 class="text-dark fw-bold mb-2" id="p-plus-value">-</h4>
@@ -191,9 +194,9 @@
                                                     </div>
                                                     
                                                     <div class="col-md-4 mb-3">
-                                                        <div class="card border-secondary h-100">
-                                                            <div class="card-header bg-secondary text-white text-center">
-                                                                <h6 class="mb-0">Prix -h</h6>
+                                                        <div class="card h-100">
+                                                            <div class="card-header text-center">
+                                                                <h6 class="card-title fw-bold mb-0">Prix -h</h6>
                                                             </div>
                                                             <div class="card-body text-center">
                                                                 <h4 class="text-dark fw-bold mb-2" id="p-minus-value">-</h4>
@@ -212,8 +215,8 @@
                                     <!-- Understanding Results Section -->
                                     <div id="understanding-results" style="display: none;">
                                         <div class="card mb-4">
-                                            <div class="card-header bg-primary text-white">
-                                                <h5 class="mb-0"><i class="bi bi-info-circle me-2"></i>Understanding the Results</h5>
+                                            <div class="card-header">
+                                                <h5 class="card-title fw-bold mb-0"><i class="bi bi-info-circle me-2"></i>Understanding the Results</h5>
                                             </div>
                                             <div class="card-body">
                                                 <h6 class="text-primary mb-3">Understanding Your Results</h6>
@@ -319,8 +322,10 @@
                     <div class="row mb-4">
                         <div class="col-12">
                             <div class="card">
-                                <div class="card-header bg-warning text-dark">
-                                    <h3><i class="bi bi-graph-up me-2"></i>Visualization</h3>
+                                <div class="card-header">
+                                    <h3 class="card-title fw-bold mb-0">
+                                        <i class="bi bi-graph-up me-2"></i>Visualization
+                                    </h3>
                                 </div>
                                 <div class="card-body p-4">
                                     <div id="chart-section" style="display: none;">

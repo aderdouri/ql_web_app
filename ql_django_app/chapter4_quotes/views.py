@@ -51,7 +51,10 @@ def bond_curve_lab_view(request):
         'form': form,
         'results': results,
         'coupon_data': coupon_data if 'coupon_data' in locals() else json.loads(form.fields['coupon_matrix'].initial),
-        'bond_quotes': bond_quotes if 'bond_quotes' in locals() else json.loads(form.fields['bond_quotes'].initial)
+        'bond_quotes': bond_quotes if 'bond_quotes' in locals() else json.loads(form.fields['bond_quotes'].initial),
+        'lab_title': 'Chapter 4: Market Quotes - Interactive Lab',
+        'lab_icon': 'bi-graph-up',
+        'lab_description': 'Build Nelson-Siegel yield curves and analyze bond price evolution with real-time market quote updates.'
     }
     
     return render(request, 'chapter4_quotes/market_lab.html', context)

@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "basics/lab_base.html" %}
 {% load crispy_forms_tags %}
 
 {% block title %}Chapter 4: Market Quotes - Interactive Lab{% endblock %}
@@ -65,43 +65,19 @@
     </style>
 {% endblock %}
 
-{% block page_content %}
-<div class="container py-5">
-    <!-- Chapter Header -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="card bg-primary text-white">
-                <div class="card-body py-4">
-                    <div class="row align-items-center">
-                        <div class="col-md-8">
-                            <h1 class="card-title fw-bold mb-3">
-                                <i class="bi bi-graph-up me-3"></i>Chapter 4: Bond Curve Lab
-                            </h1>
-                            <p class="card-text lead mb-0">Build Nelson-Siegel yield curves and analyze bond price evolution with real-time market quote updates.</p>
-                        </div>
-                        <div class="col-md-4 text-md-end">
-                            <a href="{% url 'basics:home' %}" class="btn btn-light btn-lg">
-                                <i class="bi bi-arrow-left me-2"></i>Back to Chapters
-                            </a>
-                        </div>
-                    </div>
-                </div>
+{% block lab_content %}
+<!-- Bond Curve Lab Form -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Bond Curve Lab
+                </h3>
             </div>
-        </div>
-    </div>
-
-
-    <!-- Chapter Content -->
-    <div class="row g-4">
-        <!-- Input Parameters Card -->
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header minimal-card-header">
-                    <h5 class="card-title mb-0">Input Parameters</h5>
-                </div>
-                <div class="card-body">
-                    <form method="post" id="bondCurveForm" class="professional-form">
-                        {% csrf_token %}
+            <div class="card-body">
+                <form method="post" id="bondCurveForm" class="professional-form">
+                    {% csrf_token %}
                         
                         <!-- Clean Horizontal Layout -->
                         <div class="row g-3">
@@ -224,13 +200,15 @@
             </div>
         </div>
 
-        <!-- Pricing Results Card - Directly under inputs -->
-        <div class="col-12">
-            <!-- Pricing Results -->
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header minimal-card-header">
-                    <h5 class="card-title mb-0">Pricing Results</h5>
-                </div>
+<!-- Results Section -->
+<div class="row mb-5" id="results-section" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Pricing Results
+                </h3>
+            </div>
                 <div class="card-body">
                     <div class="alert alert-light mb-3">
                         <h6 class="alert-heading mb-2">Test Bond Results</h6>
@@ -404,7 +382,7 @@
             </div>
 
             <!-- Bond Price History -->
-            <div class="card mb-3 shadow-sm">
+            <div class="card mb-3 shadow-sm" id="price-history-section" style="display: none;">
                 <div class="card-header bg-primary text-white">
                     <div class="d-flex align-items-center">
                         <i class="bi bi-clock-history me-2 fs-5"></i>
@@ -453,59 +431,27 @@
         </div>
     </div>
 
-    <!-- Charts Section -->
-    <div class="row g-3 mt-2">
-        <!-- Discount Curve Chart -->
-        <div class="col-lg-6">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header bg-info text-white">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-graph-up me-2 fs-5"></i>
-                        <h5 class="card-title mb-0 fw-bold">Discount Factor Curve</h5>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="curveChart"></canvas>
-                    </div>
-                </div>
+<!-- Charts Section -->
+<div class="row mb-5" id="visualization-section" style="display: none;">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Visualization
+                </h3>
             </div>
-        </div>
-
-        <!-- Price Evolution Chart -->
-        <div class="col-lg-6">
-            <div class="card h-100 shadow-sm">
-                <div class="card-header bg-warning text-dark">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-graph-up-arrow me-2 fs-5"></i>
-                        <h5 class="card-title mb-0 fw-bold">Price Evolution</h5>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <div class="chart-container">
-                        <canvas id="priceEvolutionChart"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Footer Navigation -->
-    <div class="row mt-3">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body text-center">
-                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <a href="{% url 'basics:home' %}" class="btn btn-outline-primary btn-lg w-100">
-                                <i class="bi bi-list me-2"></i>View All Chapters
-                            </a>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h5 class="fw-bold text-primary mb-3">Discount Factor Curve</h5>
+                        <div class="chart-container">
+                            <canvas id="curveChart"></canvas>
                         </div>
-                        <div class="col-md-6">
-                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
-                                <i class="bi bi-house me-2"></i>Back to Home
-                            </a>
+                    </div>
+                    <div class="col-lg-6">
+                        <h5 class="fw-bold text-primary mb-3">Price Evolution</h5>
+                        <div class="chart-container">
+                            <canvas id="priceEvolutionChart"></canvas>
                         </div>
                     </div>
                 </div>
@@ -514,6 +460,7 @@
     </div>
 </div>
 
+
 <!-- Chart Data -->
 {% if results.curve_chart_data %}
     {{ results.curve_chart_data|json_script:"curve-chart-data" }}
@@ -521,7 +468,7 @@
 {% if results.price_chart_data %}
     {{ results.price_chart_data|json_script:"price-chart-data" }}
 {% endif %}
-{% endblock page_content %}
+{% endblock lab_content %}
 
 {% block scripts %}
 <script>
@@ -948,6 +895,23 @@ function enableAutomaticUpdates() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Function to show hidden results sections
+    function showResultsSections() {
+        const resultsSection = document.getElementById('results-section');
+        const priceHistorySection = document.getElementById('price-history-section');
+        const visualizationSection = document.getElementById('visualization-section');
+        
+        if (resultsSection) {
+            resultsSection.style.display = 'block';
+        }
+        if (priceHistorySection) {
+            priceHistorySection.style.display = 'block';
+        }
+        if (visualizationSection) {
+            visualizationSection.style.display = 'block';
+        }
+    }
+
     // Initialize coupon matrix and bond quotes tables
     initializeTables();
     
@@ -980,7 +944,19 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('bondCurveForm').addEventListener('submit', function(e) {
         e.preventDefault();
         updateResults();
+        
+        // Show hidden sections after calculation
+        showResultsSections();
     });
+    
+    // Add event listener for calculate button
+    const calculateBtn = document.getElementById('calculateBtn');
+    if (calculateBtn) {
+        calculateBtn.addEventListener('click', function() {
+            // Show hidden sections when calculate button is clicked
+            showResultsSections();
+        });
+    }
     
     // Freeze/Unfreeze functionality
     document.getElementById('freezeBtn').addEventListener('click', function() {
