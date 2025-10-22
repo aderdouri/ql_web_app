@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SASU myGenAI{% endblock %}</title>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    {% block styles %}{% endblock %}
+</head>
+<body class="d-flex flex-column min-vh-100 bg-light">
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="bi bi-graph-up me-2"></i>SASU myGenAI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="/">
+                            <i class="bi bi-house me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'basics' in request.resolver_match.namespace %}active{% endif %}" href="{% url 'basics:home' %}">
+                            <i class="bi bi-calculator me-1"></i>Basics
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'interest_rate_curves' in request.resolver_match.namespace %}active{% endif %}" href="{% url 'interest_rate_curves:home' %}">
+                            <i class="bi bi-graph-up me-1"></i>Interest-Rate Curves
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'interest_rate_models' in request.resolver_match.namespace %}active{% endif %}" href="{% url 'interest_rate_models:home' %}">
+                            <i class="bi bi-diagram-3 me-1"></i>Interest-Rate Models
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'equity_models' in request.resolver_match.namespace %}active{% endif %}" href="{% url 'equity_models:home' %}">
+                            <i class="bi bi-bar-chart me-1"></i>Equity Models
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'bonds' in request.resolver_match.namespace %}active{% endif %}" href="{% url 'bonds:home' %}">
+                            <i class="bi bi-bank me-1"></i>Bonds
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow-1">
+        {% block page_content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <!-- Company Information -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5 class="fw-bold mb-3" style="color: var(--primary-blue) !important;">
+                        <i class="bi bi-building me-2" style="color: var(--primary-blue) !important;"></i>SASU myGenAI
+                    </h5>
+                    <p class="mb-3" style="color: #e9ecef !important;">Advanced quantitative finance tools and interactive laboratories for financial professionals.</p>
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-geo-alt me-3" style="color: var(--primary-blue) !important;"></i>
+                        <span class="small" style="color: #e9ecef !important;">9 Rue des Frères Chausson<br>92600 Asnières sur Seine</span>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3" style="color: var(--primary-blue) !important;">
+                        <i class="bi bi-telephone me-2" style="color: var(--primary-blue) !important;"></i>Contact Information
+                    </h6>
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-envelope me-3" style="color: var(--primary-blue) !important;"></i>
+                            <a href="mailto:abderrazak.derdouri@gmail.com" class="text-decoration-none small" style="color: #e9ecef !important;">
+                                abderrazak.derdouri@gmail.com
+                            </a>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-phone me-3" style="color: var(--primary-blue) !important;"></i>
+                            <a href="tel:+33651156968" class="text-decoration-none small" style="color: #e9ecef !important;">
+                                06.51.15.69.68
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Technology & Copyright -->
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <h6 class="fw-bold mb-3" style="color: var(--primary-blue) !important;">
+                        <i class="bi bi-code-slash me-2" style="color: var(--primary-blue) !important;"></i>Technology
+                    </h6>
+                    <p class="small mb-3" style="color: #e9ecef !important;">Developed with Django & QuantLib</p>
+                    <div class="border-top pt-3" style="border-color: #495057 !important;">
+                        <p class="small mb-0" style="color: #e9ecef !important;">
+                            &copy; {% now "Y" %} SASU myGenAI. All rights reserved.
+                        </p>
+                        <p class="small mb-0" style="color: #e9ecef !important;">
+                            Professional quantitative finance solutions
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Border -->
+            <div class="row">
+                <div class="col-12">
+                    <hr style="border-color: #495057 !important;">
+                    <div class="text-center">
+                        <p class="small mb-0" style="color: #e9ecef !important;">
+                            <i class="bi bi-shield-check me-1" style="color: var(--primary-blue) !important;"></i>
+                            Secure • Professional • Reliable
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript blocks -->
+    {% block javascript %}{% endblock %}
+    {% block scripts %}{% endblock %}
+</body>
+</html>
