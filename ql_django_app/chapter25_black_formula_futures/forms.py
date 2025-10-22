@@ -17,10 +17,14 @@ class BlackFormulaForm(forms.Form):
     # Paramètres communs
     evaluation_date = forms.DateField(
         label="Evaluation Date",
+        input_formats=["%Y-%m-%d"],
+        widget=forms.DateInput(attrs={"type": "date"}),
         help_text="The pricing date (must be before maturity date)"
     )
     maturity_date = forms.DateField(
-        label="Maturity Date", 
+        label="Maturity Date",
+        input_formats=["%Y-%m-%d"],
+        widget=forms.DateInput(attrs={"type": "date"}),
         help_text="The expiration date (must be after evaluation date)"
     )
     

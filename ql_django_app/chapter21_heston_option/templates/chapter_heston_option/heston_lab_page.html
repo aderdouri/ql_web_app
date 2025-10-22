@@ -5,13 +5,11 @@
 <!-- Interactive Lab Section -->
     <div class="row g-4">
         <div class="col-lg-6">
-            <div class="card border-primary h-100">
-                <div class="card-header bg-light">
-                    <h5 class="card-title fw-bold text-primary mb-0">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-primary mb-3">
                         <i class="bi bi-sliders me-2"></i>Option Parameters
                     </h5>
-                </div>
-                <div class="card-body">
                     <form method="post">
                         {% csrf_token %}
                         
@@ -113,13 +111,11 @@
         </div>
 
         <div class="col-lg-6">
-            <div class="card border-primary h-100">
-                <div class="card-header bg-primary">
-                    <h5 class="card-title fw-bold text-white mb-0">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title fw-bold text-primary mb-3">
                         <i class="bi bi-graph-up me-2"></i>Pricing Results
                     </h5>
-                </div>
-                <div class="card-body">
                     {% if results %}
                         <!-- Results Dashboard -->
                         <div class="row g-3 mb-4">

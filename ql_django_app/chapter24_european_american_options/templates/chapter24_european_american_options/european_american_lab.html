@@ -14,12 +14,10 @@
                     <!-- Parameters Section -->
                     <div class="col-lg-4">
                         <div class="card h-100">
-                            <div class="card-header bg-primary">
-                                <h5 class="fw-bold text-white mb-0">
+                            <div class="card-body">
+                                <h5 class="fw-bold text-primary mb-3">
                                     <i class="bi bi-sliders me-2"></i>Option Parameters
                                 </h5>
-                            </div>
-                            <div class="card-body">
                                 <form id="optionForm" method="post">
                                     {% csrf_token %}
                                     {{ form|crispy }}
@@ -64,12 +62,10 @@
                     <!-- Results Section -->
                     <div class="col-lg-8">
                         <div class="card h-100">
-                            <div class="card-header bg-primary">
-                                <h5 class="fw-bold text-white mb-0">
+                            <div class="card-body">
+                                <h5 class="fw-bold text-primary mb-3">
                                     <i class="bi bi-graph-up me-2"></i>Convergence Analysis Results
                                 </h5>
-                            </div>
-                            <div class="card-body">
                                 {% if error %}
                                     <div class="alert alert-danger">{{ error }}</div>
                                 {% endif %}
@@ -125,13 +121,11 @@
                                 <!-- Compact Results Summary -->
                                 <div class="row">
                                     <div class="col-12">
-                                        <div class="card border-primary">
-                                            <div class="card-header bg-primary">
-                                                <h6 class="fw-bold text-white mb-0">
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <h6 class="fw-bold text-primary mb-3">
                                                     <i class="bi bi-lightbulb me-2"></i>Results Summary
                                                 </h6>
-                                            </div>
-                                            <div class="card-body">
                                                 {% if results_json %}
                                                     <div class="row">
                                                         <div class="col-md-6">
@@ -480,6 +474,7 @@
     });
 </script>
 {% endblock %}
+
 
 
 

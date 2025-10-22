@@ -75,22 +75,29 @@ def price_callable_bond_and_analyze(data):
         ts = ql.FlatForward(calc_date, rate, day_count, ql.Compounded, ql.Semiannual)
         ts_handle = ql.YieldTermStructureHandle(ts)
 
-        # 3. Create the callability schedule - exactly like the book
+        # 3. Create the callability schedule - using default values
         callability_schedule = ql.CallabilitySchedule()
         call_price = 100.0
-        call_date = ql.Date(15, ql.September, 2016)
+        first_call_date = datetime.date(2016, 9, 15)
+        call_frequency_months = 3
+        number_of_calls = 24
+        
+        call_date = ql.Date(first_call_date.day, first_call_date.month, first_call_date.year)
         null_calendar = ql.NullCalendar()
         
-        for i in range(0, 24):
+        for i in range(0, number_of_calls):
             callability_price = ql.BondPrice(call_price, ql.BondPrice.Clean)
             callability_schedule.append(
                 ql.Callability(callability_price, ql.Callability.Call, call_date)
             )
-            call_date = null_calendar.advance(call_date, 3, ql.Months)
+            call_date = null_calendar.advance(call_date, call_frequency_months, ql.Months)
             
-        # 4. Create the bond schedule - exactly like the book
-        issue_date = ql.Date(16, ql.September, 2014)
-        maturity_date = ql.Date(15, ql.September, 2022)
+        # 4. Create the bond schedule - using default values
+        issue_date_data = datetime.date(2014, 9, 16)
+        maturity_date_data = datetime.date(2022, 9, 15)
+        
+        issue_date = ql.Date(issue_date_data.day, issue_date_data.month, issue_date_data.year)
+        maturity_date = ql.Date(maturity_date_data.day, maturity_date_data.month, maturity_date_data.year)
         calendar = ql.UnitedStates(ql.UnitedStates.GovernmentBond)
         tenor = ql.Period(ql.Quarterly)
         accrual_convention = ql.Unadjusted
@@ -99,7 +106,7 @@ def price_callable_bond_and_analyze(data):
                               accrual_convention, accrual_convention,
                               ql.DateGeneration.Backward, False)
         
-        # 5. Create the callable bond - exactly like the book
+        # 5. Create the callable bond - using default values
         settlement_days = 3
         face_amount = 100
         accrual_daycount = ql.ActualActual(ql.ActualActual.Bond)

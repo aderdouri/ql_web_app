@@ -2,10 +2,12 @@ from django import forms
 import datetime
 
 class CallableBondForm(forms.Form):
-    # Paramètres de la courbe de taux et de l'obligation (simplifié)
+    # Paramètres de base pour le formulaire (champs requis par le template)
     evaluation_date = forms.DateField(
         label="Evaluation Date", 
         initial=datetime.date(2016, 8, 16),
+        input_formats=["%Y-%m-%d"],
+        widget=forms.DateInput(attrs={"type": "date"}),
         help_text="Date for bond valuation (format: YYYY-MM-DD)"
     )
     yield_curve_rate = forms.FloatField(

@@ -2,24 +2,126 @@
 {% load static %}
 
 {% block page_content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h1 class="mb-0"><i class="{{ chapter_icon }} me-2"></i>{{ chapter_title }}</h1>
+<div class="container py-5">
+    <!-- Chapter Navigation -->
+    <div class="chapter-nav">
+        <div class="row">
+            <div class="col-12">
+                <h3 class="fw-bold text-center mb-4">
+                    <i class="bi bi-book me-2"></i>Available Chapters
+                </h3>
+            </div>
+        </div>
+        <div class="row g-3">
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-calendar-date text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">1. QuantLib Basics</h5>
+                        <p class="card-text text-muted small">Interactive lab for dates, calendars, schedules, and interest rates</p>
+                        <a href="{% url 'basics:chapter1' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <p class="lead">{{ chapter_description }}</p>
-                    
-                    {% block sub_page_content %}
-                    {% endblock %}
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-gear text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">2. Instruments</h5>
+                        <p class="card-text text-muted small">Learn about financial instruments and pricing engines</p>
+                        <a href="{% url 'basics:chapter2' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-graph-up text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">3. Numerical Greeks</h5>
+                        <p class="card-text text-muted small">Calculate numerical derivatives and sensitivities</p>
+                        <a href="{% url 'basics:chapter3' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-quote text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">4. Market Quotes</h5>
+                        <p class="card-text text-muted small">Work with market data and quotes</p>
+                        <a href="{% url 'basics:chapter4' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-graph-up-arrow text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">5. Term Structures</h5>
+                        <p class="card-text text-muted small">Build and manage yield curves</p>
+                        <a href="{% url 'basics:chapter5' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-clock text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">6. Pricing Over Time</h5>
+                        <p class="card-text text-muted small">Analyze price evolution over time</p>
+                        <a href="{% url 'basics:chapter6' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-4 col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-shuffle text-primary" style="font-size: 2.5rem;"></i>
+                        </div>
+                        <h5 class="card-title fw-bold">7. Random Numbers</h5>
+                        <p class="card-text text-muted small">Generate and work with random numbers</p>
+                        <a href="{% url 'basics:chapter7' %}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-play-circle me-1"></i>View Chapter
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 {% endblock %}
+
 
 
 
