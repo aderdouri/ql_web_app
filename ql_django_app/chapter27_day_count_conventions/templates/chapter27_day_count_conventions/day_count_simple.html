@@ -1,0 +1,163 @@
+{% extends "equity_models/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter examines the impact of different day-count conventions on option pricing 
+                    in QuantLib. Learn about the glitch that occurs when using curves with different 
+                    day-count conventions and its effect on pricing engines.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Day-count conventions</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Pricing engine issues</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Glitch identification</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Workaround solutions</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Key Concepts:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Day Count Conventions</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Time Calculations</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Pricing Engines</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Glitch Analysis</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Explore the day-count convention glitch in QuantLib. Compare different day-count 
+                    conventions and understand their impact on option pricing accuracy.
+                </p>
+                <div class="text-center">
+                    <a href="/equity-models/day-count-conventions/chapter/" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Concepts -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="fw-bold text-dark mb-4">
+            <i class="bi bi-lightbulb me-2"></i>Key Concepts
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Day Count Conventions -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calendar3 text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Day Count Conventions</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Different methods for calculating time periods between dates, affecting 
+                    interest rate calculations and option pricing accuracy.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Actual/365 (Fixed)</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Business/252</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Impact on pricing</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pricing Engine Issues -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-exclamation-triangle text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Pricing Engine Issues</h5>
+                </div>
+                <p class="card-text text-muted">
+                    When different day-count conventions are used for risk-free rates and volatility, 
+                    pricing engines may produce inconsistent results.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Inconsistent time calculations</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Pricing discrepancies</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Engine-specific problems</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Convention Types -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-calendar-check me-2"></i>Day Count Convention Types
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Actual/365 (Fixed)</h5>
+                        <p class="text-muted">Uses actual calendar days divided by 365, regardless of leap years.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Simple calculation</li>
+                            <li>• Common in bonds</li>
+                            <li>• Fixed denominator</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Business/252</h5>
+                        <p class="text-muted">Uses business days divided by 252, excluding weekends and holidays.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Trading days only</li>
+                            <li>• Market-based</li>
+                            <li>• Excludes holidays</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Impact on Pricing</h5>
+                        <p class="text-muted">Different conventions can lead to different time calculations and pricing results.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Time period differences</li>
+                            <li>• Pricing discrepancies</li>
+                            <li>• Risk management impact</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

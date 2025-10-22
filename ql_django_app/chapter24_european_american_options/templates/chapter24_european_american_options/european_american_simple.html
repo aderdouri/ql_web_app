@@ -1,0 +1,163 @@
+{% extends "equity_models/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter covers the valuation of European and American options using both analytical 
+                    and numerical methods. Learn about Black-Scholes pricing, binomial tree methods, and 
+                    the convergence behavior of numerical techniques.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>European option pricing</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>American option pricing</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Black-Scholes formula</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Binomial tree convergence</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Key Concepts:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Exercise Rights</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Early Exercise</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Numerical Methods</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Convergence Analysis</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Calculate European and American option prices using both Black-Scholes and Binomial Tree methods. 
+                    Experiment with different parameters and observe convergence behavior.
+                </p>
+                <div class="text-center">
+                    <a href="/equity-models/european-american-options/lab/" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Concepts -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="fw-bold text-dark mb-4">
+            <i class="bi bi-lightbulb me-2"></i>Key Concepts
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- European Options -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calendar-check text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">European Options</h5>
+                </div>
+                <p class="card-text text-muted">
+                    European options can only be exercised at expiration. They have analytical solutions 
+                    under the Black-Scholes model and serve as benchmarks for numerical methods.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Exercise only at maturity</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Black-Scholes formula</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Analytical Greeks</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- American Options -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calendar-event text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">American Options</h5>
+                </div>
+                <p class="card-text text-muted">
+                    American options can be exercised at any time before expiration. They require 
+                    numerical methods like binomial trees or finite difference schemes.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Early exercise rights</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Numerical pricing</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Optimal exercise boundary</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pricing Methods -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Pricing Methods
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Black-Scholes</h5>
+                        <p class="text-muted">Analytical solution for European options under constant volatility.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Fast and accurate</li>
+                            <li>• European options only</li>
+                            <li>• Closed-form solution</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Binomial Tree</h5>
+                        <p class="text-muted">Numerical method using discrete time steps for both European and American options.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Handles American options</li>
+                            <li>• Convergence to Black-Scholes</li>
+                            <li>• Flexible and intuitive</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Finite Difference</h5>
+                        <p class="text-muted">PDE-based method for complex option structures and early exercise.</p>
+                        <ul class="list-unstyled small">
+                            <li>• High accuracy</li>
+                            <li>• Complex boundaries</li>
+                            <li>• Computational intensive</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

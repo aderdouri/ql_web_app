@@ -27,128 +27,161 @@
         </div>
     </div>
 
-    <!-- Chapter Overview -->
-    <div class="row mb-5">
+    <!-- Chapter Content -->
+    <div class="row">
         <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h3 class="card-title fw-bold text-primary mb-3">
-                        <i class="bi bi-info-circle me-2"></i>Chapter Overview
-                    </h3>
-                    <p class="card-text">
-                        This chapter covers the valuation of interest rate caps and floors using QuantLib. 
-                        Caps and floors are important interest rate derivatives that provide protection against 
-                        adverse interest rate movements.
-                    </p>
-                    <div class="row mt-4">
-                        <div class="col-md-6">
-                            <h5 class="fw-bold text-dark">What You'll Learn:</h5>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-check-circle text-success me-2"></i>Cap and floor pricing mechanics</li>
-                                <li><i class="bi bi-check-circle text-success me-2"></i>Constant volatility approach</li>
-                                <li><i class="bi bi-check-circle text-success me-2"></i>Volatility surface modeling</li>
-                                <li><i class="bi bi-check-circle text-success me-2"></i>Optionlet stripping techniques</li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h5 class="fw-bold text-dark">Key Concepts:</h5>
-                            <ul class="list-unstyled">
-                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Black formula for caplets</li>
-                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Volatility smile effects</li>
-                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Market data construction</li>
-                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Implied volatility calculation</li>
-                            </ul>
-                        </div>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-4">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text lead">
+                    This chapter introduces interest rate caps and floors, essential derivatives for managing 
+                    interest rate risk. You'll learn how to construct and price these instruments using QuantLib, 
+                    and understand the different pricing methodologies available.
+                </p>
+                
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark mb-3">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Creating cap and floor instruments</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Understanding pricing engines</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Black-Scholes pricing for caps</li>
+                            <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>Volatility surface methods</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark mb-3">Instruments Covered:</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="bi bi-arrow-right text-primary me-2"></i>Interest Rate Caps</li>
+                            <li class="mb-2"><i class="bi bi-arrow-right text-primary me-2"></i>Interest Rate Floors</li>
+                            <li class="mb-2"><i class="bi bi-arrow-right text-primary me-2"></i>Caplets and Floorlets</li>
+                            <li class="mb-2"><i class="bi bi-arrow-right text-primary me-2"></i>Volatility Surfaces</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Interactive Lab Section -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="card border-primary">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="card-title fw-bold mb-0">
-                        <i class="bi bi-calculator me-2"></i>Interactive Laboratory
-                    </h4>
-                </div>
-                <div class="card-body">
-                    <p class="card-text">
-                        Experience hands-on cap and floor pricing with two different approaches:
-                    </p>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="me-3">
-                                    <i class="bi bi-graph-up text-primary" style="font-size: 2rem;"></i>
-                                </div>
-                                <div>
-                                    <h5 class="fw-bold mb-1">Constant Volatility</h5>
-                                    <p class="text-muted mb-0">Price caps using a single volatility value</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="me-3">
-                                    <i class="bi bi-graph-down text-primary" style="font-size: 2rem;"></i>
-                                </div>
-                                <div>
-                                    <h5 class="fw-bold mb-1">Volatility Surface</h5>
-                                    <p class="text-muted mb-0">Use market volatility surfaces for pricing</p>
-                                </div>
-                            </div>
-                        </div>
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-key me-2"></i>Key Concepts
+                </h4>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Interest Rate Caps</h5>
+                        <p class="text-muted">
+                            <strong>Caps</strong> are interest rate derivatives that provide protection against 
+                            rising interest rates. They pay the holder when rates exceed a predetermined strike level.
+                        </p>
+                        <ul class="text-muted">
+                            <li>Instrument construction</li>
+                            <li>Payoff functions</li>
+                            <li>Exercise conditions</li>
+                        </ul>
                     </div>
-                    <div class="text-center mt-4">
-                        <a href="{% url 'interest_rate_models:chapter20_caps_floors:lab' %}" class="btn btn-primary btn-lg">
-                            <i class="bi bi-play-circle me-2"></i>Start Interactive Lab
-                        </a>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Pricing Engines</h5>
+                        <p class="text-muted">
+                            <strong>Pricing engines</strong> implement different methodologies for valuing caps and floors. 
+                            Choose the appropriate engine based on instrument type and market conditions.
+                        </p>
+                        <ul class="text-muted">
+                            <li>Analytical solutions</li>
+                            <li>Numerical methods</li>
+                            <li>Monte Carlo simulation</li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Theory Section -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-body">
-                    <h3 class="card-title fw-bold text-primary mb-3">
-                        <i class="bi bi-book me-2"></i>Theoretical Background
-                    </h3>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h5 class="fw-bold text-dark">What are Caps and Floors?</h5>
-                            <p class="text-muted">
-                                <strong>Caps</strong> provide protection against rising interest rates by paying the holder 
-                                when rates exceed a predetermined strike level. <strong>Floors</strong> provide protection 
-                                against falling interest rates.
-                            </p>
-                            <p class="text-muted">
-                                Each cap can be decomposed into a series of <strong>caplets</strong>, each valued 
-                                using the Black formula for interest rate options.
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <h5 class="fw-bold text-dark">Pricing Approaches</h5>
-                            <p class="text-muted">
-                                <strong>Constant Volatility:</strong> Uses a single volatility value for all caplets, 
-                                suitable for simple analysis and educational purposes.
-                            </p>
-                            <p class="text-muted">
-                                <strong>Volatility Surface:</strong> Uses market-implied volatilities that vary by 
-                                strike and tenor, providing more realistic pricing.
-                            </p>
-                        </div>
-                    </div>
+<!-- Interactive Laboratory Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Experiment with different cap and floor pricing parameters and methods using our interactive lab. 
+                    Compare different pricing methodologies and see how market parameters affect instrument values.
+                </p>
+                <div class="text-center">
+                    <a href="{% url 'interest_rate_models:chapter20_caps_floors:lab' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+</div>
+
+<!-- Pricing Methodologies Section -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <h4 class="card-title fw-bold mb-4">Pricing Methodologies</h4>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="fw-bold text-primary">Black-Scholes</h5>
+                <p class="text-muted">Analytical solution for caplets under the Black-Scholes model.</p>
+                <ul class="text-muted">
+                    <li>Fast and accurate</li>
+                    <li>Assumes log-normal returns</li>
+                    <li>Constant volatility</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="fw-bold text-primary">Volatility Surface</h5>
+                <p class="text-muted">Market-implied volatilities that vary by strike and tenor.</p>
+                <ul class="text-muted">
+                    <li>Handles smile effects</li>
+                    <li>More realistic pricing</li>
+                    <li>Requires market data</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="fw-bold text-primary">Optionlet Stripping</h5>
+                <p class="text-muted">Extract individual caplet volatilities from cap quotes.</p>
+                <ul class="text-muted">
+                    <li>Handles complex payoffs</li>
+                    <li>Multiple underlying assets</li>
+                    <li>Requires calibration</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 
     <!-- Navigation Footer -->
     <div class="row mt-5">
@@ -174,7 +207,3 @@
     </div>
 </div>
 {% endblock %}
-
-
-
-

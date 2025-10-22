@@ -14,6 +14,7 @@ def swap_description_view(request):
 def pricer_view(request):
     form = VanillaSwapForm(request.POST or None)
     results = None
+    book_validation = None
     
     if form.is_valid():
         params = form.cleaned_data
@@ -27,10 +28,24 @@ def pricer_view(request):
             'floating_spread_bps': form.fields['floating_spread_bps'].initial,
             'risk_free_rate_pct': form.fields['risk_free_rate_pct'].initial,
             'libor_rate_pct': form.fields['libor_rate_pct'].initial,
-            'evaluation_date': date.today(),
+            'evaluation_date': None,  # Use book's default date
         }
-            
+    
+    # Calculate results
     results = services.calculate_vanilla_swap_metrics(**params)
     
-    context = {'form': form, 'results': results}
+    # Validate against book example if using default parameters
+    if (params['notional'] == 10000000 and 
+        params['maturity_years'] == 10 and 
+        params['fixed_rate_pct'] == 2.5 and 
+        params['floating_spread_bps'] == 40.0 and 
+        params['risk_free_rate_pct'] == 1.0 and 
+        params['libor_rate_pct'] == 2.0):
+        book_validation = services.calculate_book_example_swap()
+    
+    context = {
+        'form': form, 
+        'results': results,
+        'book_validation': book_validation
+    }
     return render(request, 'swap/pricer.html', context)

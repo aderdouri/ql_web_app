@@ -10,7 +10,7 @@ def option_valuation_description_view(request):
         'chapter_icon': 'bi-option',
         'chapter_description': 'Comprehensive option pricing models for European and American options using advanced numerical methods.'
     }
-    return render(request, 'chapter24_european_american_options/european_american_description.html', context)
+    return render(request, 'chapter24_european_american_options/european_american_simple.html', context)
 
 def option_valuation_lab_view(request):
     """

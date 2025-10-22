@@ -12,11 +12,13 @@ def calculate_vanilla_swap_metrics(
     evaluation_date=None
 ) -> dict:
     
-    # 1. Setup and parameter conversion - using dynamic date for interactive experience
+    # 1. Setup and parameter conversion - using book's exact date for consistency
     if evaluation_date is None:
-        evaluation_date = date.today()
+        # Use the exact date from the book for consistent results
+        calculation_date = ql.Date(20, 10, 2015)  # October 20, 2015 as in the book
+    else:
+        calculation_date = ql.Date(evaluation_date.day, evaluation_date.month, evaluation_date.year)
     
-    calculation_date = ql.Date(evaluation_date.day, evaluation_date.month, evaluation_date.year)
     ql.Settings.instance().evaluationDate = calculation_date
     
     fixed_rate = fixed_rate_pct / 100.0
@@ -101,3 +103,78 @@ def calculate_vanilla_swap_metrics(
         'floating_leg_cash_flows': floating_leg_cash_flows,
     }
     return results
+
+def calculate_book_example_swap():
+    """
+    Calculate the exact swap from the book example to validate our implementation.
+    This uses the exact parameters from the book: Chapter 19.
+    """
+    # Book parameters exactly as specified
+    calculation_date = ql.Date(20, 10, 2015)
+    ql.Settings.instance().evaluationDate = calculation_date
+    
+    risk_free_rate = 0.01  # 1%
+    libor_rate = 0.02      # 2%
+    day_count = ql.Actual365Fixed()
+    
+    # Build curves exactly as in book
+    discount_curve = ql.YieldTermStructureHandle(
+        ql.FlatForward(calculation_date, risk_free_rate, day_count)
+    )
+    libor_curve = ql.YieldTermStructureHandle(
+        ql.FlatForward(calculation_date, libor_rate, day_count)
+    )
+    libor3M_index = ql.USDLibor(ql.Period(3, ql.Months), libor_curve)
+    
+    # Create schedules exactly as in book
+    calendar = ql.UnitedStates(ql.UnitedStates.GovernmentBond)
+    settle_date = calendar.advance(calculation_date, 5, ql.Days)
+    maturity_date = calendar.advance(settle_date, 10, ql.Years)
+    
+    # Fixed leg: 6 months (semiannual)
+    fixed_leg_tenor = ql.Period(6, ql.Months)
+    fixed_schedule = ql.Schedule(
+        settle_date, maturity_date, fixed_leg_tenor, calendar,
+        ql.ModifiedFollowing, ql.ModifiedFollowing, ql.DateGeneration.Forward, False
+    )
+    
+    # Floating leg: 3 months (quarterly)
+    float_leg_tenor = ql.Period(3, ql.Months)
+    float_schedule = ql.Schedule(
+        settle_date, maturity_date, float_leg_tenor, calendar,
+        ql.ModifiedFollowing, ql.ModifiedFollowing, ql.DateGeneration.Forward, False
+    )
+    
+    # Create swap exactly as in book
+    notional = 10000000
+    fixed_rate = 0.025  # 2.5%
+    fixed_leg_daycount = ql.Actual360()
+    float_spread = 0.004  # 40 bps
+    float_leg_daycount = ql.Actual360()
+    
+    ir_swap = ql.VanillaSwap(
+        ql.VanillaSwap.Payer, 
+        notional, 
+        fixed_schedule,
+        fixed_rate, 
+        fixed_leg_daycount, 
+        float_schedule,
+        libor3M_index, 
+        float_spread, 
+        float_leg_daycount
+    )
+    
+    # Set pricing engine
+    swap_engine = ql.DiscountingSwapEngine(discount_curve)
+    ir_swap.setPricingEngine(swap_engine)
+    
+    # Return exact book results
+    return {
+        'npv': ir_swap.NPV(),
+        'fair_rate': ir_swap.fairRate(),
+        'fair_spread': ir_swap.fairSpread(),
+        'fixed_leg_bps': ir_swap.fixedLegBPS(),
+        'floating_leg_bps': ir_swap.floatingLegBPS(),
+        'fixed_leg_npv': ir_swap.fixedLegNPV(),
+        'floating_leg_npv': ir_swap.floatingLegNPV(),
+    }

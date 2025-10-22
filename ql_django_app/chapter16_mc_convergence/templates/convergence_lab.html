@@ -18,8 +18,8 @@
                             <p class="card-text lead mb-0">Interactive analysis of Monte Carlo simulation convergence for the Hull-White model</p>
                         </div>
                         <div class="col-md-4 text-md-end">
-                            <a href="{% url 'interest_rate_models:chapter16_mc_convergence:description' %}" class="btn btn-light btn-lg">
-                                <i class="bi bi-arrow-left me-2"></i>Back to Description
+                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Chapters
                             </a>
                         </div>
                     </div>
@@ -626,26 +626,7 @@
             });
         }
 
-        // Try to load initial data from server-side data first
-        const initialDataEl = document.getElementById('initial-data');
-        if(initialDataEl) {
-            try {
-                const initialData = JSON.parse(initialDataEl.textContent);
-                if (!initialData.error && initialData.plots && initialData.plots.length > 0) {
-                    console.log("Loading initial data from server");
-                    renderChart(initialData);
-                } else {
-                    console.log("No valid initial data, loading with form defaults");
-                    setTimeout(loadInitialData, 1000);
-                }
-            } catch (e) { 
-                console.error("Failed to parse initial data:", e);
-                setTimeout(loadInitialData, 1000);
-            }
-        } else {
-            console.log("No initial data element, loading with form defaults");
-            setTimeout(loadInitialData, 1000);
-        }
+        // No automatic loading - user must click calculate button
     });
 </script>
 {% endblock %}

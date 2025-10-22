@@ -6,9 +6,10 @@ from .services import analyze_rho_for_black_process
 def defining_rho_description_view(request):
     context = {
         'chapter_title': 'Chapter 26: Defining Rho for the Black Process',
+        'chapter_icon': 'bi-graph-up-arrow',
         'chapter_description': 'Understanding rho (interest rate sensitivity) calculation in the Black-Scholes framework, with focus on the Black process and challenges in calculating Greeks for different process types.'
     }
-    return render(request, 'chapter26_defining_rho/defining_rho_description.html', context)
+    return render(request, 'chapter26_defining_rho/rho_simple.html', context)
 
 def defining_rho_lab_view(request):
     """

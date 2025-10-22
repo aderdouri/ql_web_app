@@ -1,0 +1,163 @@
+{% extends "equity_models/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter explores the calculation of rho (interest rate sensitivity) in different 
+                    QuantLib processes. Learn about the differences between BlackScholesProcess and 
+                    BlackProcess, and understand the challenges in calculating Greeks for different process types.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Rho calculation methods</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Process differences</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Greeks computation</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Numerical vs analytical</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Key Concepts:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Interest Rate Sensitivity</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Black Process</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Greeks Calculation</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Process Comparison</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Explore the rho calculation glitch in QuantLib's BlackProcess. Compare analytical 
+                    and numerical methods for calculating interest rate sensitivity.
+                </p>
+                <div class="text-center">
+                    <a href="/equity-models/defining-rho/lab/" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Concepts -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="fw-bold text-dark mb-4">
+            <i class="bi bi-lightbulb me-2"></i>Key Concepts
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Rho Sensitivity -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-graph-up-arrow text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Rho Sensitivity</h5>
+                </div>
+                <p class="card-text text-muted">
+                    Rho measures how much an option's price changes when interest rates change. 
+                    It's crucial for understanding interest rate risk in option portfolios.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Interest rate impact</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Portfolio risk management</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Hedging strategies</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Differences -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-gear text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Process Differences</h5>
+                </div>
+                <p class="card-text text-muted">
+                    BlackScholesProcess and BlackProcess handle interest rates differently, 
+                    leading to different rho calculations and potential implementation issues.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>BlackScholesProcess</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>BlackProcess</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Implementation challenges</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calculation Methods -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-calculator me-2"></i>Calculation Methods
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Analytical Rho</h5>
+                        <p class="text-muted">Direct calculation using mathematical formulas and derivatives.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Fast computation</li>
+                            <li>• Exact results</li>
+                            <li>• Process-dependent</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Numerical Rho</h5>
+                        <p class="text-muted">Calculation using finite differences and perturbation methods.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Process-independent</li>
+                            <li>• More robust</li>
+                            <li>• Computational cost</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Correction Methods</h5>
+                        <p class="text-muted">Techniques to fix rho calculation issues in specific processes.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Dividend rho adjustment</li>
+                            <li>• Process-specific fixes</li>
+                            <li>• Validation methods</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -76,31 +76,11 @@ def par_indexed_coupons_lab_view(request):
                 'error_message': "Veuillez corriger les erreurs dans le formulaire."
             }
     else:
+        # Initial page load (GET) - No automatic results
         form = SwapAnalysisForm()
-        # Perform initial analysis with default values
-        try:
-            initial_results = analyze_swap_coupons(
-                notional=form.fields['notional'].initial,
-                swap_length=form.fields['swap_length'].initial,
-                evaluation_date=form.fields['evaluation_date'].initial,
-                use_par=form.fields['use_par_coupons'].initial,
-                use_indexed=form.fields['use_indexed_coupons'].initial
-            )
-            if initial_results['success']:
-                context = {
-                    'form': form,
-                    'results': initial_results
-                }
-            else:
-                context = {
-                    'form': form,
-                    'error_message': initial_results['error']
-                }
-        except Exception as e:
-            context = {
-                'form': form,
-                'error_message': f"Erreur lors du chargement initial: {str(e)}"
-            }
+        context = {
+            'form': form
+        }
     
     return render(request, 'chapter_par_indexed_coupons/par_indexed_coupons_lab_professional.html', context)
 

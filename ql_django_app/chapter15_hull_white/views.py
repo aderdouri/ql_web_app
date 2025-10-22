@@ -30,15 +30,8 @@ def hull_white_lab_view(request):
             print(f"Form errors: {form.errors}")
             return JsonResponse({'error': 'Invalid form data.', 'form_errors': form.errors}, status=400)
 
-    # Initial page load (GET)
+    # Initial page load (GET) - No automatic results
     form = HullWhiteForm()
-    initial_data = {key: field.initial for key, field in form.fields.items()}
-    results = simulate_hull_white_paths(initial_data)
-    
     context['form'] = form
-    if 'error' in results:
-        context['error'] = results['error']
-    else:
-        context['results_json'] = json.dumps(results)
         
     return render(request, 'chapter_hull_white/hull_white_lab.html', context)

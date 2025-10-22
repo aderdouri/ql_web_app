@@ -1,97 +1,237 @@
-{% extends "equity_models/chapter_base.html" %}
-{% load static %}
+{% extends "equity_models/base.html" %}
 
-{% block title %}Heston Calibration with SciPy{% endblock %}
+{% block title %}Heston Parameter Calibration{% endblock %}
 
 {% block styles %}
     {{ block.super }}
     <style>
-        .page-wrapper { 
+        /* Professional layout with better space utilization */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+        
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+        
+        /* Compact form layout */
+        .form-section {
+            position: sticky;
+            top: 1rem;
+        }
+        
+        .form-section .card {
+            height: fit-content;
+            max-height: calc(100vh - 2rem);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-section .card-body {
+            flex: 1;
             display: flex; 
-            flex-wrap: wrap; 
-            gap: 2rem; 
+            flex-direction: column;
         }
-        .controls { 
+        
+        .form-section form {
             flex: 1; 
-            min-width: 350px; 
-            background-color: white; 
-            padding: 1.5rem; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
-            align-self: flex-start; 
+            display: flex;
+            flex-direction: column;
         }
-        .results-area { 
-            flex: 2; 
-            min-width: 400px; 
+        
+        .form-section .d-grid {
+            margin-top: auto;
+            padding-top: 1rem;
         }
-        h2, h3, h4, h5 { 
-            color: #333; 
-            border-bottom: 2px solid #eee; 
-            padding-bottom: 0.5rem; 
+        
+        /* Ensure button is visible and properly styled */
+        #runAnalysisBtn {
+            width: 100%;
+            font-size: 1rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        #runAnalysisBtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Compact parameter groups */
+        .param-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .param-group:last-child {
             margin-bottom: 1rem; 
         }
-        .form-group { 
-            margin-bottom: 1rem; 
+        
+        .param-group h6 {
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
         }
-        .form-group label { 
-            display: block; 
-            margin-bottom: 0.5rem; 
-            font-weight: bold; 
-            color: #555; 
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .form-row.full-width {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-row .form-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.25rem;
+        }
+        
+        .form-row .form-control {
             font-size: 0.9rem; 
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #ced4da;
+            border-radius: 0.375rem;
         }
-        .form-group input, .form-group select, .form-group textarea { 
-            width: 100%; 
-            padding: 8px; 
-            border: 1px solid #ccc; 
-            border-radius: 4px; 
-            box-sizing: border-box; 
+        
+        .form-row .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
         }
+        
         .form-text {
-            font-size: 0.8rem;
-            color: #666;
+            font-size: 0.75rem;
+            color: #6c757d;
             margin-top: 0.25rem;
-            line-height: 1.3;
         }
         
-        .solver-info {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 4px solid #007BFF;
+        /* Results area styling */
+        .results-area {
+            min-height: 400px;
         }
         
-        .solver-info h4 {
-            color: #007BFF;
-            margin-bottom: 10px;
+        .chart-card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
         }
         
-        .comparison-section {
-            margin-top: 20px;
+        .chart-card .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 0.5rem 0.5rem 0 0;
+        }
+        
+        .chart-card .card-body {
+            padding: 1.5rem;
+        }
+        
+        .param-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .param-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .param-card h6 {
+            color: #495057;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .param-card .param-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #0d6efd;
+            margin-bottom: 0.25rem;
+        }
+        
+        .param-card .param-explanation {
+            font-size: 0.75rem;
+            color: #6c757d;
+            font-style: italic;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+        }
+        
+        .status-warning {
+            background-color: #fff3cd;
+            color: #664d03;
+        }
+        
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .calibration-details {
+            background: #f8f9fa;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
         }
         
         .comparison-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 1rem;
             background-color: white;
-            border-radius: 8px;
+            border-radius: 0.5rem;
             overflow: hidden;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .comparison-table th {
-            background-color: #007BFF;
+            background-color: #0d6efd;
             color: white;
-            padding: 12px;
+            padding: 0.75rem;
             text-align: left;
             font-weight: 600;
+            font-size: 0.9rem;
         }
         
         .comparison-table td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
+            padding: 0.75rem;
+            border-bottom: 1px solid #e9ecef;
+            font-size: 0.9rem;
         }
         
         .comparison-table tr:nth-child(even) {
@@ -101,206 +241,206 @@
         .comparison-table tr:hover {
             background-color: #e3f2fd;
         }
-        .result-box { 
-            background-color: white; 
-            border: 1px solid #e0e0e0; 
-            padding: 1.5rem; 
-            border-radius: 8px; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .results-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-            gap: 1rem; 
-            margin-bottom: 2rem; 
-        }
-        .result-item {
-            background-color: #f8f9fa;
-            border: 1px solid #e0e0e0;
-            padding: 1rem;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .result-item h4 { 
-            margin: 0 0 0.5rem 0; 
-            color: var(--primary-blue); 
-            font-size: 1rem; 
-        }
-        .result-item p { 
-            font-size: 1.2rem; 
-            font-weight: bold; 
-            margin: 0; 
-            color: #333; 
-        }
-        .result-item .explanation {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 0.5rem;
-            font-style: italic;
-        }
-        #runCalibrationBtn { 
-            width: 100%; 
-            padding: 10px; 
-            margin-top: 10px; 
-            background-color: #28a745; 
-            color: white; 
-            border: none; 
-            cursor: pointer; 
-            border-radius: 4px; 
-            font-size: 1rem; 
-        }
-        .spinner-container {
-            text-align: center;
-            padding: 2rem;
-        }
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-        }
     </style>
 {% endblock %}
 
-{% block chapter_content %}
+{% block sub_page_content %}
+<!-- Page Header -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-primary text-white">
+            <div class="card-body py-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h1 class="card-title fw-bold mb-3">
+                            <i class="bi bi-gear-fill me-3"></i>Chapter 23: Heston Parameter Calibration
+                        </h1>
+                        <p class="card-text lead mb-0">Advanced parameter estimation techniques for the Heston stochastic volatility model</p>
+                    </div>
+                    <div class="col-md-4 text-md-end">
+                        <a href="{% url 'equity_models:home' %}" class="btn btn-light btn-lg">
+                            <i class="bi bi-arrow-left me-2"></i>Back to Chapters
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-<div class="page-wrapper">
-    <div class="controls">
-        <h2>Calibration Control</h2>
+<div class="main-container">
+    <!-- Main Content Grid -->
+    <div class="content-grid">
+        <!-- Form Section -->
+        <div class="form-section">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-sliders me-2"></i>Calibration Parameters
+                    </h5>
+                </div>
+                <div class="card-body">
         <form id="calibrationForm" method="post">
             {% csrf_token %}
             
-            <div class="form-group">
-                <label>Solver Method</label>
+                        <!-- Solver Method -->
+                        <div class="param-group">
+                            <h6 class="text-primary">Optimization Method</h6>
+                            <div class="form-row full-width">
+                                <div>
+                                    <label class="form-label">Solver Method</label>
                 {{ form.solver_method }}
-                <small class="form-text text-muted">Choose the optimization method for calibration</small>
+                                    <div class="form-text">Choose the optimization method for calibration</div>
+                                </div>
+                            </div>
             </div>
             
-            <h5>Initial Heston Parameters</h5>
-            <div class="form-group">
-                <label>Initial θ (Theta)</label>
+                        <!-- Initial Parameters -->
+                        <div class="param-group">
+                            <h6 class="text-primary">Initial Heston Parameters</h6>
+                            
+                            <div class="form-row">
+                                <div>
+                                    <label class="form-label">θ (Theta)</label>
                 {{ form.theta }}
-                <small class="form-text text-muted">Long-term variance level (default: 0.02)</small>
+                                    <div class="form-text">Long-term variance level</div>
             </div>
-            <div class="form-group">
-                <label>Initial κ (Kappa)</label>
+                                <div>
+                                    <label class="form-label">κ (Kappa)</label>
                 {{ form.kappa }}
-                <small class="form-text text-muted">Mean reversion speed (default: 0.2)</small>
+                                    <div class="form-text">Mean reversion speed</div>
+                                </div>
             </div>
-            <div class="form-group">
-                <label>Initial σ (Sigma)</label>
+                            
+                            <div class="form-row">
+                                <div>
+                                    <label class="form-label">σ (Sigma)</label>
                 {{ form.sigma }}
-                <small class="form-text text-muted">Volatility of volatility (default: 0.5)</small>
+                                    <div class="form-text">Volatility of volatility</div>
             </div>
-            <div class="form-group">
-                <label>Initial ρ (Rho)</label>
+                                <div>
+                                    <label class="form-label">ρ (Rho)</label>
                 {{ form.rho }}
-                <small class="form-text text-muted">Correlation between asset and volatility (default: 0.1)</small>
+                                    <div class="form-text">Price-volatility correlation</div>
+                                </div>
             </div>
-            <div class="form-group">
-                <label>Initial v₀ (V0)</label>
+                            
+                            <div class="form-row">
+                                <div>
+                                    <label class="form-label">V₀ (V0)</label>
                 {{ form.v0 }}
-                <small class="form-text text-muted">Initial variance level (default: 0.01)</small>
+                                    <div class="form-text">Initial variance level</div>
+                                </div>
+                            </div>
             </div>
             
-            <h5>Market Data</h5>
-            <div class="form-group">
-                <label>Evaluation Date</label>
+                        <!-- Market Data -->
+                        <div class="param-group">
+                            <h6 class="text-primary">Market Data</h6>
+                            
+                            <div class="form-row">
+                                <div>
+                                    <label class="form-label">Evaluation Date</label>
                 {{ form.evaluation_date }}
-                <small class="form-text text-muted">Date for option valuation</small>
+                                    <div class="form-text">Base date for all calculations</div>
             </div>
-            <div class="form-group">
-                <label>Spot Price</label>
+                                <div>
+                                    <label class="form-label">Spot Price</label>
                 {{ form.spot_price }}
-                <small class="form-text text-muted">Current asset price</small>
+                                    <div class="form-text">Current asset price</div>
+                                </div>
             </div>
-            <div class="form-group">
-                <label>Risk-Free Rate (%)</label>
+                            
+                            <div class="form-row">
+                                <div>
+                                    <label class="form-label">Risk-Free Rate (%)</label>
                 {{ form.risk_free_rate }}
-                <small class="form-text text-muted">Risk-free interest rate</small>
+                                    <div class="form-text">Annual risk-free interest rate</div>
             </div>
-            <div class="form-group">
-                <label>Dividend Rate (%)</label>
+                                <div>
+                                    <label class="form-label">Dividend Rate (%)</label>
                 {{ form.dividend_rate }}
-                <small class="form-text text-muted">Dividend yield</small>
+                                    <div class="form-text">Annual dividend yield</div>
+                                </div>
+                            </div>
             </div>
             
-            <button type="submit" id="runCalibrationBtn">Run Calibration</button>
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" id="runAnalysisBtn" class="btn btn-primary btn-lg">
+                                <i class="bi bi-play-circle me-2"></i>Run Calibration
+                            </button>
+                        </div>
         </form>
     </div>
-
-    <div class="results-area">
-        <h2>Calibration Results</h2>
-        <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+            </div>
+        </div>
         
-        {% if results and not results.error %}
-        <div id="results-container" class="result-box">
-            <h3>Calibrated Parameters</h3>
-            <div class="results-grid">
-                <div class="result-item">
-                    <h4>θ (Theta)</h4>
-                    <p id="theta_result">{{ results.calibrated_params.theta|floatformat:6 }}</p>
-                    <div class="explanation">Long-term variance level</div>
+        <!-- Results Section -->
+        <div class="results-area">
+            <!-- Loading Spinner -->
+            <div id="loadingSpinner" class="text-center py-5" style="display: none;">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
                 </div>
-                <div class="result-item">
-                    <h4>κ (Kappa)</h4>
-                    <p id="kappa_result">{{ results.calibrated_params.kappa|floatformat:6 }}</p>
-                    <div class="explanation">Mean reversion speed</div>
+                <p class="mt-3 text-muted">Running calibration...</p>
                 </div>
-                <div class="result-item">
-                    <h4>σ (Sigma)</h4>
-                    <p id="sigma_result">{{ results.calibrated_params.sigma|floatformat:6 }}</p>
-                    <div class="explanation">Volatility of volatility</div>
+            
+            <!-- Error Container -->
+            <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+            
+            <!-- Results Container -->
+            <div id="resultsContainer" style="display: none;">
+                <div class="chart-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-graph-up me-2"></i>Calibration Results
+                        </h5>
                 </div>
-                <div class="result-item">
-                    <h4>ρ (Rho)</h4>
-                    <p id="rho_result">{{ results.calibrated_params.rho|floatformat:6 }}</p>
-                    <div class="explanation">Asset-volatility correlation</div>
+                    <div class="card-body">
+                        <div id="calibrationResults"></div>
                 </div>
-                <div class="result-item">
-                    <h4>v₀ (V0)</h4>
-                    <p id="v0_result">{{ results.calibrated_params.v0|floatformat:6 }}</p>
-                    <div class="explanation">Initial variance level</div>
-                </div>
-                <div class="result-item">
-                    <h4>Average Error</h4>
-                    <p id="error_result">{{ results.avg_abs_error_pct|floatformat:4 }}%</p>
-                    <div class="explanation">Average absolute error percentage</div>
                 </div>
             </div>
+            
+            <!-- Instructions -->
+            <div id="instructions" class="chart-card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Instructions
+                    </h5>
         </div>
-        {% elif results and results.error %}
-        <div class="result-box">
-            <div class="alert alert-warning">
-                <strong>Calculation Error:</strong> {{ results.error }}
-            </div>
-        </div>
-        {% else %}
-        <div id="instructions" class="result-box">
-            <h3>Instructions</h3>
+                <div class="card-body">
             <p>This interactive lab demonstrates Heston model parameter calibration using different optimization methods:</p>
-            <ul>
+                    <ul class="mb-3">
                 <li><strong>QuantLib Levenberg-Marquardt:</strong> QuantLib's built-in solver</li>
                 <li><strong>SciPy Levenberg-Marquardt:</strong> SciPy's implementation</li>
                 <li><strong>SciPy Least Squares:</strong> Robust least squares method</li>
                 <li><strong>SciPy Differential Evolution:</strong> Global optimization (slower but more robust)</li>
                 <li><strong>SciPy Basin Hopping:</strong> Global optimization with local refinement</li>
             </ul>
-            <p>Use the preset buttons to try different initial conditions from the book, or adjust parameters manually. You can also customize market data in the advanced section.</p>
+                    <p class="mb-0">Use the preset buttons to try different initial conditions from the book, or adjust parameters manually. You can also customize market data in the advanced section.</p>
+                </div>
+            </div>
         </div>
-        {% endif %}
     </div>
 </div>
-
-{% endblock chapter_content %}
+{% endblock %}
 
 {% block scripts %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('calibrationForm');
-        const resultsContainer = document.getElementById('results-container');
+        const resultsContainer = document.getElementById('resultsContainer');
         const errorContainer = document.getElementById('error-container');
-        const spinner = document.getElementById('spinner');
+        const loadingSpinner = document.getElementById('loadingSpinner');
         const instructions = document.getElementById('instructions');
 
+        // Check if form exists before adding event listener
+        if (!form) {
+            console.error('Form with ID "calibrationForm" not found');
+            return;
+        }
 
         form.addEventListener('submit', function(event) {
             event.preventDefault();
@@ -309,16 +449,17 @@
             if (instructions) instructions.style.display = 'none';
             if (resultsContainer) resultsContainer.style.display = 'none';
             if (errorContainer) errorContainer.style.display = 'none';
+            if (loadingSpinner) loadingSpinner.style.display = 'block';
 
             const formData = new FormData(form);
             
-            // FORCER le solver method basé sur la sélection visible
+            // Force solver method based on visible selection
             const solverSelect = form.querySelector('select[name="solver_method"]');
             if (solverSelect) {
                 const selectedText = solverSelect.options[solverSelect.selectedIndex].text;
                 console.log('Selected solver text:', selectedText);
                 
-                // Mapper le texte affiché vers la valeur
+                // Map displayed text to value
                 if (selectedText.includes('SciPy Levenberg-Marquardt')) {
                     formData.set('solver_method', 'scipy_lm');
                     console.log('FORCED solver_method to scipy_lm');
@@ -331,7 +472,11 @@
                 }
             }
             
-            // Debug: afficher les données du formulaire
+            // Add CSRF token to form data
+            const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+            formData.set('csrfmiddlewaretoken', csrfToken);
+            
+            // Debug: display form data
             console.log('Form data being sent:');
             for (let [key, value] of formData.entries()) {
                 console.log(key + ': ' + value);
@@ -342,31 +487,44 @@
                 body: new URLSearchParams(formData),
                 headers: { 
                     'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+                    'X-CSRFToken': csrfToken
                 }
             })
             .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const contentType = response.headers.get('content-type');
+                console.log('Content-Type:', contentType);
                 if (!contentType || !contentType.includes('application/json')) {
                     throw new Error('Response is not JSON');
                 }
                 return response.json();
             })
             .then(data => {
+                console.log('Response data received:', data);
+                console.log('Data type:', typeof data);
+                console.log('Data keys:', Object.keys(data));
+                if (loadingSpinner) loadingSpinner.style.display = 'none';
+                
                 if (data.error) {
+                    console.log('Error in response:', data.error);
                     if (errorContainer) {
                         errorContainer.innerText = `Error: ${data.error}`;
                         errorContainer.style.display = 'block';
                     }
                 } else {
+                    console.log('Success - updating results display');
+                    console.log('Calibrated params:', data.calibrated_params);
+                    console.log('Initial condition:', data.initial_condition);
                     // Update the results display without reloading
                     updateResultsDisplay(data);
                 }
             })
             .catch(error => {
+                if (loadingSpinner) loadingSpinner.style.display = 'none';
                 if (errorContainer) {
                     errorContainer.innerText = `An unexpected error occurred: ${error.message}`;
                     errorContainer.style.display = 'block';
@@ -375,10 +533,9 @@
         });
     });
 
-
     // Update results display function
     function updateResultsDisplay(data) {
-        const resultsContainer = document.getElementById('results-container');
+        const resultsContainer = document.getElementById('resultsContainer');
         const errorContainer = document.getElementById('error-container');
         const instructions = document.getElementById('instructions');
         
@@ -393,44 +550,137 @@
             if (errorContainer) errorContainer.style.display = 'none';
             if (instructions) instructions.style.display = 'none';
             
-            // Create or update the results display
-            if (!resultsContainer) {
-                // Create the results container if it doesn't exist
-                createResultsContainer(data);
-            } else {
-                // Update existing results
-                const params = data.calibrated_params;
-                const thetaEl = resultsContainer.querySelector('#theta_result');
-                const kappaEl = resultsContainer.querySelector('#kappa_result');
-                const sigmaEl = resultsContainer.querySelector('#sigma_result');
-                const rhoEl = resultsContainer.querySelector('#rho_result');
-                const v0El = resultsContainer.querySelector('#v0_result');
-                const errorEl = resultsContainer.querySelector('#error_result');
-                
-                if (thetaEl) thetaEl.innerText = params.theta.toFixed(6);
-                if (kappaEl) kappaEl.innerText = params.kappa.toFixed(6);
-                if (sigmaEl) sigmaEl.innerText = params.sigma.toFixed(6);
-                if (rhoEl) rhoEl.innerText = params.rho.toFixed(6);
-                if (v0El) v0El.innerText = params.v0.toFixed(6);
-                if (errorEl) errorEl.innerText = data.avg_abs_error_pct.toFixed(4) + '%';
-                
-                resultsContainer.style.display = 'block';
+            // Always generate complete content in the existing container
+            console.log('Generating complete results content');
+            const params = data.calibrated_params;
+            const initial = data.initial_condition;
+            
+            if (!params || !initial) {
+                console.error('Missing required data: params or initial condition');
+                return;
             }
+            
+            // Generate complete HTML content
+            const resultsHTML = `
+                <div class="calibration-details">
+                    <h6 class="text-primary mb-3">Solver Information</h6>
+                    <p class="mb-2"><strong>Solver:</strong> ${data.solver_used ? data.solver_used.replace(/_/g, ' ').toUpperCase() : 'Unknown'}</p>
+                    <p class="mb-0"><strong>Initial Condition:</strong> θ=${initial[0].toFixed(4)}, κ=${initial[1].toFixed(4)}, σ=${initial[2].toFixed(4)}, ρ=${initial[3].toFixed(4)}, v₀=${initial[4].toFixed(4)}</p>
+                </div>
+                
+                <div class="param-display">
+                    <div class="param-card">
+                        <h6>θ (Theta)</h6>
+                        <div class="param-value">${params.theta.toFixed(6)}</div>
+                        <div class="param-explanation">Long-term variance level</div>
+                    </div>
+                    <div class="param-card">
+                        <h6>κ (Kappa)</h6>
+                        <div class="param-value">${params.kappa.toFixed(6)}</div>
+                        <div class="param-explanation">Mean reversion speed</div>
+                    </div>
+                    <div class="param-card">
+                        <h6>σ (Sigma)</h6>
+                        <div class="param-value">${params.sigma.toFixed(6)}</div>
+                        <div class="param-explanation">Volatility of volatility</div>
+                    </div>
+                    <div class="param-card">
+                        <h6>ρ (Rho)</h6>
+                        <div class="param-value">${params.rho.toFixed(6)}</div>
+                        <div class="param-explanation">Asset-volatility correlation</div>
+                    </div>
+                    <div class="param-card">
+                        <h6>v₀ (V0)</h6>
+                        <div class="param-value">${params.v0.toFixed(6)}</div>
+                        <div class="param-explanation">Initial variance level</div>
+                    </div>
+                    <div class="param-card">
+                        <h6>Average Error</h6>
+                        <div class="param-value">${data.avg_abs_error_pct.toFixed(4)}%</div>
+                        <div class="param-explanation">Average absolute error percentage</div>
+                    </div>
+                </div>
+                
+                <div class="calibration-details">
+                    <h6 class="text-primary mb-3">Parameter Comparison</h6>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Initial</th>
+                                <th>Calibrated</th>
+                                <th>Change</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>θ (Theta)</td>
+                                <td>${initial[0].toFixed(4)}</td>
+                                <td>${params.theta.toFixed(4)}</td>
+                                <td>${((params.theta - initial[0]) / initial[0] * 100).toFixed(1)}%</td>
+                            </tr>
+                            <tr>
+                                <td>κ (Kappa)</td>
+                                <td>${initial[1].toFixed(4)}</td>
+                                <td>${params.kappa.toFixed(4)}</td>
+                                <td>${((params.kappa - initial[1]) / initial[1] * 100).toFixed(1)}%</td>
+                            </tr>
+                            <tr>
+                                <td>σ (Sigma)</td>
+                                <td>${initial[2].toFixed(4)}</td>
+                                <td>${params.sigma.toFixed(4)}</td>
+                                <td>${((params.sigma - initial[2]) / initial[2] * 100).toFixed(1)}%</td>
+                            </tr>
+                            <tr>
+                                <td>ρ (Rho)</td>
+                                <td>${initial[3].toFixed(4)}</td>
+                                <td>${params.rho.toFixed(4)}</td>
+                                <td>${((params.rho - initial[3]) / Math.abs(initial[3]) * 100).toFixed(1)}%</td>
+                            </tr>
+                            <tr>
+                                <td>v₀ (V0)</td>
+                                <td>${initial[4].toFixed(4)}</td>
+                                <td>${params.v0.toFixed(4)}</td>
+                                <td>${((params.v0 - initial[4]) / initial[4] * 100).toFixed(1)}%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            // Insert content into existing container
+            resultsContainer.innerHTML = resultsHTML;
+            resultsContainer.style.display = 'block';
+            console.log('Results content inserted successfully');
         }
     }
 
         // Create results container function
         function createResultsContainer(data) {
+        console.log('createResultsContainer called with data:', data);
             const resultsArea = document.querySelector('.results-area');
             
-            // Vérifier si c'est une réponse de test
+        if (!resultsArea) {
+            console.error('Results area not found');
+            return;
+        }
+        
+        console.log('Results area found:', resultsArea);
+        
+        // Check if it's a test response
             if (data.test === 'success') {
                 const testHTML = `
-                    <div id="results-container" class="result-box">
-                        <h3>Test Successful!</h3>
+                <div id="resultsContainer" class="chart-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-check-circle me-2"></i>Test Successful!
+                        </h5>
+                    </div>
+                    <div class="card-body">
                         <div class="alert alert-success">
                             <strong>Form data received successfully!</strong><br>
                             <pre>${JSON.stringify(data.form_data, null, 2)}</pre>
+                        </div>
                         </div>
                     </div>
                 `;
@@ -438,13 +688,19 @@
                 return;
             }
             
-            // Vérifier si c'est une erreur
+        // Check if it's an error
             if (data.error) {
                 const errorHTML = `
-                    <div id="results-container" class="result-box">
-                        <h3>Calibration Error</h3>
+                <div id="resultsContainer" class="chart-card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-exclamation-triangle me-2"></i>Calibration Error
+                        </h5>
+                    </div>
+                    <div class="card-body">
                         <div class="alert alert-danger">
                             <strong>Error:</strong> ${data.error}
+                        </div>
                         </div>
                     </div>
                 `;
@@ -454,48 +710,83 @@
             
             const params = data.calibrated_params;
             const initial = data.initial_condition;
+        
+        console.log('Params received:', params);
+        console.log('Initial condition received:', initial);
+        console.log('Solver used:', data.solver_used);
+        console.log('Average error:', data.avg_abs_error_pct);
+        
+        // Log individual parameter values
+        if (params) {
+            console.log('Theta:', params.theta);
+            console.log('Kappa:', params.kappa);
+            console.log('Sigma:', params.sigma);
+            console.log('Rho:', params.rho);
+            console.log('V0:', params.v0);
+        }
+        
+        if (!params || !initial) {
+            console.error('Missing required data: params or initial condition');
+            return;
+        }
+        
+        console.log('Generating HTML with values:');
+        console.log('Theta:', params.theta.toFixed(6));
+        console.log('Kappa:', params.kappa.toFixed(6));
+        console.log('Sigma:', params.sigma.toFixed(6));
+        console.log('Rho:', params.rho.toFixed(6));
+        console.log('V0:', params.v0.toFixed(6));
+        console.log('Error:', data.avg_abs_error_pct.toFixed(4));
             
             const resultsHTML = `
-                <div id="results-container" class="result-box">
-                    <h3>Calibration Results</h3>
-                    <div class="solver-info">
-                        <h4>Solver: ${data.solver_used ? data.solver_used.replace(/_/g, ' ').toUpperCase() : 'Unknown'}</h4>
-                        <p><strong>Initial Condition:</strong> θ=${initial[0].toFixed(4)}, κ=${initial[1].toFixed(4)}, σ=${initial[2].toFixed(4)}, ρ=${initial[3].toFixed(4)}, v₀=${initial[4].toFixed(4)}</p>
+            <div id="resultsContainer" class="chart-card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-graph-up me-2"></i>Calibration Results
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="calibration-details">
+                        <h6 class="text-primary mb-3">Solver Information</h6>
+                        <p class="mb-2"><strong>Solver:</strong> ${data.solver_used ? data.solver_used.replace(/_/g, ' ').toUpperCase() : 'Unknown'}</p>
+                        <p class="mb-0"><strong>Initial Condition:</strong> θ=${initial[0].toFixed(4)}, κ=${initial[1].toFixed(4)}, σ=${initial[2].toFixed(4)}, ρ=${initial[3].toFixed(4)}, v₀=${initial[4].toFixed(4)}</p>
                     </div>
-                    <div class="results-grid">
-                        <div class="result-item">
-                            <h4>θ (Theta)</h4>
-                            <p id="theta_result">${params.theta.toFixed(6)}</p>
-                            <div class="explanation">Long-term variance level</div>
+                    
+                    <div class="param-display">
+                        <div class="param-card">
+                            <h6>θ (Theta)</h6>
+                            <div class="param-value" id="theta_result">${params.theta.toFixed(6)}</div>
+                            <div class="param-explanation">Long-term variance level</div>
                         </div>
-                        <div class="result-item">
-                            <h4>κ (Kappa)</h4>
-                            <p id="kappa_result">${params.kappa.toFixed(6)}</p>
-                            <div class="explanation">Mean reversion speed</div>
+                        <div class="param-card">
+                            <h6>κ (Kappa)</h6>
+                            <div class="param-value" id="kappa_result">${params.kappa.toFixed(6)}</div>
+                            <div class="param-explanation">Mean reversion speed</div>
                         </div>
-                        <div class="result-item">
-                            <h4>σ (Sigma)</h4>
-                            <p id="sigma_result">${params.sigma.toFixed(6)}</p>
-                            <div class="explanation">Volatility of volatility</div>
+                        <div class="param-card">
+                            <h6>σ (Sigma)</h6>
+                            <div class="param-value" id="sigma_result">${params.sigma.toFixed(6)}</div>
+                            <div class="param-explanation">Volatility of volatility</div>
                         </div>
-                        <div class="result-item">
-                            <h4>ρ (Rho)</h4>
-                            <p id="rho_result">${params.rho.toFixed(6)}</p>
-                            <div class="explanation">Asset-volatility correlation</div>
+                        <div class="param-card">
+                            <h6>ρ (Rho)</h6>
+                            <div class="param-value" id="rho_result">${params.rho.toFixed(6)}</div>
+                            <div class="param-explanation">Asset-volatility correlation</div>
                         </div>
-                        <div class="result-item">
-                            <h4>v₀ (V0)</h4>
-                            <p id="v0_result">${params.v0.toFixed(6)}</p>
-                            <div class="explanation">Initial variance level</div>
+                        <div class="param-card">
+                            <h6>v₀ (V0)</h6>
+                            <div class="param-value" id="v0_result">${params.v0.toFixed(6)}</div>
+                            <div class="param-explanation">Initial variance level</div>
                         </div>
-                        <div class="result-item">
-                            <h4>Average Error</h4>
-                            <p id="error_result">${data.avg_abs_error_pct.toFixed(4)}%</p>
-                            <div class="explanation">Average absolute error percentage</div>
+                        <div class="param-card">
+                            <h6>Average Error</h6>
+                            <div class="param-value" id="error_result">${data.avg_abs_error_pct.toFixed(4)}%</div>
+                            <div class="param-explanation">Average absolute error percentage</div>
                         </div>
                     </div>
-                    <div class="comparison-section">
-                        <h4>Parameter Comparison</h4>
+                    
+                    <div class="calibration-details">
+                        <h6 class="text-primary mb-3">Parameter Comparison</h6>
                         <table class="comparison-table">
                             <thead>
                                 <tr>
@@ -539,17 +830,47 @@
                             </tbody>
                         </table>
                     </div>
+                    </div>
                 </div>
             `;
             
             // Remove instructions if they exist
-            const instructions = document.getElementById('instructions');
             if (instructions) {
                 instructions.remove();
             }
             
             // Insert results before the end of results-area
+        console.log('Inserting HTML into results area');
             resultsArea.insertAdjacentHTML('beforeend', resultsHTML);
+        console.log('HTML inserted successfully');
+        
+        // Make sure the results container is visible
+        const insertedContainer = document.getElementById('resultsContainer');
+        if (insertedContainer) {
+            console.log('Results container found and made visible');
+            insertedContainer.style.display = 'block';
+            insertedContainer.style.visibility = 'visible';
+            insertedContainer.style.opacity = '1';
+            console.log('Results container styles applied');
+            
+            // Log container properties
+            console.log('Container display:', insertedContainer.style.display);
+            console.log('Container visibility:', insertedContainer.style.visibility);
+            console.log('Container opacity:', insertedContainer.style.opacity);
+            console.log('Container position:', insertedContainer.style.position);
+            console.log('Container z-index:', insertedContainer.style.zIndex);
+            console.log('Container offsetHeight:', insertedContainer.offsetHeight);
+            console.log('Container offsetWidth:', insertedContainer.offsetWidth);
+            
+            // Scroll to the results container
+            insertedContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            console.log('Scrolled to results container');
+        } else {
+            console.error('Results container not found after insertion');
+        }
         }
 </script>
 {% endblock %}
+
+
+

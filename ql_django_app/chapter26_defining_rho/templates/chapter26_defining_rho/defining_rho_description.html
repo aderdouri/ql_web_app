@@ -1,145 +1,50 @@
-{% extends "equity_models/chapter_base.html" %}
+{% extends "basics/chapter_base.html" %}
 {% load static %}
 
 {% block title %}{{ chapter_title }}{% endblock %}
 
 {% block chapter_content %}
-                    
-                    <!-- Chapter Overview -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h2><i class="bi bi-info-circle me-2"></i>Chapter Overview</h2>
-                            <p>This chapter explores the calculation and interpretation of rho (interest rate sensitivity) in the Black-Scholes framework, 
-                            with a particular focus on the Black process and the challenges that arise when calculating Greeks for different process types.</p>
-                            
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <h5><strong>What You'll Learn:</strong></h5>
-                                    <ul class="list-unstyled">
-                                        <li><i class="bi bi-check-circle text-primary me-2"></i>Rho calculation in Black process</li>
-                                        <li><i class="bi bi-check-circle text-primary me-2"></i>Process type differences</li>
-                                        <li><i class="bi bi-check-circle text-primary me-2"></i>Greeks calculation methods</li>
-                                        <li><i class="bi bi-check-circle text-primary me-2"></i>Numerical vs analytical Greeks</li>
-                                    </ul>
-                                </div>
-                                <div class="col-md-6">
-                                    <h5><strong>Key Processes:</strong></h5>
-                                    <ul class="list-unstyled">
-                                        <li><i class="bi bi-currency-dollar text-primary me-2"></i>BlackScholesProcess</li>
-                                        <li><i class="bi bi-currency-dollar text-primary me-2"></i>BlackProcess</li>
-                                        <li><i class="bi bi-currency-dollar text-primary me-2"></i>BlackScholesMertonProcess</li>
-                                        <li><i class="bi bi-currency-dollar text-primary me-2"></i>GeneralizedBlackScholesProcess</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Interactive Laboratory -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body text-center">
-                                    <h3 class="mb-3">Interactive Laboratory</h3>
-                                    <p class="mb-4">Explore rho calculations and Greeks analysis for different process types. 
-                                    Compare analytical and numerical methods for calculating interest rate sensitivity.</p>
-                                    <a href="{% url 'equity_models:chapter26_defining_rho:lab' %}" class="btn btn-light btn-lg">
-                                        <i class="bi bi-tools me-2"></i>Interactive Lab
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Key Concepts -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h3><i class="bi bi-lightbulb me-2"></i>Key Concepts</h3>
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="card mb-3">
-                                        <div class="card-header bg-info text-white">
-                                            <h5><i class="bi bi-calculator me-2"></i>Process Types</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <p>QuantLib provides different process classes for various Black-Scholes scenarios with different dividend constraints.</p>
-                                            <ul class="list-unstyled">
-                                                <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>BlackScholesProcess:</strong> q(t) = 0 (no dividends)</li>
-                                                <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>BlackProcess:</strong> q(t) = r(t) (cost of carry = 0)</li>
-                                                <li><i class="bi bi-arrow-right text-primary me-2"></i><strong>Generalized:</strong> q(t) = continuous dividend yield</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="card mb-3">
-                                        <div class="card-header bg-primary text-white">
-                                            <h5><i class="bi bi-graph-up me-2"></i>Rho Calculation</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <p>Rho measures the sensitivity of option price to changes in the risk-free interest rate.</p>
-                                            <ul class="list-unstyled">
-                                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Analytical: ∂V/∂r</li>
-                                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Numerical: (V(r+Δr) - V(r-Δr))/(2Δr)</li>
-                                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Process-specific considerations</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Pricing Methodologies -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body">
-                                    <h3 class="mb-3">Greeks Calculation Methods</h3>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <h5><strong>Analytical Greeks</strong></h5>
-                                            <p>Closed-form derivatives of Black-Scholes formula</p>
-                                            <ul class="list-unstyled">
-                                                <li>• Fast and accurate</li>
-                                                <li>• Process-specific issues</li>
-                                                <li>• May need corrections</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <h5><strong>Numerical Greeks</strong></h5>
-                                            <p>Finite difference approximation</p>
-                                            <ul class="list-unstyled">
-                                                <li>• Bump and reprice</li>
-                                                <li>• Process-agnostic</li>
-                                                <li>• More computationally intensive</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <h5><strong>Verification</strong></h5>
-                                            <p>Compare analytical vs numerical</p>
-                                            <ul class="list-unstyled">
-                                                <li>• Cross-validation</li>
-                                                <li>• Error detection</li>
-                                                <li>• Process understanding</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>Chapter Overview</h2>
+        <p>This chapter focuses on the correlation parameter (ρ) in stochastic volatility models, particularly the Heston model. 
+        We'll explore how to define, estimate, and interpret the correlation between asset returns and volatility changes.</p>
+        
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <h5><strong>What You'll Learn:</strong></h5>
+                <ul class="list-unstyled">
+                    <li>Correlation parameter (ρ)</li>
+                    <li>Leverage effect modeling</li>
+                    <li>Volatility smile dynamics</li>
+                    <li>Market behavior analysis</li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h5><strong>Model Components:</strong></h5>
+                <ul class="list-unstyled">
+                    <li>Asset Price Process</li>
+                    <li>Volatility Process</li>
+                    <li>Correlation Structure</li>
+                    <li>Smile Patterns</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h3 class="mb-3">Interactive Laboratory</h3>
+                <p class="mb-4">Explore the impact of correlation parameter (ρ) on option pricing and volatility smile. 
+                Experiment with different correlation values and observe their effects on model behavior.</p>
+                <a href="{% url 'equity_models:chapter26_defining_rho:lab' %}" class="btn btn-light btn-lg">
+                    Launch Interactive Lab
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

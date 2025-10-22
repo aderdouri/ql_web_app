@@ -1,24 +1,28 @@
 {% extends "base.html" %}
 
-{% block title %}{{ lab_title }} - {{ block.super }}{% endblock %}
+{% block title %}{{ chapter_title }} - {{ block.super }}{% endblock %}
+
+{% block chapter_navigation %}
+<!-- Available Chapters section removed for chapter pages -->
+{% endblock %}
 
 {% block page_content %}
 <div class="container py-5">
-    <!-- Lab Header -->
-    <div class="row mb-4">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
         <div class="col-12">
             <div class="card bg-primary text-white">
                 <div class="card-body py-4">
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <h1 class="card-title fw-bold mb-3">
-                                <i class="bi {{ lab_icon }} me-3"></i>{{ lab_title }}
+                                <i class="bi {{ chapter_icon }} me-3"></i>{{ chapter_title }}
                             </h1>
-                            <p class="card-text lead mb-0">{{ lab_description }}</p>
+                            <p class="card-text lead mb-0">{{ chapter_description }}</p>
                         </div>
                         <div class="col-md-4 text-md-end">
-                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-light btn-lg">
-                                <i class="bi bi-arrow-left me-2"></i>Back to Chapters
+                            <a href="{% url 'equity_models:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Equity Models
                             </a>
                         </div>
                     </div>
@@ -27,10 +31,10 @@
         </div>
     </div>
 
-    <!-- Lab Content -->
+    <!-- Chapter Content -->
     <div class="row">
         <div class="col-12">
-            {% block lab_content %}{% endblock %}
+            {% block chapter_content %}{% endblock %}
         </div>
     </div>
 
@@ -42,8 +46,8 @@
                     <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <a href="{% url 'interest_rate_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
-                                <i class="bi bi-list me-2"></i>View All Chapters
+                            <a href="{% url 'equity_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Equity Models
                             </a>
                         </div>
                         <div class="col-md-6">
@@ -58,7 +62,3 @@
     </div>
 </div>
 {% endblock %}
-
-{% block extra_js %}
-{% endblock %}
-

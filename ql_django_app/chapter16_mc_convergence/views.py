@@ -30,17 +30,8 @@ def convergence_lab_view(request):
                 'form_errors': form.errors
             }, status=400)
 
-    # Premier chargement (GET)
+    # Premier chargement (GET) - Pas de résultats automatiques
     form = ConvergenceForm()
-    # On récupère les valeurs initiales du formulaire pour le premier calcul
-    initial_data = {key: field.initial for key, field in form.fields.items()}
-    results = analyze_hull_white_convergence(initial_data)
-    
     context['form'] = form
-    if 'error' in results:
-        context['error'] = results['error']
-    else:
-        # On passe les résultats au template pour que le JavaScript puisse les utiliser
-        context['results_json'] = json.dumps(results)
         
     return render(request, 'convergence_lab.html', context)

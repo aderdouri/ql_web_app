@@ -1,0 +1,163 @@
+{% extends "equity_models/chapter_base.html" %}
+
+{% block chapter_content %}
+<!-- Chapter Overview -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title fw-bold text-primary mb-3">
+                    <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                </h3>
+                <p class="card-text">
+                    This chapter covers volatility smile construction and Heston model calibration for European options. 
+                    Learn how to build volatility surfaces from market data and calibrate stochastic volatility models 
+                    to capture the smile effect in option pricing.
+                </p>
+                <div class="row mt-4">
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Volatility smile construction</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Heston model calibration</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Stochastic volatility models</li>
+                            <li><i class="bi bi-check-circle text-success me-2"></i>Market data analysis</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="fw-bold text-dark">Key Concepts:</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Volatility Smile</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Heston Model</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Model Calibration</li>
+                            <li><i class="bi bi-currency-dollar text-primary me-2"></i>Stochastic Volatility</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Interactive Lab Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                </h3>
+            </div>
+            <div class="card-body">
+                <p class="card-text mb-4">
+                    Build volatility smiles from market data and calibrate the Heston stochastic volatility model. 
+                    Visualize the volatility surface and analyze model parameters.
+                </p>
+                <div class="text-center">
+                    <a href="/equity-models/volatility-smile-heston-calibration/lab/" class="btn btn-primary btn-lg">
+                        <i class="bi bi-play-circle me-2"></i>Launch Interactive Lab
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Key Concepts -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h3 class="fw-bold text-dark mb-4">
+            <i class="bi bi-lightbulb me-2"></i>Key Concepts
+        </h3>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Volatility Smile -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-graph-up text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Volatility Smile</h5>
+                </div>
+                <p class="card-text text-muted">
+                    The volatility smile is the pattern of implied volatilities across different strike prices, 
+                    showing that out-of-the-money options have higher implied volatilities than at-the-money options.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Implied volatility patterns</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Market data analysis</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Surface construction</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Heston Model -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <i class="bi bi-calculator text-primary me-3" style="font-size: 2rem;"></i>
+                    <h5 class="card-title fw-bold mb-0">Heston Model</h5>
+                </div>
+                <p class="card-text text-muted">
+                    The Heston model is a stochastic volatility model that allows volatility to change over time, 
+                    capturing the volatility smile effect in option pricing.
+                </p>
+                <ul class="list-unstyled">
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Stochastic volatility</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Mean reversion</li>
+                    <li><i class="bi bi-arrow-right text-primary me-2"></i>Correlation effects</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Calibration Process -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title fw-bold mb-0">
+                    <i class="bi bi-gear me-2"></i>Calibration Process
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Data Collection</h5>
+                        <p class="text-muted">Gather market data including option prices, strikes, and maturities.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Option market data</li>
+                            <li>• Strike price ranges</li>
+                            <li>• Maturity dates</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Parameter Estimation</h5>
+                        <p class="text-muted">Use optimization algorithms to find the best Heston model parameters.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Initial variance</li>
+                            <li>• Mean reversion speed</li>
+                            <li>• Volatility of volatility</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-4">
+                        <h5 class="fw-bold text-dark">Model Validation</h5>
+                        <p class="text-muted">Test the calibrated model against market data to ensure accuracy.</p>
+                        <ul class="list-unstyled small">
+                            <li>• Pricing accuracy</li>
+                            <li>• Greeks calculation</li>
+                            <li>• Risk management</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

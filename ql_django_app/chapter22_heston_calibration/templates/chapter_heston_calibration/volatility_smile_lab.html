@@ -1,0 +1,1131 @@
+{% extends "base.html" %}
+
+{% block title %}Volatility Smile & Heston Calibration{% endblock %}
+
+{% block styles %}
+    {{ block.super }}
+    <style>
+        /* Professional layout with better space utilization */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .content-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+        
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+        
+        /* Compact form layout */
+        .form-section {
+            position: sticky;
+            top: 1rem;
+        }
+        
+        .form-section .card {
+            height: fit-content;
+            max-height: calc(100vh - 2rem);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-section .card-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-section form {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-section .d-grid {
+            margin-top: auto;
+            padding-top: 1rem;
+        }
+        
+        /* Ensure button is visible and properly styled */
+        #runAnalysisBtn {
+            width: 100%;
+            font-size: 1rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        #runAnalysisBtn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Compact parameter groups */
+        .param-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .param-group:last-child {
+            margin-bottom: 1rem;
+        }
+        
+        .param-group h6 {
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .form-row.full-width {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-row .form-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .form-control {
+            font-size: 0.875rem;
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+        }
+        
+        .form-text {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        /* Results area optimization */
+        .results-area {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .chart-card {
+            margin-bottom: 0;
+        }
+        
+        .chart-card .card-body {
+            padding: 1rem;
+        }
+        
+        .chart-container {
+            height: 350px;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        #surface3d {
+            height: 100%;
+            border-radius: 0.5rem;
+        }
+        
+        /* Compact results tables */
+        .results-table {
+            font-size: 0.875rem;
+        }
+        
+        .results-table th {
+            font-size: 0.8rem;
+            padding: 0.5rem 0.75rem;
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .results-table td {
+            padding: 0.5rem 0.75rem;
+            vertical-align: middle;
+        }
+        
+        /* Parameter display optimization */
+        .param-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .param-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+        }
+        
+        .param-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #0d6efd;
+        }
+        
+        .param-label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+        }
+        
+        /* Status indicators */
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+        }
+        
+        /* Compact calibration details */
+        .calibration-details {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .calibration-details table {
+            font-size: 0.8rem;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .param-display {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+        }
+        
+        /* Professional card styling */
+        .card {
+            border: 1px solid #e9ecef;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+        
+        .card-header {
+            background: #0d6efd;
+            color: white;
+            border-radius: 0.5rem 0.5rem 0 0;
+            font-weight: 600;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        /* Button styling */
+        .btn-primary {
+            background: #0d6efd;
+            border: none;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary:hover {
+            background: #0b5ed7;
+            transform: translateY(-1px);
+        }
+        
+        /* Loading state */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+        
+        /* Parameter explanations styling */
+        .alert-light {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+        }
+        
+        .alert-light strong {
+            color: #0d6efd;
+        }
+        
+        .alert-light small {
+            color: #6c757d;
+            line-height: 1.4;
+        }
+    </style>
+{% endblock %}
+
+
+{% block page_content %}
+<div class="container py-5">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title fw-bold mb-3">
+                                <i class="bi bi-graph-up me-3"></i>Volatility Smile & Heston Model Calibration
+                            </h1>
+                            <p class="card-text lead mb-0">Interactive laboratory for volatility surface analysis and stochastic volatility model calibration</p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <a href="{% url 'equity_models:home' %}" class="btn btn-light btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Chapters
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="row">
+        <div class="col-12">
+            <div class="main-container">
+
+        <!-- Main Content Grid -->
+        <div class="content-grid">
+            <!-- Left Column: Compact Form -->
+            <div class="form-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="bi bi-calculator me-2"></i>Parameters
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="volatilityForm" method="post">
+                            {% csrf_token %}
+                            
+                            <!-- Display form errors -->
+                            {% if form.errors %}
+                                <div class="alert alert-danger alert-sm mb-3">
+                                    <h6 class="fw-bold mb-2">Please correct the following errors:</h6>
+                                    <ul class="mb-0 small">
+                                        {% for field, errors in form.errors.items %}
+                                            {% for error in errors %}
+                                                <li>{{ field|title }}: {{ error }}</li>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Market Parameters -->
+                            <div class="param-group">
+                                <h6 class="fw-bold text-primary">Market Parameters</h6>
+                                <div class="form-row full-width">
+                                    <div>
+                                        <label for="{{ form.evaluation_date.id_for_label }}" class="form-label">{{ form.evaluation_date.label }}</label>
+                                        {{ form.evaluation_date }}
+                                        <div class="form-text">Base date for all option pricing calculations</div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div>
+                                        <label for="{{ form.spot_price.id_for_label }}" class="form-label">{{ form.spot_price.label }}</label>
+                                        {{ form.spot_price }}
+                                        <div class="form-text">Current market price of the underlying asset</div>
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.risk_free_rate.id_for_label }}" class="form-label">{{ form.risk_free_rate.label }}</label>
+                                        {{ form.risk_free_rate }}
+                                        <div class="form-text">Annual risk-free interest rate (e.g., 1.0 for 1%)</div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div>
+                                        <label for="{{ form.dividend_rate.id_for_label }}" class="form-label">{{ form.dividend_rate.label }}</label>
+                                        {{ form.dividend_rate }}
+                                        <div class="form-text">Annual dividend yield (e.g., 0.0 for no dividends)</div>
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.smile_expiry.id_for_label }}" class="form-label">{{ form.smile_expiry.label }}</label>
+                                        {{ form.smile_expiry }}
+                                        <div class="form-text">Time to expiration for volatility smile (max 2.0 years)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Heston Parameters -->
+                            <div class="param-group">
+                                <h6 class="fw-bold text-primary">Heston Model Parameters</h6>
+                                <div class="form-row">
+                                    <div>
+                                        <label for="{{ form.initial_variance.id_for_label }}" class="form-label">{{ form.initial_variance.label }}</label>
+                                        {{ form.initial_variance }}
+                                        <div class="form-text">Starting variance level (typically 0.01-0.05)</div>
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.kappa.id_for_label }}" class="form-label">{{ form.kappa.label }}</label>
+                                        {{ form.kappa }}
+                                        <div class="form-text">Speed of return to long-term variance (higher = faster)</div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div>
+                                        <label for="{{ form.theta.id_for_label }}" class="form-label">{{ form.theta.label }}</label>
+                                        {{ form.theta }}
+                                        <div class="form-text">Target variance level (typically 0.02-0.08)</div>
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.sigma.id_for_label }}" class="form-label">{{ form.sigma.label }}</label>
+                                        {{ form.sigma }}
+                                        <div class="form-text">Controls volatility clustering (typically 0.1-1.0)</div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div>
+                                        <label for="{{ form.rho.id_for_label }}" class="form-label">{{ form.rho.label }}</label>
+                                        {{ form.rho }}
+                                        <div class="form-text">Price-volatility correlation (negative = leverage effect)</div>
+                                    </div>
+                                    <div>
+                                        <label for="{{ form.calibration_expiry_index.id_for_label }}" class="form-label">{{ form.calibration_expiry_index.label }}</label>
+                                        {{ form.calibration_expiry_index }}
+                                        <div class="form-text">Which expiration date to use for calibration (0-23)</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid mt-3">
+                                <button type="submit" class="btn btn-primary btn-lg" id="runAnalysisBtn">
+                                    <i class="bi bi-calculator me-2"></i>Calculate Results
+                                </button>
+                            </div>
+                            
+                            <!-- Loading indicator -->
+                            <div id="loadingIndicator" class="text-center mt-3" style="display: none;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p class="text-muted mt-2 small">Calculating...</p>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column: Results Area -->
+            <div class="results-area">
+                <div id="error-container" class="alert alert-danger" style="display: none;"></div>
+            
+            
+                <div id="results-wrapper">
+                    {% if error %}
+                        <div class="alert alert-danger">
+                            <h5><i class="bi bi-exclamation-triangle me-2"></i>Calculation Error</h5>
+                            <p><strong>Error:</strong> {{ error }}</p>
+                            <p class="text-muted">Please check your parameters and try again.</p>
+                        </div>
+                    {% elif results_json %}
+                        <!-- 2D Volatility Smile Chart -->
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Volatility Smile (2D)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <canvas id="smileChart" style="height: 100%;"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 3D Volatility Surface -->
+                        <div class="card chart-card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-graph-up-arrow me-2"></i>Volatility Surface (3D)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container">
+                                    <div id="surface3d"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Heston Calibration Results -->
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Heston Model Calibration</h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- Calibration Quality Summary -->
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="alert alert-info py-2">
+                                            <strong>Average Error:</strong> <span id="avg_error_display" class="badge bg-primary status-badge"></span>%
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div id="quality_assessment">
+                                            <div id="quality_alert" class="alert py-2" style="display: none;">
+                                                <div id="quality_message"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Calibrated Parameters -->
+                                <div class="param-display">
+                                    <div class="param-card">
+                                        <div class="param-label">Long-term Variance (θ)</div>
+                                        <div class="param-value" id="theta_display">-</div>
+                                    </div>
+                                    <div class="param-card">
+                                        <div class="param-label">Mean Reversion (κ)</div>
+                                        <div class="param-value" id="kappa_display">-</div>
+                                    </div>
+                                    <div class="param-card">
+                                        <div class="param-label">Vol of Vol (σ)</div>
+                                        <div class="param-value" id="sigma_display">-</div>
+                                    </div>
+                                    <div class="param-card">
+                                        <div class="param-label">Correlation (ρ)</div>
+                                        <div class="param-value" id="rho_display">-</div>
+                                    </div>
+                                    <div class="param-card">
+                                        <div class="param-label">Initial Variance (v₀)</div>
+                                        <div class="param-value" id="v0_display">-</div>
+                                    </div>
+                                    <div class="param-card">
+                                        <div class="param-label">Calibration Quality</div>
+                                        <div class="param-value" id="quality_display">-</div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Parameter Explanations -->
+                                <div class="mt-3">
+                                    <h6 class="fw-bold text-primary mb-2">Parameter Interpretations:</h6>
+                                    <div id="parameter_explanations" class="row">
+                                        <div class="col-md-6 mb-2">
+                                            <div id="theta_explanation" class="alert alert-light py-2" style="display: none;">
+                                                <strong>θ (Long-term Variance):</strong> <span id="theta_value"></span><br>
+                                                <small class="text-muted" id="theta_interpretation"></small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <div id="kappa_explanation" class="alert alert-light py-2" style="display: none;">
+                                                <strong>κ (Mean Reversion Speed):</strong> <span id="kappa_value"></span><br>
+                                                <small class="text-muted" id="kappa_interpretation"></small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <div id="sigma_explanation" class="alert alert-light py-2" style="display: none;">
+                                                <strong>σ (Vol of Vol):</strong> <span id="sigma_value"></span><br>
+                                                <small class="text-muted" id="sigma_interpretation"></small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <div id="rho_explanation" class="alert alert-light py-2" style="display: none;">
+                                                <strong>ρ (Correlation):</strong> <span id="rho_value"></span><br>
+                                                <small class="text-muted" id="rho_interpretation"></small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6 mb-2">
+                                            <div id="v0_explanation" class="alert alert-light py-2" style="display: none;">
+                                                <strong>v₀ (Initial Variance):</strong> <span id="v0_value"></span><br>
+                                                <small class="text-muted" id="v0_interpretation"></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Calibration Details Table -->
+                                <div class="mt-3">
+                                    <h6 class="fw-bold mb-2">Calibration Details:</h6>
+                                    <div class="calibration-details">
+                                        <table class="table table-sm table-striped results-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Strike</th>
+                                                    <th>Market Vol</th>
+                                                    <th>Model Vol</th>
+                                                    <th>Error (%)</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="calibration_table_body"></tbody>
+                                        </table>
+                                    </div>
+                                    
+                                    <!-- Strike-by-Strike Analysis -->
+                                    <div id="calibration_explanations" class="mt-3">
+                                        <h6 class="text-primary fw-bold">Strike Analysis:</h6>
+                                        <div id="strike_explanations">
+                                            <!-- Explanations will be populated by JavaScript -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Parameter Sensitivity Analysis -->
+                        <div class="card" id="sensitivity-section" style="display: none;">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="bi bi-activity me-2"></i>Parameter Sensitivity Analysis</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="table-responsive">
+                                            <table class="table table-sm table-bordered results-table">
+                                                <thead>
+                                                    <tr><th>Parameter</th><th>Stability</th><th>Sensitivity</th></tr>
+                                                </thead>
+                                                <tbody id="sensitivity_table_body">
+                                                    <!-- Will be populated by JavaScript -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="alert alert-info">
+                                            <h6>Interpretation:</h6>
+                                            <ul class="mb-0 small">
+                                                <li><span class="badge bg-primary status-badge">Stable</span> - Parameter is robust to small changes</li>
+                                                <li><span class="badge bg-warning status-badge">Moderate</span> - Parameter shows some sensitivity</li>
+                                                <li><span class="badge bg-danger status-badge">Sensitive</span> - Parameter is highly sensitive to changes</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if results_json %}
+                            {{ results_json|json_script:"volatility-data" }}
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-info">
+                            <h5><i class="bi bi-info-circle me-2"></i>Ready to Calculate</h5>
+                            <p>Click the <strong>"Calculate Results"</strong> button to start the analysis.</p>
+                            <p class="text-muted mb-0">This will generate:</p>
+                            <ul class="text-muted mb-0">
+                                <li>2D volatility smile visualization</li>
+                                <li>3D volatility surface plot</li>
+                                <li>Heston model calibration results</li>
+                                <li>Parameter sensitivity analysis</li>
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Footer -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title fw-bold text-primary mb-3">Continue Learning</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <a href="{% url 'equity_models:home' %}" class="btn btn-outline-primary btn-lg w-100">
+                                <i class="bi bi-list me-2"></i>View All Chapters
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg w-100">
+                                <i class="bi bi-house me-2"></i>Back to Home
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-2.35.3.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Gestion du formulaire et de l'indicateur de chargement
+        const form = document.getElementById('volatilityForm');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const runBtn = document.getElementById('runAnalysisBtn');
+        
+        if (form) {
+            form.addEventListener('submit', function() {
+                if (loadingIndicator) loadingIndicator.style.display = 'block';
+                if (runBtn) {
+                    runBtn.disabled = true;
+                    runBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Calculating...';
+                }
+            });
+        }
+        
+        // Masquer l'indicateur de chargement après le chargement de la page
+        if (loadingIndicator) loadingIndicator.style.display = 'none';
+        if (runBtn) {
+            runBtn.disabled = false;
+            runBtn.innerHTML = '<i class="bi bi-calculator me-2"></i>Calculate Results';
+        }
+        // Vérifier si Chart.js est chargé
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js is not loaded');
+            const errorContainer = document.getElementById('error-container');
+            if (errorContainer) {
+                errorContainer.innerText = 'Chart.js library is not loaded. Please refresh the page.';
+                errorContainer.style.display = 'block';
+            }
+            return;
+        }
+        
+        // Vérifier si les données existent
+        const dataElement = document.getElementById('volatility-data');
+        if (!dataElement) {
+            console.log('No volatility data found - this is normal for first page load');
+            return;
+        }
+
+        try {
+            const rawData = dataElement.textContent;
+            let allData;
+            
+            // Double parsing pour gérer les données double-encodées
+            try {
+                allData = JSON.parse(rawData);
+                if (typeof allData === 'string') {
+                    allData = JSON.parse(allData);
+                }
+            } catch (e) {
+                console.error('JSON parse error:', e);
+                const errorContainer = document.getElementById('error-container');
+                if (errorContainer) {
+                    errorContainer.innerText = 'Error parsing data: ' + e.message;
+                    errorContainer.style.display = 'block';
+                }
+                return;
+            }
+            
+            if (allData.error) {
+                const errorContainer = document.getElementById('error-container');
+                if (errorContainer) {
+                    errorContainer.innerText = `Error: ${allData.error}`;
+                    errorContainer.style.display = 'block';
+                }
+                const resultsWrapper = document.getElementById('results-wrapper');
+                if (resultsWrapper) resultsWrapper.style.display = 'none';
+                return;
+            }
+
+            // --- Graphique du Smile ---
+            const smileCanvas = document.getElementById('smileChart');
+            if (!smileCanvas) {
+                console.error('Smile chart canvas not found');
+                return;
+            }
+            
+            const smileCtx = smileCanvas.getContext('2d', { willReadFrequently: true });
+            new Chart(smileCtx, {
+                type: 'line',
+                data: {
+                    labels: allData.smile_data.strikes_grid,
+                    datasets: [
+                        {
+                            label: 'Black Surface',
+                            data: allData.smile_data.implied_vols,
+                            borderColor: 'rgb(0, 123, 255)',
+                            tension: 0.1, pointRadius: 0
+                        },
+                        {
+                            label: 'Actual Market Data',
+                            data: allData.smile_data.market_strikes.map((strike, i) => ({
+                                x: strike,
+                                y: allData.smile_data.market_vols[i]
+                            })),
+                            type: 'scatter',
+                            backgroundColor: 'rgb(255, 159, 64)', // Orange comme dans le livre
+                            pointRadius: 5
+                        }
+                    ]
+                },
+                options: {
+                    scales: {
+                        x: { type: 'linear', title: { display: true, text: 'Strikes' } },
+                        y: { title: { display: true, text: 'Implied Volatility' }}
+                    }
+                }
+            });
+            
+            // --- 3D Surface Visualization ---
+            if (allData.surface_data) {
+                const surface3dElement = document.getElementById('surface3d');
+                if (!surface3dElement) {
+                    console.error('3D surface container not found');
+                    return;
+                }
+                
+                const surfaceData = [{
+                    x: allData.surface_data.x,
+                    y: allData.surface_data.y,
+                    z: allData.surface_data.z,
+                    type: 'surface',
+                    colorscale: 'Viridis',
+                    name: 'Implied Volatility Surface',
+                    hovertemplate: 'Strike: %{x}<br>Time: %{y}<br>Vol: %{z:.4f}<extra></extra>'
+                }];
+                
+                const surfaceLayout = {
+                    title: 'Implied Volatility Surface',
+                    scene: {
+                        xaxis: { title: 'Strike Price' },
+                        yaxis: { title: 'Time to Maturity (Years)' },
+                        zaxis: { title: 'Implied Volatility' },
+                        camera: {
+                            eye: { x: 1.5, y: 1.5, z: 1.5 }
+                        }
+                    },
+                    margin: { l: 0, r: 0, b: 0, t: 40 }
+                };
+                
+                const surfaceConfig = {
+                    displayModeBar: true,
+                    displaylogo: false,
+                    modeBarButtonsToRemove: ['pan2d', 'lasso2d', 'select2d'],
+                    toImageButtonOptions: {
+                        format: 'png',
+                        filename: 'volatility_surface',
+                        height: 500,
+                        width: 800,
+                        scale: 1
+                    }
+                };
+                
+                Plotly.newPlot('surface3d', surfaceData, surfaceLayout, surfaceConfig);
+            }
+            
+            // --- Remplissage des résultats Heston ---
+            const avgErrorDisplay = document.getElementById('avg_error_display');
+            if (avgErrorDisplay) {
+                avgErrorDisplay.innerText = allData.avg_abs_error_pct.toFixed(3);
+            }
+            
+            // --- Dynamic Parameter Explanations ---
+            if (allData.heston_params) {
+                generateParameterExplanations(allData.heston_params);
+            }
+            
+            // --- Dynamic Quality Assessment ---
+            generateQualityAssessment(allData.avg_abs_error_pct);
+            
+            // Populate parameter display cards
+            if (allData.heston_params) {
+                const thetaDisplay = document.getElementById('theta_display');
+                const kappaDisplay = document.getElementById('kappa_display');
+                const sigmaDisplay = document.getElementById('sigma_display');
+                const rhoDisplay = document.getElementById('rho_display');
+                const v0Display = document.getElementById('v0_display');
+                const qualityDisplay = document.getElementById('quality_display');
+                
+                if (thetaDisplay) thetaDisplay.textContent = allData.heston_params.theta.toFixed(4);
+                if (kappaDisplay) kappaDisplay.textContent = allData.heston_params.kappa.toFixed(4);
+                if (sigmaDisplay) sigmaDisplay.textContent = allData.heston_params.sigma.toFixed(4);
+                if (rhoDisplay) rhoDisplay.textContent = allData.heston_params.rho.toFixed(4);
+                if (v0Display) v0Display.textContent = allData.heston_params.v0.toFixed(4);
+                
+                // Quality assessment
+                if (qualityDisplay) {
+                    const avgError = allData.avg_abs_error_pct;
+                    if (avgError < 5) {
+                        qualityDisplay.innerHTML = '<span class="badge bg-success">Excellent</span>';
+                    } else if (avgError < 10) {
+                        qualityDisplay.innerHTML = '<span class="badge bg-warning">Good</span>';
+                    } else {
+                        qualityDisplay.innerHTML = '<span class="badge bg-danger">Poor</span>';
+                    }
+                }
+            }
+            
+            // Populate calibration details table
+            const tableBody = document.getElementById('calibration_table_body');
+            if (tableBody && allData.calibration_summary) {
+                allData.calibration_summary.forEach((row, index) => {
+                const tr = tableBody.insertRow();
+                tr.insertCell().innerText = row.strike.toFixed(2);
+                tr.insertCell().innerText = row.market_vol.toFixed(4);
+                tr.insertCell().innerText = row.model_vol.toFixed(4);
+                
+                const errorCell = tr.insertCell();
+                const errorValue = Math.abs(row.rel_error_pct);
+                errorCell.innerHTML = `<span class="${errorValue < 5 ? 'text-primary' : errorValue < 10 ? 'text-warning' : 'text-danger'}">${row.rel_error_pct.toFixed(3)}</span>`;
+                
+                const statusCell = tr.insertCell();
+                if (errorValue < 5) {
+                        statusCell.innerHTML = '<span class="badge bg-primary">Excellent</span>';
+                } else if (errorValue < 10) {
+                    statusCell.innerHTML = '<span class="badge bg-warning">Good</span>';
+                } else {
+                    statusCell.innerHTML = '<span class="badge bg-danger">Poor</span>';
+                }
+            });
+                
+                // Generate explanations for each calibration result
+                generateCalibrationExplanations(allData.calibration_summary);
+            }
+            
+            // --- Parameter Sensitivity Analysis ---
+            if (allData.sensitivity_analysis && !allData.sensitivity_analysis.error) {
+                const sensitivitySection = document.getElementById('sensitivity-section');
+                if (sensitivitySection) {
+                    sensitivitySection.style.display = 'block';
+                }
+                
+                const sensitivityTableBody = document.getElementById('sensitivity_table_body');
+                if (sensitivityTableBody && allData.sensitivity_analysis.stability_assessment) {
+                const paramNames = {
+                    'theta': 'θ (Long-term variance)',
+                    'kappa': 'κ (Mean reversion speed)', 
+                    'sigma': 'σ (Volatility of volatility)',
+                    'rho': 'ρ (Correlation coefficient)',
+                    'v0': 'v₀ (Initial variance)'
+                };
+                
+                Object.entries(allData.sensitivity_analysis.stability_assessment).forEach(([param, assessment]) => {
+                    const row = sensitivityTableBody.insertRow();
+                    row.insertCell().innerHTML = `<strong>${paramNames[param] || param}</strong>`;
+                    
+                    const stabilityCell = row.insertCell();
+                    stabilityCell.innerHTML = `<span class="badge bg-${assessment.color}">${assessment.stability}</span>`;
+                    
+                    const sensitivityCell = row.insertCell();
+                    sensitivityCell.innerHTML = `<code>${assessment.avg_sensitivity.toFixed(4)}</code>`;
+                });
+                }
+            }
+
+        } catch (e) {
+            console.error("Failed to parse or render data:", e);
+            const errorContainer = document.getElementById('error-container');
+            if (errorContainer) {
+                errorContainer.innerText = "An error occurred while displaying the results: " + e.message;
+                errorContainer.style.display = 'block';
+            }
+        }
+    });
+    
+    // --- Dynamic Parameter Explanations Functions ---
+    function generateParameterExplanations(params) {
+        if (!params) return;
+        
+        // Theta (Long-term variance)
+        const theta = params.theta;
+        const thetaValue = document.getElementById('theta_value');
+        const thetaInterpretation = document.getElementById('theta_interpretation');
+        const thetaExplanation = document.getElementById('theta_explanation');
+        
+        if (thetaValue) thetaValue.textContent = theta.toFixed(6);
+        if (thetaInterpretation) {
+            if (theta > 0.1) {
+                thetaInterpretation.textContent = 'High long-term variance indicates significant volatility persistence.';
+            } else if (theta > 0.05) {
+                thetaInterpretation.textContent = 'Moderate long-term variance suggests balanced volatility behavior.';
+            } else {
+                thetaInterpretation.textContent = 'Low long-term variance indicates mean-reverting volatility.';
+            }
+        }
+        if (thetaExplanation) thetaExplanation.style.display = 'block';
+        
+        // Kappa (Mean reversion speed)
+        const kappa = params.kappa;
+        const kappaValue = document.getElementById('kappa_value');
+        const kappaInterpretation = document.getElementById('kappa_interpretation');
+        const kappaExplanation = document.getElementById('kappa_explanation');
+        
+        if (kappaValue) kappaValue.textContent = kappa.toFixed(6);
+        if (kappaInterpretation) {
+            if (kappa > 2.0) {
+                kappaInterpretation.textContent = 'Fast mean reversion - volatility returns to long-term level quickly.';
+            } else if (kappa > 0.5) {
+                kappaInterpretation.textContent = 'Moderate mean reversion speed - balanced volatility dynamics.';
+            } else {
+                kappaInterpretation.textContent = 'Slow mean reversion - volatility changes persist longer.';
+            }
+        }
+        if (kappaExplanation) kappaExplanation.style.display = 'block';
+        
+        // Sigma (Volatility of volatility)
+        const sigma = params.sigma;
+        const sigmaValue = document.getElementById('sigma_value');
+        const sigmaInterpretation = document.getElementById('sigma_interpretation');
+        const sigmaExplanation = document.getElementById('sigma_explanation');
+        
+        if (sigmaValue) sigmaValue.textContent = sigma.toFixed(6);
+        if (sigmaInterpretation) {
+            if (sigma > 1.0) {
+                sigmaInterpretation.textContent = 'High volatility of volatility - significant volatility clustering.';
+            } else if (sigma > 0.3) {
+                sigmaInterpretation.textContent = 'Moderate volatility of volatility - some volatility clustering.';
+            } else {
+                sigmaInterpretation.textContent = 'Low volatility of volatility - stable volatility behavior.';
+            }
+        }
+        if (sigmaExplanation) sigmaExplanation.style.display = 'block';
+        
+        // Rho (Correlation)
+        const rho = params.rho;
+        const rhoValue = document.getElementById('rho_value');
+        const rhoInterpretation = document.getElementById('rho_interpretation');
+        const rhoExplanation = document.getElementById('rho_explanation');
+        
+        if (rhoValue) rhoValue.textContent = rho.toFixed(6);
+        if (rhoInterpretation) {
+            if (rho < -0.5) {
+                rhoInterpretation.textContent = 'Strong negative correlation - volatility increases when price falls (leverage effect).';
+            } else if (rho < 0) {
+                rhoInterpretation.textContent = 'Moderate negative correlation - some leverage effect present.';
+            } else if (rho > 0.5) {
+                rhoInterpretation.textContent = 'Strong positive correlation - volatility increases with price (inverse leverage).';
+            } else {
+                rhoInterpretation.textContent = 'Weak correlation - limited relationship between price and volatility.';
+            }
+        }
+        if (rhoExplanation) rhoExplanation.style.display = 'block';
+        
+        // V0 (Initial variance)
+        const v0 = params.v0;
+        const v0Value = document.getElementById('v0_value');
+        const v0Interpretation = document.getElementById('v0_interpretation');
+        const v0Explanation = document.getElementById('v0_explanation');
+        
+        if (v0Value) v0Value.textContent = v0.toFixed(6);
+        if (v0Interpretation) {
+            if (v0 > 0.1) {
+                v0Interpretation.textContent = 'High initial variance - starting from high volatility state.';
+            } else if (v0 > 0.05) {
+                v0Interpretation.textContent = 'Moderate initial variance - balanced starting volatility.';
+            } else {
+                v0Interpretation.textContent = 'Low initial variance - starting from low volatility state.';
+            }
+        }
+        if (v0Explanation) v0Explanation.style.display = 'block';
+    }
+    
+    function generateQualityAssessment(avgError) {
+        const qualityAlert = document.getElementById('quality_alert');
+        const qualityMessage = document.getElementById('quality_message');
+        const qualityRecommendations = document.getElementById('quality_recommendations');
+        
+        if (!qualityAlert || !qualityMessage) return;
+        
+        if (avgError < 1.0) {
+            qualityAlert.className = 'alert alert-info';
+            if (qualityMessage) qualityMessage.innerHTML = '<strong>Excellent Calibration!</strong> The model fits the market data very well.';
+            if (qualityRecommendations) qualityRecommendations.innerHTML = '<small class="text-muted">This calibration is suitable for pricing and risk management.</small>';
+        } else if (avgError < 3.0) {
+            qualityAlert.className = 'alert alert-warning';
+            if (qualityMessage) qualityMessage.innerHTML = '<strong>Good Calibration</strong> The model provides reasonable fit to market data.';
+            if (qualityRecommendations) qualityRecommendations.innerHTML = '<small class="text-muted">Consider adjusting initial parameters or using different calibration data.</small>';
+        } else {
+            qualityAlert.className = 'alert alert-danger';
+            if (qualityMessage) qualityMessage.innerHTML = '<strong>Poor Calibration</strong> The model does not fit the market data well.';
+            if (qualityRecommendations) qualityRecommendations.innerHTML = '<small class="text-muted">Try different initial parameters, check data quality, or consider alternative models.</small>';
+        }
+        
+        qualityAlert.style.display = 'block';
+    }
+    
+    function generateCalibrationExplanations(calibrationData) {
+        if (!calibrationData) return;
+        
+        const explanationsContainer = document.getElementById('strike_explanations');
+        if (!explanationsContainer) return;
+        
+        explanationsContainer.innerHTML = ''; // Clear previous explanations
+        
+        calibrationData.forEach((row, index) => {
+            const errorValue = Math.abs(row.rel_error_pct);
+            const strike = row.strike;
+            const marketVol = row.market_vol;
+            const modelVol = row.model_vol;
+            
+            // Create explanation card for each strike
+            const explanationCard = document.createElement('div');
+            explanationCard.className = 'card mb-2';
+            
+            let explanationText = '';
+            let cardClass = '';
+            
+            if (errorValue < 1.0) {
+                cardClass = 'border-primary';
+                explanationText = `Strike ${strike.toFixed(2)}: <strong>Excellent fit!</strong> The Heston model predicts ${modelVol.toFixed(4)} volatility vs market ${marketVol.toFixed(4)} (${row.rel_error_pct.toFixed(2)}% error). This strike is well-calibrated and suitable for pricing.`;
+            } else if (errorValue < 3.0) {
+                cardClass = 'border-warning';
+                explanationText = `Strike ${strike.toFixed(2)}: <strong>Good fit</strong> with ${row.rel_error_pct.toFixed(2)}% error. Model: ${modelVol.toFixed(4)} vs Market: ${marketVol.toFixed(4)}. The model captures the volatility level reasonably well.`;
+            } else if (errorValue < 5.0) {
+                cardClass = 'border-warning';
+                explanationText = `Strike ${strike.toFixed(2)}: <strong>Moderate fit</strong> with ${row.rel_error_pct.toFixed(2)}% error. Model: ${modelVol.toFixed(4)} vs Market: ${marketVol.toFixed(4)}. Consider adjusting Heston parameters for better calibration.`;
+            } else {
+                cardClass = 'border-danger';
+                explanationText = `Strike ${strike.toFixed(2)}: <strong>Poor fit</strong> with ${row.rel_error_pct.toFixed(2)}% error. Model: ${modelVol.toFixed(4)} vs Market: ${marketVol.toFixed(4)}. This strike needs parameter adjustment or alternative modeling approach.`;
+            }
+            
+            // Add strike-specific insights
+            if (strike < 600) {
+                explanationText += ` <em>This is an out-of-the-money put strike, typically showing higher implied volatility due to the volatility smile.</em>`;
+            } else if (strike > 700) {
+                explanationText += ` <em>This is an out-of-the-money call strike, also showing elevated volatility due to market expectations.</em>`;
+            } else {
+                explanationText += ` <em>This is an at-the-money strike, serving as the reference point for the volatility smile.</em>`;
+            }
+            
+            explanationCard.innerHTML = `
+                <div class="card-body py-2 ${cardClass}">
+                    <div class="row align-items-center">
+                        <div class="col-md-1">
+                            <span class="badge bg-primary">${index + 1}</span>
+                        </div>
+                        <div class="col-md-11">
+                            <small class="text-muted">${explanationText}</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            explanationsContainer.appendChild(explanationCard);
+        });
+    }
+</script>
+{% endblock %}

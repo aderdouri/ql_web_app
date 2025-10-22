@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.http import JsonResponse
 from .forms import ModelChoiceForm
 from . import services
 
@@ -35,14 +36,37 @@ def calibration_lab_view(request):
         try:
             results = services.calibrate_short_rate_model(model_name, calibration_type, fixed_reversion)
             print(f"DEBUG: Calibration successful, results: {results is not None}")
+            
+            # If this is an AJAX request, return JSON
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                if results:
+                    # Convert results to JSON-serializable format
+                    json_results = {
+                        'model_name': results.get('model_name', 'Unknown Model'),
+                        'param_string': results.get('param_string', 'No parameters'),
+                        'params': results.get('params', {}),
+                        'report': results.get('report', {}),
+                        'error': None
+                    }
+                    return JsonResponse(json_results)
+                else:
+                    return JsonResponse({'error': 'No results generated'}, status=400)
+                    
         except Exception as e:
             error_message = f"Calibration failed: {str(e)}"
             print(f"ERROR during calibration: {e}")
+            
+            # If this is an AJAX request, return JSON error
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'error': error_message}, status=400)
     
     context = {
         'form': form,
         'results': results,
-        'error_message': error_message
+        'error_message': error_message,
+        'lab_title': 'Chapter 17: Short Rate Model Calibration Lab',
+        'lab_icon': 'bi-sliders',
+        'lab_description': 'Interactive laboratory to calibrate short-rate models to market data using various calibration techniques and optimization methods.'
     }
     print(f"DEBUG: Context results: {results is not None}")
-    return render(request, 'chapter_calibration/calibration_lab.html', context)
+    return render(request, 'chapter_calibration/calibration_lab_simple.html', context)

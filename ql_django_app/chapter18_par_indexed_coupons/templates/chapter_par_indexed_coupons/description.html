@@ -4,8 +4,8 @@
 
 {% block page_content %}
 <div class="container py-5">
-    <!-- Lab Header -->
-    <div class="row mb-4">
+    <!-- Chapter Header -->
+    <div class="row mb-5">
         <div class="col-12">
             <div class="card bg-primary text-white">
                 <div class="card-body py-4">
@@ -27,145 +27,166 @@
         </div>
     </div>
 
-    <!-- Lab Content -->
+    <!-- Chapter Content -->
     <div class="row">
         <div class="col-12">
-<!-- Chapter Overview -->
-<div class="row mb-4">
-    <div class="col-12">
-        <h2><i class="bi bi-info-circle me-2"></i>Chapter Overview</h2>
-        <p>This chapter explores the differences between par coupons and indexed coupons in interest rate swap calculations. 
-        Learn about coupon calculation methodologies and their impact on swap valuation.</p>
-        
-        <div class="row mt-3">
-            <div class="col-md-6">
-                <h5><strong>What You'll Learn:</strong></h5>
-                <ul class="list-unstyled">
-                    <li><i class="bi bi-check-circle text-primary me-2"></i>Par coupon calculation methodology</li>
-                    <li><i class="bi bi-check-circle text-primary me-2"></i>Indexed coupon calculation methodology</li>
-                    <li><i class="bi bi-check-circle text-primary me-2"></i>Differences between the two approaches</li>
-                    <li><i class="bi bi-check-circle text-primary me-2"></i>Practical implications for swap valuation</li>
-                </ul>
+            <!-- Chapter Overview -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h3 class="card-title fw-bold text-primary mb-3">
+                                <i class="bi bi-info-circle me-2"></i>Chapter Overview
+                            </h3>
+                            <p class="card-text">
+                                This chapter explores the differences between par coupons and indexed coupons in interest rate swap calculations. 
+                                Learn about coupon calculation methodologies and their impact on swap valuation.
+                            </p>
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <h5 class="fw-bold text-dark">What You'll Learn:</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Par coupon calculation methodology</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Indexed coupon calculation methodology</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Differences between the two approaches</li>
+                                        <li><i class="bi bi-check-circle text-success me-2"></i>Practical implications for swap valuation</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5 class="fw-bold text-dark">Key Features:</h5>
+                                    <ul class="list-unstyled">
+                                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Interactive parameter adjustment</li>
+                                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Real-time coupon calculations</li>
+                                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Method comparison results</li>
+                                        <li><i class="bi bi-arrow-right text-primary me-2"></i>Detailed analysis tables</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="col-md-6">
-                <h5><strong>Key Features:</strong></h5>
-                <ul class="list-unstyled">
-                    <li><i class="bi bi-graph-up text-primary me-2"></i>Interactive parameter adjustment</li>
-                    <li><i class="bi bi-graph-up text-primary me-2"></i>Real-time coupon calculations</li>
-                    <li><i class="bi bi-graph-up text-primary me-2"></i>Method comparison results</li>
-                    <li><i class="bi bi-graph-up text-primary me-2"></i>Detailed analysis tables</li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Interactive Laboratory -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card bg-primary text-white">
-            <div class="card-body text-center">
-                <h3 class="mb-3">Interactive Laboratory</h3>
-                <p class="mb-4">Use the interactive swap analysis lab to compare par coupons versus indexed coupons. 
-                Analyze the differences in coupon calculations and understand their impact on swap valuation.</p>
-                <a href="{% url 'chapter18_par_indexed_coupons:par_indexed_coupons_lab' %}" class="btn btn-light btn-lg">
-                    <i class="bi bi-play-circle me-2"></i>Launch Swap Analysis Lab
-                </a>
+            <!-- Interactive Lab Section -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">
+                                <i class="bi bi-flask me-2"></i>Interactive Laboratory
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="card-text mb-4">
+                                Use the interactive swap analysis lab to compare par coupons versus indexed coupons. 
+                                Analyze the differences in coupon calculations and understand their impact on swap valuation.
+                            </p>
+                            <div class="text-center">
+                                <a href="{% url 'chapter18_par_indexed_coupons:par_indexed_coupons_lab' %}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-play-circle me-2"></i>Launch Swap Analysis Lab
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
-</div>
 
-<!-- Key Concepts -->
-<div class="row mb-4">
-    <div class="col-12">
-        <h3><i class="bi bi-lightbulb me-2"></i>Key Concepts</h3>
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card mb-3">
-                    <div class="card-header bg-success text-white">
-                        <h5><i class="bi bi-calculator me-2"></i>Par Coupons</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>In par coupon calculations, the floating rate is calculated over the duration of the coupon period.</p>
-                        <ul class="list-unstyled">
-                            <li><i class="bi bi-arrow-right text-primary me-2"></i>Rate over coupon accrual period</li>
-                            <li><i class="bi bi-arrow-right text-primary me-2"></i>May cause swap value jumps</li>
-                            <li><i class="bi bi-arrow-right text-primary me-2"></i>Requires P&L adjustments</li>
-                        </ul>
-                    </div>
+            <!-- Key Concepts -->
+            <div class="row mb-5">
+                <div class="col-12">
+                    <h3 class="fw-bold text-dark mb-4">
+                        <i class="bi bi-lightbulb me-2"></i>Key Concepts
+                    </h3>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card mb-3">
-                    <div class="card-header bg-primary text-white">
-                        <h5><i class="bi bi-graph-up me-2"></i>Indexed Coupons</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>In indexed coupon calculations, the rate is calculated over the LIBOR tenor period.</p>
-                        <ul class="list-unstyled">
-                            <li><i class="bi bi-arrow-right text-primary me-2"></i>Rate over LIBOR tenor period</li>
-                            <li><i class="bi bi-arrow-right text-primary me-2"></i>Market convention consistent</li>
-                            <li><i class="bi bi-arrow-right text-primary me-2"></i>Requires convexity adjustments</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
-<!-- Analysis Methods -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card bg-primary text-white">
-            <div class="card-body">
-                <h3 class="mb-3">Analysis Methods</h3>
-            </div>
-        </div>
-        <div class="row mt-3">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5><strong>Par Coupons</strong></h5>
-                        <p>Rate calculated over coupon accrual period</p>
-                        <ul class="list-unstyled">
-                            <li>• Simple calculation method</li>
-                            <li>• Textbook approach</li>
-                            <li>• May cause valuation jumps</li>
-                        </ul>
+            <div class="row g-4">
+                <!-- Par Coupons -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-calculator text-success me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">Par Coupons</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                In par coupon calculations, the floating rate is calculated over the duration of the coupon period.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Rate over coupon accrual period</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>May cause swap value jumps</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Requires P&L adjustments</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Indexed Coupons -->
+                <div class="col-lg-6">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-graph-up text-primary me-3" style="font-size: 2rem;"></i>
+                                <h5 class="card-title fw-bold mb-0">Indexed Coupons</h5>
+                            </div>
+                            <p class="card-text text-muted">
+                                In indexed coupon calculations, the rate is calculated over the LIBOR tenor period.
+                            </p>
+                            <ul class="list-unstyled">
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Rate over LIBOR tenor period</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Market convention consistent</li>
+                                <li><i class="bi bi-arrow-right text-primary me-2"></i>Requires convexity adjustments</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5><strong>Indexed Coupons</strong></h5>
-                        <p>Rate calculated over LIBOR tenor period</p>
-                        <ul class="list-unstyled">
-                            <li>• Market convention</li>
-                            <li>• Theoretically correct</li>
-                            <li>• Requires adjustments</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5><strong>Comparison</strong></h5>
-                        <p>Understanding the differences between methods</p>
-                        <ul class="list-unstyled">
-                            <li>• Risk management</li>
-                            <li>• Pricing accuracy</li>
-                            <li>• Market consistency</li>
-                        </ul>
+
+            <!-- Laboratory Features -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title fw-bold mb-0">
+                                <i class="bi bi-graph-up me-2"></i>Laboratory Features
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <h5 class="fw-bold text-dark">Par Coupons</h5>
+                                    <p class="text-muted">Rate calculated over coupon accrual period</p>
+                                    <ul class="list-unstyled small">
+                                        <li>• Simple calculation method</li>
+                                        <li>• Textbook approach</li>
+                                        <li>• May cause valuation jumps</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5 class="fw-bold text-dark">Indexed Coupons</h5>
+                                    <p class="text-muted">Rate calculated over LIBOR tenor period</p>
+                                    <ul class="list-unstyled small">
+                                        <li>• Market convention</li>
+                                        <li>• Theoretically correct</li>
+                                        <li>• Requires adjustments</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <h5 class="fw-bold text-dark">Comparison</h5>
+                                    <p class="text-muted">Understanding the differences between methods</p>
+                                    <ul class="list-unstyled small">
+                                        <li>• Risk management</li>
+                                        <li>• Pricing accuracy</li>
+                                        <li>• Market consistency</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Navigation Footer -->
     <div class="row mt-5">

@@ -1,52 +1,58 @@
 from django.shortcuts import render
-from .forms import HestonCalibrationForm
-from . import services
+from .forms import VolatilitySmileForm
+from .services import process_volatility_data
+import json
 
-def calibration_description_view(request):
-    """Chapter 23: Description page"""
+def heston_calibration_description_view(request):
+    """Chapter 22: Description page"""
     context = {
-        'chapter_title': 'Chapter 23: Heston Model Parameter Calibration in QuantLib Python & SciPy',
-        'chapter_icon': 'bi-gear',
-        'chapter_description': 'Learn advanced parameter calibration techniques using QuantLib Python and SciPy optimization methods.'
+        'chapter_title': 'Chapter 22: Volatility Smile and Heston Model Calibration',
+        'chapter_icon': 'bi-graph-up-arrow',
+        'chapter_description': 'Learn how to construct volatility smiles and calibrate the Heston stochastic volatility model to market data for European options.'
     }
-    return render(request, 'chapter_heston_calibration/heston_calibration_description.html', context)
+    return render(request, 'chapter_heston_calibration/volatility_smile_simple.html', context)
 
-def calibration_lab_view(request):
-    """Chapter 23: Interactive calibration lab page"""
-    form = HestonCalibrationForm(request.POST or None)
-    results = None
+def volatility_smile_lab_view(request):
+    context = {}
     
-    if form.is_valid():
-        try:
-            # Extract form data
-            calibration_data = {
-                'spot_price': form.cleaned_data['spot_price'],
-                'risk_free_rate_pct': form.cleaned_data['risk_free_rate_pct'],
-                'dividend_rate_pct': form.cleaned_data['dividend_rate_pct'],
-                'calculation_date': form.cleaned_data['calculation_date'],
-                'maturity_date': form.cleaned_data['maturity_date'],
-                'strikes': form.cleaned_data['strikes'],
-                'volatilities': form.cleaned_data['volatilities'],
-                'solver_method': form.cleaned_data['solver_method'],
-                'initial_theta': form.cleaned_data['initial_theta'],
-                'initial_kappa': form.cleaned_data['initial_kappa'],
-                'initial_sigma': form.cleaned_data['initial_sigma'],
-                'initial_rho': form.cleaned_data['initial_rho'],
-                'initial_v0': form.cleaned_data['initial_v0']
-            }
-            
-            results = services.calibrate_heston_parameters(calibration_data)
-            
-        except Exception as e:
-            results = {'error': str(e)}
-    else:
-        form = HestonCalibrationForm()
-
-    context = {
-        'form': form, 
-        'results': results,
-        'chapter_title': 'Chapter 23: Interactive Heston Calibration Laboratory',
-        'chapter_icon': 'bi-gear',
-        'chapter_description': 'Interactive laboratory for Heston model parameter calibration using QuantLib Python and SciPy optimization methods.'
+    # Valeurs par défaut explicites
+    import datetime
+    default_data = {
+        'evaluation_date': datetime.date(2015, 11, 6),
+        'spot_price': 659.37,
+        'risk_free_rate': 1.0,
+        'dividend_rate': 0.0,
+        'smile_expiry': 1.0,
+        'calibration_expiry_index': 11,
+        'initial_variance': 0.01,
+        'kappa': 0.2,
+        'theta': 0.02,
+        'sigma': 0.5,
+        'rho': -0.75
     }
-    return render(request, 'chapter_heston_calibration/heston_calibration_lab.html', context)
+    
+    if request.method == 'POST':
+        form = VolatilitySmileForm(request.POST)
+        if form.is_valid():
+            # Utiliser les données du formulaire validé
+            results = process_volatility_data(form.cleaned_data)
+        else:
+            # Si le formulaire n'est pas valide, utiliser les données par défaut
+            results = process_volatility_data(default_data)
+    else:
+        # Pour GET, seulement pré-remplir le formulaire, pas de calcul
+        form = VolatilitySmileForm(initial=default_data)
+        results = None
+            
+    context['form'] = form
+    if results is None:
+        # Pas de calcul effectué (première visite)
+        context['error'] = None
+        context['results_json'] = None
+    elif 'error' in results:
+        context['error'] = results['error']
+        context['results_json'] = None
+    else:
+        context['results_json'] = json.dumps(results)
+        
+    return render(request, 'chapter_heston_calibration/volatility_smile_lab.html', context)

@@ -10,27 +10,27 @@
                     Chapter Overview
                 </h3>
                 <p class="card-text">
-                    This chapter explores volatility smile modeling and Heston model calibration for European options. 
-                    Learn how to construct implied volatility surfaces from market data and calibrate the Heston 
-                    stochastic volatility model to fit market quotes.
+                    This chapter teaches you how to automatically find the best parameters for the Heston model using 
+                    different mathematical optimization methods. Learn to calibrate the model to real market data and 
+                    compare different algorithms to see which works best.
                 </p>
                 <div class="row mt-4">
                     <div class="col-md-6">
                         <h5 class="fw-bold text-dark">What You'll Learn:</h5>
                         <ul class="list-unstyled">
-                            <li>Volatility smile construction</li>
-                            <li>Implied volatility surface modeling</li>
-                            <li>Heston model calibration techniques</li>
-                            <li>Model parameter optimization</li>
+                            <li>How to automatically find model parameters</li>
+                            <li>Different optimization methods and their performance</li>
+                            <li>How to calibrate models to real market data</li>
+                            <li>How to check if the optimization worked well</li>
                         </ul>
                     </div>
                     <div class="col-md-6">
                         <h5 class="fw-bold text-dark">Key Features:</h5>
                         <ul class="list-unstyled">
-                            <li>Interactive volatility surface visualization</li>
-                            <li>Real-time calibration results</li>
-                            <li>Market data analysis tools</li>
-                            <li>Parameter sensitivity analysis</li>
+                            <li>Try different optimization methods</li>
+                            <li>See results in real-time</li>
+                            <li>Compare which method works best</li>
+                            <li>Understand parameter sensitivity</li>
                         </ul>
                     </div>
                 </div>
@@ -50,12 +50,12 @@
             </div>
             <div class="card-body">
                 <p class="card-text mb-4">
-                    Explore volatility smile modeling and calibrate the Heston model to market data. 
-                    Visualize implied volatility surfaces and analyze calibration quality.
+                    Try different methods to automatically find the best Heston model parameters. 
+                    Compare which optimization method works fastest and most accurately.
                 </p>
                 <div class="text-center">
-                    <a href="{% url 'equity_models:chapter22_heston_calibration:calibration_lab' %}" class="btn btn-primary btn-lg">
-                        Launch Heston Calibration Lab
+                    <a href="{% url 'equity_models:heston_calibration_scipy:lab' %}" class="btn btn-primary btn-lg">
+                        Launch Parameter Calibration Lab
                     </a>
                 </div>
             </div>
@@ -86,13 +86,12 @@
                         </div>
                     </div>
                     <div class="col-md-6">
-                        <h5 class="fw-bold text-primary">Model Parameters</h5>
+                        <h5 class="fw-bold text-primary">Available Methods</h5>
                         <ul class="list-unstyled">
-                            <li><strong>V<sub>0</sub>:</strong> Initial variance</li>
-                            <li><strong>κ:</strong> Mean reversion speed</li>
-                            <li><strong>θ:</strong> Long-term variance level</li>
-                            <li><strong>σ:</strong> Volatility of volatility</li>
-                            <li><strong>ρ:</strong> Correlation between price and volatility</li>
+                            <li><strong>L-BFGS-B:</strong> Fast method with parameter bounds</li>
+                            <li><strong>SLSQP:</strong> Good for constrained problems</li>
+                            <li><strong>Nelder-Mead:</strong> Simple but reliable method</li>
+                            <li><strong>Powell:</strong> Works without derivatives</li>
                         </ul>
                     </div>
                 </div>
@@ -115,28 +114,28 @@
                     <div class="col-md-4 mb-3">
                         <div class="text-center">
                             <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <span class="fw-bold fs-4">σ</span>
+                                <span class="fw-bold fs-4">⚙</span>
                             </div>
-                            <h5 class="fw-bold">Volatility Smile</h5>
-                            <p class="text-muted small">The phenomenon where implied volatility varies with strike price, creating a smile-shaped curve</p>
+                            <h5 class="fw-bold">Parameter Estimation</h5>
+                            <p class="text-muted small">Automatically finding the best model parameters that match real market data</p>
                         </div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="text-center">
                             <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <span class="fw-bold fs-4">3D</span>
+                                <span class="fw-bold fs-4">📊</span>
                             </div>
-                            <h5 class="fw-bold">Volatility Surface</h5>
-                            <p class="text-muted small">A 3D representation of implied volatility as a function of both strike and time to maturity</p>
+                            <h5 class="fw-bold">Convergence Analysis</h5>
+                            <p class="text-muted small">Checking if the optimization method found a good solution</p>
                         </div>
                     </div>
                     <div class="col-md-4 mb-3">
                         <div class="text-center">
                             <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
-                                <span class="fw-bold fs-4">⚙</span>
+                                <span class="fw-bold fs-4">🔍</span>
                             </div>
-                            <h5 class="fw-bold">Model Calibration</h5>
-                            <p class="text-muted small">The process of finding model parameters that best fit observed market prices</p>
+                            <h5 class="fw-bold">Solver Comparison</h5>
+                            <p class="text-muted small">Comparing different methods to see which works best</p>
                         </div>
                     </div>
                 </div>
@@ -145,37 +144,6 @@
     </div>
 </div>
 
-<!-- Practical Example -->
-<div class="row mt-5">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title fw-bold mb-0">
-                    Practical Example
-                </h3>
-            </div>
-            <div class="card-body">
-                <p class="card-text">
-                    In this lab, you'll work with S&P 500 options data with the following characteristics:
-                </p>
-                <div class="row">
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li>Spot Price: $659.37</li>
-                            <li>Strikes: 527.50 to 758.28</li>
-                            <li>Maturities: 1 month to 2 years</li>
-                        </ul>
-                    </div>
-                    <div class="col-md-6">
-                        <ul class="list-unstyled">
-                            <li>Risk-Free Rate: 1%</li>
-                            <li>Dividend Yield: 0%</li>
-                            <li>Volatility Range: 25% to 38%</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 {% endblock %}
+
+

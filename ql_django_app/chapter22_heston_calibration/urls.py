@@ -3,6 +3,6 @@ from . import views
 
 app_name = 'chapter22_heston_calibration'
 urlpatterns = [
-    path('', views.calibration_description_view, name='calibration_description'),
-    path('lab/', views.calibration_lab_view, name='calibration_lab'),
+    path('', views.heston_calibration_description_view, name='description'),
+    path('lab/', views.volatility_smile_lab_view, name='volatility_smile_lab'),
 ]

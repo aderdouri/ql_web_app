@@ -13,7 +13,7 @@ def black_formula_futures_description_view(request):
         'chapter_icon': 'bi-option',
         'chapter_description': 'Advanced option pricing for commodity futures using the Black formula, including Greeks calculation and risk management applications.'
     }
-    return render(request, 'chapter25_black_formula_futures/black_formula_futures_description.html', context)
+    return render(request, 'chapter25_black_formula_futures/black_formula_simple.html', context)
 
 # Dictionnaires contenant les données des exemples du livre
 TREASURY_DEFAULTS = {

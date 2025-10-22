@@ -5,10 +5,10 @@ from .services import analyze_day_count_glitch
 def day_count_conventions_description_view(request):
     context = {
         'chapter_title': 'Chapter 27: Using Curves with Different Day-Count Conventions',
-        'chapter_description': 'Understanding the glitch in QuantLib when using curves with different day-count conventions and its impact on option pricing engines.',
-        'chapter_icon': 'bi bi-calendar3'
+        'chapter_icon': 'bi-calendar3',
+        'chapter_description': 'Understanding the glitch in QuantLib when using curves with different day-count conventions and its impact on option pricing engines.'
     }
-    return render(request, 'chapter27_day_count_conventions/day_count_conventions_description.html', context)
+    return render(request, 'chapter27_day_count_conventions/day_count_simple.html', context)
 
 def day_count_conventions_chapter_view(request):
     context = {
